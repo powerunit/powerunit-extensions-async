@@ -139,6 +139,14 @@ public final class WaitResultImpl<T> implements WaitResultBuilder1<T>, WaitResul
 		return CompletableFuture.supplyAsync(this);
 	}
 
+	private void sleepBetweenRetry() {
+		try {
+			Thread.sleep(waitInMs);
+		} catch (InterruptedException e) {
+			// ignore
+		}
+	}
+
 	@Override
 	public Optional<T> get() {
 		Exception prev = null;
@@ -155,11 +163,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder1<T>, WaitResul
 					continue;
 				}
 			}
-			try {
-				Thread.sleep(waitInMs);
-			} catch (InterruptedException e) {
-				// ignore
-			}
+			sleepBetweenRetry();
 		}
 		if (prev != null && !alsoDontThrowLastExceptionWhenNoResult) {
 			throw new AssertionError("Unable to obtains the result, because of " + prev.getMessage()
