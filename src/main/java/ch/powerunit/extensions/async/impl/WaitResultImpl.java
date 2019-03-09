@@ -90,7 +90,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder1<T>, WaitResul
 	 * boolean)
 	 */
 	@Override
-	public WaitResultBuilder2<T> ignoreException(boolean alsoDontFailWhenNoResultAndException) {
+	public WaitResultImpl<T> ignoreException(boolean alsoDontFailWhenNoResultAndException) {
 		return new WaitResultImpl<T>(this, true, alsoDontFailWhenNoResultAndException);
 	}
 
@@ -102,7 +102,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder1<T>, WaitResul
 	 * function.Predicate)
 	 */
 	@Override
-	public WaitResultBuilder3<T> expecting(Predicate<T> acceptingClause) {
+	public WaitResultImpl<T> expecting(Predicate<T> acceptingClause) {
 		return new WaitResultImpl<T>(this, acceptingClause);
 	}
 
@@ -112,7 +112,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder1<T>, WaitResul
 	 * @see ch.powerunit.extensions.async.lang.WaitResultBuilder3#repeat(int)
 	 */
 	@Override
-	public WaitResultBuilder4<T> repeat(int count) {
+	public WaitResultImpl<T> repeat(int count) {
 		return new WaitResultImpl<T>(this, count);
 	}
 
@@ -123,7 +123,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder1<T>, WaitResul
 	 * java.util.concurrent.TimeUnit)
 	 */
 	@Override
-	public WaitResultBuilder5<T> every(int value, TimeUnit unit) {
+	public WaitResultImpl<T> every(int value, TimeUnit unit) {
 		return new WaitResultImpl<T>(this, Objects.requireNonNull(unit, "unit can't be null").toMillis(value));
 	}
 
