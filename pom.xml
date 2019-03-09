@@ -7,7 +7,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<name>Powerunit - Java Testing framework for JDK 1.8 - Extension to provide async operation in unit test.</name>
-	<description>This is a test framework for the JDK 1.8 - Extension to provide matchers based on annotation</description>
+	<description>This is a test framework for the JDK 1.8 - Extension to provide async operation in unit test.</description>
 
 	<packaging>jar</packaging>
 	<issueManagement>
