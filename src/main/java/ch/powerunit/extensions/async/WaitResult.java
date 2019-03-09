@@ -5,10 +5,12 @@ package ch.powerunit.extensions.async;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import ch.powerunit.extensions.async.impl.WaitResultImpl;
 import ch.powerunit.extensions.async.lang.WaitResultBuilder1;
 import ch.powerunit.extensions.async.lang.WaitResultBuilder2;
+import ch.powerunit.extensions.async.lang.WaitResultBuilder3;
 
 /**
  * This class is the entry point for this library to support async operation
@@ -62,5 +64,17 @@ public final class WaitResult {
 	 */
 	public static <T> WaitResultBuilder2<T> on(T mutableObject) {
 		return of(() -> mutableObject);
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * repeated control on a method returning a boolean.
+	 * 
+	 * @param conditionSupplier
+	 *            the boolean supplier
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 */
+	public static WaitResultBuilder3<Boolean> onCondition(Supplier<Boolean> conditionSupplier) {
+		return of(conditionSupplier::get).expecting(b -> b);
 	}
 }

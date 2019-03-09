@@ -12,17 +12,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import ch.powerunit.extensions.async.lang.WaitResultBuilder1;
-import ch.powerunit.extensions.async.lang.WaitResultBuilder3;
-import ch.powerunit.extensions.async.lang.WaitResultBuilder4;
-import ch.powerunit.extensions.async.lang.WaitResultBuilder5;
+import ch.powerunit.extensions.async.lang.WaitResultBuilder;
 
 /**
  * @author borettim
  *
  */
-public final class WaitResultImpl<T> implements WaitResultBuilder1<T>, WaitResultBuilder3<T>, WaitResultBuilder4<T>,
-		WaitResultBuilder5<T>, Supplier<Optional<T>> {
+public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Supplier<Optional<T>> {
 
 	private final Callable<T> action;
 
