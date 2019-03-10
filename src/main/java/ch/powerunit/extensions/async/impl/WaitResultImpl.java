@@ -3,7 +3,8 @@
  */
 package ch.powerunit.extensions.async.impl;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
@@ -27,7 +28,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 	private final long waitInMs;
 
 	public WaitResultImpl(Callable<T> action) {
-		this.action = Objects.requireNonNull(action, "action can't be null");
+		this.action = requireNonNull(action, "action can't be null");
 		this.exceptionHandler = new ExceptionHandler(false, false);
 		this.acceptingClause = null;
 		this.count = 0;

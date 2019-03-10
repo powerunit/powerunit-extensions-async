@@ -3,8 +3,9 @@
  */
 package ch.powerunit.extensions.async.lang;
 
-import java.util.Arrays;
-import java.util.Objects;
+import static java.util.Arrays.stream;
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -35,7 +36,7 @@ public interface WaitResultBuilder2<T> {
 	 * @since 1.0.0
 	 */
 	default WaitResultBuilder3<T> expectingNot(Predicate<T> notAcceptingClause) {
-		return expecting(Objects.requireNonNull(notAcceptingClause, "notAcceptingClause can't be null").negate());
+		return expecting(requireNonNull(notAcceptingClause, "notAcceptingClause can't be null").negate());
 	}
 
 	/**
@@ -50,8 +51,8 @@ public interface WaitResultBuilder2<T> {
 	 */
 	default WaitResultBuilder3<T> expectingAnyOf(Predicate<T> acceptingClause1,
 			@SuppressWarnings("unchecked") Predicate<T>... next) {
-		Predicate<T> base = Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null");
-		return expecting(Arrays.stream(next).reduce(base, Predicate::or));
+		Predicate<T> base = requireNonNull(acceptingClause1, "acceptingClause1 can't be null");
+		return expecting(stream(next).reduce(base, Predicate::or));
 	}
 
 	/**
@@ -66,8 +67,8 @@ public interface WaitResultBuilder2<T> {
 	 */
 	default WaitResultBuilder3<T> expectingAllOf(Predicate<T> acceptingClause1,
 			@SuppressWarnings("unchecked") Predicate<T>... next) {
-		Predicate<T> base = Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null");
-		return expecting(Arrays.stream(next).reduce(base, Predicate::and));
+		Predicate<T> base = requireNonNull(acceptingClause1, "acceptingClause1 can't be null");
+		return expecting(stream(next).reduce(base, Predicate::and));
 
 	}
 }

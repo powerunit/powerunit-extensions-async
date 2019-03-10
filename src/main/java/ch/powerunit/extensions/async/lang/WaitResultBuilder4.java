@@ -1,7 +1,8 @@
 package ch.powerunit.extensions.async.lang;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.Duration;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +35,7 @@ public interface WaitResultBuilder4<T> {
 	 * @return {@link WaitResultBuilder5 the last step of the builder}
 	 */
 	default WaitResultBuilder5<T> every(int value, TimeUnit unit) {
-		return everyMs(Objects.requireNonNull(unit, "unit can't be null").toMillis(value));
+		return everyMs(requireNonNull(unit, "unit can't be null").toMillis(value));
 	}
 
 	/**
@@ -46,6 +47,6 @@ public interface WaitResultBuilder4<T> {
 	 * @since 1.0.0
 	 */
 	default WaitResultBuilder5<T> every(Duration delay) {
-		return everyMs(Objects.requireNonNull(delay, "delay can't be null").toMillis());
+		return everyMs(requireNonNull(delay, "delay can't be null").toMillis());
 	}
 }

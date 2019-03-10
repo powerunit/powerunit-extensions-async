@@ -3,6 +3,7 @@ package ch.powerunit.extensions.async;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -205,4 +206,15 @@ public class WaitResultTest implements TestSuite {
 		assertThat(result).isNotNull();
 		assertThat(result.isPresent()).is(true);
 	}
+
+	// Interrupt
+	@Test
+	public void testObjectMethodNotDirectlyOKThenInterrupt() throws InterruptedException, ExecutionException {
+		Handler h = new Handler();
+		CompletableFuture<Optional<Handler>> exec = WaitResult.on(h).expecting(o -> o.ok).repeat(10)
+				.every(Duration.ofMillis(1000)).asyncExec();
+		exec.cancel(true);
+		assertWhen(exec::get).throwException(instanceOf(CancellationException.class));
+	}
+
 }
