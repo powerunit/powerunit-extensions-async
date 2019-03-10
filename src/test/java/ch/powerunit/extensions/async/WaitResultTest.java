@@ -1,6 +1,7 @@
 package ch.powerunit.extensions.async;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -86,7 +87,7 @@ public class WaitResultTest implements TestSuite {
 		WaitResultBuilder5<Object> exec = WaitResult.of(() -> {
 			throw new IllegalArgumentException("TEST");
 		}).expecting(o -> true).repeat(10).every(10, TimeUnit.MILLISECONDS);
-		assertWhen(exec::finish).throwException(exceptionMessage(containsString("TEST")));
+		assertWhen((Callable<Optional<Object>>) exec::finish).throwException(exceptionMessage(containsString("TEST")));
 	}
 
 	@Test
@@ -112,7 +113,7 @@ public class WaitResultTest implements TestSuite {
 		WaitResultBuilder5<Object> exec = WaitResult.of(() -> {
 			throw new IllegalArgumentException("TEST");
 		}).expecting(o -> true).repeat(10).every(10, TimeUnit.MILLISECONDS);
-		assertWhen(exec::finishWithAResult).throwException(exceptionMessage(containsString("TEST")));
+		assertWhen((Callable<Object>) exec::finishWithAResult).throwException(exceptionMessage(containsString("TEST")));
 	}
 
 	@Test
@@ -120,7 +121,7 @@ public class WaitResultTest implements TestSuite {
 		WaitResultBuilder5<Object> exec = WaitResult.of(() -> {
 			throw new IllegalArgumentException("TEST");
 		}).ignoreException().expecting(o -> true).repeat(10).every(10, TimeUnit.MILLISECONDS);
-		assertWhen(exec::finishWithAResult).throwException(instanceOf(AssertionError.class));
+		assertWhen((Callable<Object>) exec::finishWithAResult).throwException(instanceOf(AssertionError.class));
 	}
 
 	@Test
