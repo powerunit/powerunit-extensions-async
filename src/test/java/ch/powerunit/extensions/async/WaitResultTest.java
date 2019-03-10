@@ -1,5 +1,6 @@
 package ch.powerunit.extensions.async;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -22,7 +23,7 @@ public class WaitResultTest implements TestSuite {
 	@Test
 	public void testObjectMethodDirectlyOK() throws InterruptedException, ExecutionException {
 		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object()).expecting(o -> true).repeat(100)
-				.every(10, TimeUnit.MILLISECONDS).asyncExec();
+				.everyMs(10).asyncExec();
 		Optional<Object> result = exec.get();
 		assertThat(result).isNotNull();
 		assertThat(result.isPresent()).is(true);
@@ -32,7 +33,7 @@ public class WaitResultTest implements TestSuite {
 	public void testObjectMethodNotDirectlyOK() throws InterruptedException, ExecutionException {
 		Handler h = new Handler();
 		CompletableFuture<Optional<Handler>> exec = WaitResult.on(h).expecting(o -> o.ok).repeat(10)
-				.every(1, TimeUnit.SECONDS).asyncExec();
+				.every(Duration.ofMillis(1000)).asyncExec();
 		Thread.sleep(2000);
 		h.ok = true;
 		Optional<Handler> result = exec.get();
@@ -45,7 +46,7 @@ public class WaitResultTest implements TestSuite {
 	public void testNotIgnoreExceptionFirstThenException() {
 		CompletableFuture<Optional<Object>> exec = WaitResult.of(() -> {
 			throw new IllegalArgumentException("TEST");
-		}).expecting(o -> true).repeat(10).every(10, TimeUnit.MILLISECONDS).asyncExec();
+		}).expecting(o -> true).repeatOnlyOnce().asyncExec();
 		assertWhen(exec::get).throwException(exceptionMessage(containsString("TEST")));
 	}
 
@@ -136,6 +137,71 @@ public class WaitResultTest implements TestSuite {
 	public void testObjectMethodDirectlyOKInSameThread() {
 		Optional<Object> result = WaitResult.on(new Object()).expecting(o -> true).repeat(100)
 				.every(10, TimeUnit.MILLISECONDS).get();
+		assertThat(result).isNotNull();
+		assertThat(result.isPresent()).is(true);
+	}
+
+	// Any / All / Not
+
+	@Test
+	public void testObjectMethodDirectlyWithNotIsOK() throws InterruptedException, ExecutionException {
+		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object()).expectingNot(o -> false).repeat(100)
+				.everyMs(10).asyncExec();
+		Optional<Object> result = exec.get();
+		assertThat(result).isNotNull();
+		assertThat(result.isPresent()).is(true);
+	}
+
+	@Test
+	public void testObjectMethodDirectlyWithAny1IsOK() throws InterruptedException, ExecutionException {
+		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object()).expectingAnyOf(o -> false, o -> true)
+				.repeat(100).everyMs(10).asyncExec();
+		Optional<Object> result = exec.get();
+		assertThat(result).isNotNull();
+		assertThat(result.isPresent()).is(true);
+	}
+
+	@Test
+	public void testObjectMethodDirectlyWithAny2IsOK() throws InterruptedException, ExecutionException {
+		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object())
+				.expectingAnyOf(o -> false, o -> false, o -> true).repeat(100).everyMs(10).asyncExec();
+		Optional<Object> result = exec.get();
+		assertThat(result).isNotNull();
+		assertThat(result.isPresent()).is(true);
+	}
+
+	@Test
+	public void testObjectMethodDirectlyWithAny3IsOK() throws InterruptedException, ExecutionException {
+		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object())
+				.expectingAnyOf(o -> false, o -> false, o -> false, o -> true).repeat(100).everyMs(10).asyncExec();
+		Optional<Object> result = exec.get();
+		assertThat(result).isNotNull();
+		assertThat(result.isPresent()).is(true);
+	}
+
+	@Test
+	public void testObjectMethodDirectlyWithAll1IsOK() throws InterruptedException, ExecutionException {
+		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object()).expectingAllOf(o -> true, o -> true)
+				.repeat(100).everyMs(10).asyncExec();
+		Optional<Object> result = exec.get();
+		assertThat(result).isNotNull();
+		assertThat(result.isPresent()).is(true);
+	}
+
+	@Test
+	public void testObjectMethodDirectlyWithAll2IsOK() throws InterruptedException, ExecutionException {
+		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object())
+				.expectingAllOf(o -> true, o -> true, o -> true).repeat(100).everyMs(10).asyncExec();
+		Optional<Object> result = exec.get();
+		assertThat(result).isNotNull();
+		assertThat(result.isPresent()).is(true);
+	}
+
+	@Test
+	public void testObjectMethodDirectlyWithAll3IsOK() throws InterruptedException, ExecutionException {
+		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object())
+				.expectingAllOf(o -> true, o -> true, o -> true, o -> true).repeat(100).everyMs(10).asyncExec();
+		Optional<Object> result = exec.get();
 		assertThat(result).isNotNull();
 		assertThat(result.isPresent()).is(true);
 	}

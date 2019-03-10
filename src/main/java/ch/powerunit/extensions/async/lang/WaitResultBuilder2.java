@@ -3,6 +3,8 @@
  */
 package ch.powerunit.extensions.async.lang;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -23,4 +25,129 @@ public interface WaitResultBuilder2<T> {
 	 * @return {@link WaitResultBuilder3 the next step of the builder}
 	 */
 	WaitResultBuilder3<T> expecting(Predicate<T> acceptingClause);
+
+	/**
+	 * Specify the condition that doesn't accept the result.
+	 * 
+	 * @param notAcceptingClause
+	 *            the {@link Predicate} to validate the result
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3<T> expectingNot(Predicate<T> notAcceptingClause) {
+		return expecting(Objects.requireNonNull(notAcceptingClause, "notAcceptingClause can't be null").negate());
+	}
+
+	/**
+	 * Specify that at least one condition must accept the result.
+	 * 
+	 * @param acceptingClause1
+	 *            {@link Predicate first condition} to accept the result.
+	 * @param acceptingClause2
+	 *            {@link Predicate second condition} to accept the result.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3<T> expectingAnyOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2) {
+		return expecting(Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
+				.or(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null")));
+	}
+
+	/**
+	 * Specify that at least one condition must accept the result.
+	 * 
+	 * @param acceptingClause1
+	 *            {@link Predicate first condition} to accept the result.
+	 * @param acceptingClause2
+	 *            {@link Predicate second condition} to accept the result.
+	 * @param acceptingClause3
+	 *            {@link Predicate third condition} to accept the result.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3<T> expectingAnyOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2,
+			Predicate<T> acceptingClause3) {
+		return expecting(Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
+				.or(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null"))
+				.or(Objects.requireNonNull(acceptingClause3, "acceptingClause3 can't be null")));
+	}
+
+	/**
+	 * Specify that at least one condition must accept the result.
+	 * 
+	 * @param acceptingClause1
+	 *            {@link Predicate first condition} to accept the result.
+	 * @param acceptingClause2
+	 *            {@link Predicate second condition} to accept the result.
+	 * @param acceptingClause3
+	 *            {@link Predicate third condition} to accept the result.
+	 * @param next
+	 *            all the following condition to accept the result.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3<T> expectingAnyOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2,
+			Predicate<T> acceptingClause3, @SuppressWarnings("unchecked") Predicate<T>... next) {
+		Predicate<T> base = Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
+				.or(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null"))
+				.or(Objects.requireNonNull(acceptingClause3, "acceptingClause3 can't be null"));
+		return expecting(Arrays.stream(next).reduce(base, Predicate::or));
+	}
+
+	/**
+	 * Specify that all conditions must accept the result.
+	 * 
+	 * @param acceptingClause1
+	 *            {@link Predicate first condition} to accept the result.
+	 * @param acceptingClause2
+	 *            {@link Predicate second condition} to accept the result.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3<T> expectingAllOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2) {
+		return expecting(Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
+				.and(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null")));
+	}
+
+	/**
+	 * Specify that at all conditions must accept the result.
+	 * 
+	 * @param acceptingClause1
+	 *            {@link Predicate first condition} to accept the result.
+	 * @param acceptingClause2
+	 *            {@link Predicate second condition} to accept the result.
+	 * @param acceptingClause3
+	 *            {@link Predicate third condition} to accept the result.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3<T> expectingAllOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2,
+			Predicate<T> acceptingClause3) {
+		return expecting(Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
+				.and(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null"))
+				.and(Objects.requireNonNull(acceptingClause3, "acceptingClause3 can't be null")));
+	}
+
+	/**
+	 * Specify that at alls conditions must accept the result.
+	 * 
+	 * @param acceptingClause1
+	 *            {@link Predicate first condition} to accept the result.
+	 * @param acceptingClause2
+	 *            {@link Predicate second condition} to accept the result.
+	 * @param acceptingClause3
+	 *            {@link Predicate third condition} to accept the result.
+	 * @param next
+	 *            all the following condition to accept the result.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3<T> expectingAllOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2,
+			Predicate<T> acceptingClause3, @SuppressWarnings("unchecked") Predicate<T>... next) {
+		Predicate<T> base = Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
+				.and(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null"))
+				.and(Objects.requireNonNull(acceptingClause3, "acceptingClause3 can't be null"));
+		return expecting(Arrays.stream(next).reduce(base, Predicate::and));
+
+	}
 }

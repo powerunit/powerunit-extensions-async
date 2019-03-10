@@ -6,7 +6,6 @@ package ch.powerunit.extensions.async.impl;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import ch.powerunit.extensions.async.lang.WaitResultBuilder;
@@ -104,12 +103,11 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see ch.powerunit.extensions.async.lang.WaitResultBuilder4#every(int,
-	 * java.util.concurrent.TimeUnit)
+	 * @see ch.powerunit.extensions.async.lang.WaitResultBuilder4#everyMs(long)
 	 */
 	@Override
-	public WaitResultImpl<T> every(int value, TimeUnit unit) {
-		return new WaitResultImpl<T>(this, Objects.requireNonNull(unit, "unit can't be null").toMillis(value));
+	public WaitResultImpl<T> everyMs(long value) {
+		return new WaitResultImpl<T>(this, value);
 	}
 
 	private void sleepBetweenRetry() {
