@@ -43,89 +43,15 @@ public interface WaitResultBuilder2<T> {
 	 * 
 	 * @param acceptingClause1
 	 *            {@link Predicate first condition} to accept the result.
-	 * @param acceptingClause2
-	 *            {@link Predicate second condition} to accept the result.
-	 * @return {@link WaitResultBuilder3 the next step of the builder}
-	 * @since 1.0.0
-	 */
-	default WaitResultBuilder3<T> expectingAnyOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2) {
-		return expecting(Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
-				.or(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null")));
-	}
-
-	/**
-	 * Specify that at least one condition must accept the result.
-	 * 
-	 * @param acceptingClause1
-	 *            {@link Predicate first condition} to accept the result.
-	 * @param acceptingClause2
-	 *            {@link Predicate second condition} to accept the result.
-	 * @param acceptingClause3
-	 *            {@link Predicate third condition} to accept the result.
-	 * @return {@link WaitResultBuilder3 the next step of the builder}
-	 * @since 1.0.0
-	 */
-	default WaitResultBuilder3<T> expectingAnyOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2,
-			Predicate<T> acceptingClause3) {
-		return expecting(Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
-				.or(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null"))
-				.or(Objects.requireNonNull(acceptingClause3, "acceptingClause3 can't be null")));
-	}
-
-	/**
-	 * Specify that at least one condition must accept the result.
-	 * 
-	 * @param acceptingClause1
-	 *            {@link Predicate first condition} to accept the result.
-	 * @param acceptingClause2
-	 *            {@link Predicate second condition} to accept the result.
-	 * @param acceptingClause3
-	 *            {@link Predicate third condition} to accept the result.
 	 * @param next
 	 *            all the following condition to accept the result.
 	 * @return {@link WaitResultBuilder3 the next step of the builder}
 	 * @since 1.0.0
 	 */
-	default WaitResultBuilder3<T> expectingAnyOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2,
-			Predicate<T> acceptingClause3, @SuppressWarnings("unchecked") Predicate<T>... next) {
-		Predicate<T> base = Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
-				.or(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null"))
-				.or(Objects.requireNonNull(acceptingClause3, "acceptingClause3 can't be null"));
+	default WaitResultBuilder3<T> expectingAnyOf(Predicate<T> acceptingClause1,
+			@SuppressWarnings("unchecked") Predicate<T>... next) {
+		Predicate<T> base = Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null");
 		return expecting(Arrays.stream(next).reduce(base, Predicate::or));
-	}
-
-	/**
-	 * Specify that all conditions must accept the result.
-	 * 
-	 * @param acceptingClause1
-	 *            {@link Predicate first condition} to accept the result.
-	 * @param acceptingClause2
-	 *            {@link Predicate second condition} to accept the result.
-	 * @return {@link WaitResultBuilder3 the next step of the builder}
-	 * @since 1.0.0
-	 */
-	default WaitResultBuilder3<T> expectingAllOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2) {
-		return expecting(Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
-				.and(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null")));
-	}
-
-	/**
-	 * Specify that at all conditions must accept the result.
-	 * 
-	 * @param acceptingClause1
-	 *            {@link Predicate first condition} to accept the result.
-	 * @param acceptingClause2
-	 *            {@link Predicate second condition} to accept the result.
-	 * @param acceptingClause3
-	 *            {@link Predicate third condition} to accept the result.
-	 * @return {@link WaitResultBuilder3 the next step of the builder}
-	 * @since 1.0.0
-	 */
-	default WaitResultBuilder3<T> expectingAllOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2,
-			Predicate<T> acceptingClause3) {
-		return expecting(Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
-				.and(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null"))
-				.and(Objects.requireNonNull(acceptingClause3, "acceptingClause3 can't be null")));
 	}
 
 	/**
@@ -133,20 +59,14 @@ public interface WaitResultBuilder2<T> {
 	 * 
 	 * @param acceptingClause1
 	 *            {@link Predicate first condition} to accept the result.
-	 * @param acceptingClause2
-	 *            {@link Predicate second condition} to accept the result.
-	 * @param acceptingClause3
-	 *            {@link Predicate third condition} to accept the result.
 	 * @param next
 	 *            all the following condition to accept the result.
 	 * @return {@link WaitResultBuilder3 the next step of the builder}
 	 * @since 1.0.0
 	 */
-	default WaitResultBuilder3<T> expectingAllOf(Predicate<T> acceptingClause1, Predicate<T> acceptingClause2,
-			Predicate<T> acceptingClause3, @SuppressWarnings("unchecked") Predicate<T>... next) {
-		Predicate<T> base = Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null")
-				.and(Objects.requireNonNull(acceptingClause2, "acceptingClause2 can't be null"))
-				.and(Objects.requireNonNull(acceptingClause3, "acceptingClause3 can't be null"));
+	default WaitResultBuilder3<T> expectingAllOf(Predicate<T> acceptingClause1,
+			@SuppressWarnings("unchecked") Predicate<T>... next) {
+		Predicate<T> base = Objects.requireNonNull(acceptingClause1, "acceptingClause1 can't be null");
 		return expecting(Arrays.stream(next).reduce(base, Predicate::and));
 
 	}
