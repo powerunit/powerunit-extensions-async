@@ -26,7 +26,7 @@
     <logo name="Vulnerability" href="https://snyk.io/test/github/powerunit/powerunit-extensions-async/badge.svg?targetFile=pom.xml"
 	  img="https://snyk.io/test/github/powerunit/powerunit-extensions-async/badge.svg?targetFile=pom.xml"/>     
     <logo name="LGTM" href="https://lgtm.com/projects/g/powerunit/powerunit-extensions-async/alerts/"
-	  img="https://img.shields.io/lgtm/alerts/g/powerunit/powerunit-extensions-async.svg?logo=lgtm&logoWidth=18"/>
+	  img="https://img.shields.io/lgtm/alerts/g/powerunit/powerunit-extensions-async.svg?logo=lgtm&amp;logoWidth=18"/>
     <logo name="Codacy" href="https://www.codacy.com/app/mathieu.boretti/powerunit-extensions-async?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=powerunit/powerunit-extensions-async&amp;utm_campaign=Badge_Grades"
           img="https://api.codacy.com/project/badge/Grade/54e6f34a650147e48b1864a420695a1c"/>
     <logo name="Codacy / Coverage" href="https://www.codacy.com/app/mathieu.boretti/powerunit-extensions-async?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=powerunit/powerunit-extensions-async&amp;utm_campaign=Badge_Coverage"
