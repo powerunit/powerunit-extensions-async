@@ -18,13 +18,11 @@ import ch.powerunit.extensions.async.lang.WaitResultBuilder;
  * @author borettim
  *
  */
-public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Supplier<Optional<T>> {
+public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Supplier<Optional<T>>, Callable<Optional<T>> {
 
 	private final Callable<T> action;
 
-	private final boolean ignoreException;
-
-	private final boolean alsoDontThrowLastExceptionWhenNoResult;
+	private final ExceptionHandler exceptionHandler;
 
 	private final Predicate<T> acceptingClause;
 
@@ -34,8 +32,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Supplier<O
 
 	public WaitResultImpl(Callable<T> action) {
 		this.action = Objects.requireNonNull(action, "action can't be null");
-		this.ignoreException = false;
-		this.alsoDontThrowLastExceptionWhenNoResult = false;
+		this.exceptionHandler = new ExceptionHandler(false, false);
 		this.acceptingClause = null;
 		this.count = 0;
 		this.waitInMs = 0;
@@ -47,14 +44,12 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Supplier<O
 		this.acceptingClause = prev.acceptingClause;
 		this.count = prev.count;
 		this.waitInMs = prev.waitInMs;
-		this.ignoreException = ignoreException;
-		this.alsoDontThrowLastExceptionWhenNoResult = alsoDontFailWhenNoResultAndException;
+		this.exceptionHandler = new ExceptionHandler(ignoreException, alsoDontFailWhenNoResultAndException);
 	}
 
 	private WaitResultImpl(WaitResultImpl<T> prev, Predicate<T> acceptingClause) {
 		this.action = prev.action;
-		this.ignoreException = prev.ignoreException;
-		this.alsoDontThrowLastExceptionWhenNoResult = prev.alsoDontThrowLastExceptionWhenNoResult;
+		this.exceptionHandler = prev.exceptionHandler;
 		this.count = prev.count;
 		this.waitInMs = prev.waitInMs;
 		this.acceptingClause = acceptingClause;
@@ -62,8 +57,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Supplier<O
 
 	private WaitResultImpl(WaitResultImpl<T> prev, int count) {
 		this.action = prev.action;
-		this.ignoreException = prev.ignoreException;
-		this.alsoDontThrowLastExceptionWhenNoResult = prev.alsoDontThrowLastExceptionWhenNoResult;
+		this.exceptionHandler = prev.exceptionHandler;
 		this.acceptingClause = prev.acceptingClause;
 		this.waitInMs = prev.waitInMs;
 		this.count = count;
@@ -71,8 +65,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Supplier<O
 
 	private WaitResultImpl(WaitResultImpl<T> prev, long millis) {
 		this.action = prev.action;
-		this.ignoreException = prev.ignoreException;
-		this.alsoDontThrowLastExceptionWhenNoResult = prev.alsoDontThrowLastExceptionWhenNoResult;
+		this.exceptionHandler = prev.exceptionHandler;
 		this.acceptingClause = prev.acceptingClause;
 		this.count = prev.count;
 		this.waitInMs = millis;
@@ -148,23 +141,23 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Supplier<O
 		for (int i = 0; i < count; i++) {
 			prev = null;
 			try {
-				T result = action.call();
-				if (acceptingClause.test(result)) {
-					return Optional.ofNullable(result);
+				Optional<T> result = call();
+				if (result.isPresent()) {
+					return result;
 				}
 			} catch (Exception e) {
 				prev = e;
-				if (ignoreException) {
-					continue;
-				}
+				exceptionHandler.handleException(e);
 			}
 			sleepBetweenRetry();
 		}
-		if (prev != null && !alsoDontThrowLastExceptionWhenNoResult) {
-			throw new AssertionError("Unable to obtains the result, because of " + prev.getMessage()
-					+ " ; Original error class is " + prev.getClass(), prev);
-		}
+		exceptionHandler.handleFinalException(prev);
 		return Optional.empty();
+	}
+
+	@Override
+	public Optional<T> call() throws Exception {
+		return Optional.ofNullable(action.call()).filter(acceptingClause);
 	}
 
 }
