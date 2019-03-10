@@ -13,6 +13,7 @@ public class WaitResultTest implements TestSuite {
 
 	private static class Handler {
 		public boolean ok = false;
+		public int count = 0;
 	}
 
 	// async
@@ -40,10 +41,23 @@ public class WaitResultTest implements TestSuite {
 	}
 
 	@Test
-	public void testNotIgnoreExceptionThenException() {
+	public void testNotIgnoreExceptionFirstThenException() {
 		CompletableFuture<Optional<Object>> exec = WaitResult.of(() -> {
 			throw new IllegalArgumentException("TEST");
 		}).expecting(o -> true).repeat(10).every(10, TimeUnit.MILLISECONDS).asyncExec();
+		assertWhen(exec::get).throwException(exceptionMessage(containsString("TEST")));
+	}
+
+	@Test
+	public void testNotIgnoreExceptionLastThenException() {
+		Handler h = new Handler();
+		CompletableFuture<Optional<Handler>> exec = WaitResult.<Handler>of(() -> {
+			if (h.count >= 2) {
+				throw new IllegalArgumentException("TEST");
+			}
+			h.count++;
+			return h;
+		}).ignoreException(false).expecting(o -> o.ok).repeat(10).every(10, TimeUnit.MILLISECONDS).asyncExec();
 		assertWhen(exec::get).throwException(exceptionMessage(containsString("TEST")));
 	}
 
