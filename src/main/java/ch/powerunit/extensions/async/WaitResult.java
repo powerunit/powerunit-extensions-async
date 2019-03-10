@@ -31,7 +31,7 @@ public final class WaitResult {
 	 * <h1>Simple sample</h1>
 	 * 
 	 * <pre>
-	 * CompletableFuture&lt;Optional&lt;MyObject&gt;&gt; exec = WaitResult.of(myObject::myCallable).expecting(myObject::myControl)
+	 * CompletableFuture&lt;Optional&lt;MyObject&gt;&gt; exec = WaitResult.of(MyObject::myCallable).expecting(MyObject::myControl)
 	 * 		.repeat(10).every(10, TimeUnit.MILLISECONDS).asyncExec();
 	 * </pre>
 	 * 

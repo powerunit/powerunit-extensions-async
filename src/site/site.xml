@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/DECORATION/1.3.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0 http://maven.apache.org/xsd/decoration-1.3.0.xsd">
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>1.7</version>
+  </skin>
+  <custom>
+    <fluidoSkin>
+      <googleSearch>
+      </googleSearch>
+      <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
+      <gitHub>
+        <projectId>powerunit/powerunit-extensions-async</projectId>
+        <ribbonOrientation>right</ribbonOrientation>
+        <ribbonColor>black</ribbonColor>
+      </gitHub>
+    </fluidoSkin>
+  </custom>
+  <poweredBy>
+    <logo name="PowerUnit" href="http://www.powerunit.ch/"
+          img="http://www.powerunit.ch/powerunit/logo.png"/>
+    <logo name="Travis-ci" href="https://travis-ci.com/powerunit/powerunit-extensions-async"
+          img="https://travis-ci.com/powerunit/powerunit-extensions-async.svg?branch=master"/>
+	<logo name="Vulnerability" href="https://snyk.io/test/github/powerunit/powerunit-extensions-async/badge.svg?targetFile=pom.xml"
+	      img="https://snyk.io/test/github/powerunit/powerunit-extensions-async/badge.svg?targetFile=pom.xml"/>          
+    <logo name="Codacy" href="https://www.codacy.com/app/mathieu.boretti/powerunit-extensions-async?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=powerunit/powerunit-extensions-async&amp;utm_campaign=Badge_Grades"
+          img="https://api.codacy.com/project/badge/Grade/54e6f34a650147e48b1864a420695a1c"/>
+    <logo name="Codacy / Coverage" href="https://www.codacy.com/app/mathieu.boretti/powerunit-extensions-async?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=powerunit/powerunit-extensions-async&amp;utm_campaign=Badge_Coverage"
+          img="https://api.codacy.com/project/badge/Coverage/54e6f34a650147e48b1864a420695a1c"/>
+    <logo name="Coveralls" href="https://coveralls.io/github/powerunit/powerunit-extensions-async?branch=master"
+          img="https://coveralls.io/repos/github/powerunit/powerunit-extensions-async/badge.svg?branch=master" />
+    <logo name="Codecov" href="https://codecov.io/gh/powerunit/powerunit-extensions-async"
+          img="https://codecov.io/gh/powerunit/powerunit-extensions-async/branch/master/graph/badge.svg" />
+    <logo name="Codefactor" href="https://www.codefactor.io/repository/github/powerunit/powerunit-extensions-async"
+          img="https://www.codefactor.io/repository/github/powerunit/powerunit-extensions-async/badge" />
+    <logo name="Bettercode" href="https://bettercodehub.com/results/powerunit/powerunit-extensions-async"
+          img="https://bettercodehub.com/edge/badge/powerunit/powerunit-extensions-async?branch=master"/>
+    <logo name="Codebeat" href="https://codebeat.co/projects/github-com-powerunit-powerunit-extensions-async-master"
+          img="https://codebeat.co/badges/cdebf167-fee0-46b4-b33d-c613f1586a9d" />
+    <logo name="Maven" href="https://maven-badges.herokuapp.com/maven-central/ch.powerunit.extensions/powerunit-extensions-async"
+          img="https://maven-badges.herokuapp.com/maven-central/ch.powerunit.extensions/powerunit-extensions-async/badge.svg" />
+    <logo name="Javadoc" href="http://javadoc.io/doc/ch.powerunit.extensions/powerunit-extensions-async" 
+    	  img="http://javadoc.io/badge/ch.powerunit.extensions/powerunit-extensions-async.svg?color=yellow"/>
+          
+  </poweredBy>
+  
+  <body>
+  	<head><![CDATA[
+  		<link rel="icon" type="image/png" href="logo.png" />
+  		<link rel="shortcut icon" type="image/png" href="logo.png" />
+  	]]></head>
+    <menu ref="reports" />
+    <menu name="Linked projects">
+      <item name="PowerUnit" href="http://www.powerunit.ch/powerunit"/>
+    </menu>
+  </body>
+</project>

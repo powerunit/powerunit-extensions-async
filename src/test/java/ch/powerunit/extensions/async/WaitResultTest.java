@@ -122,4 +122,11 @@ public class WaitResultTest implements TestSuite {
 		}).ignoreException().expecting(o -> true).repeat(10).every(10, TimeUnit.MILLISECONDS);
 		assertWhen(exec::finishWithAResult).throwException(instanceOf(AssertionError.class));
 	}
+
+	@Test
+	public void testObjectMethodDirectlyOnConditionOKWithFinishWithAResult() {
+		Object result = WaitResult.onCondition(() -> true).repeat(100).every(10, TimeUnit.MILLISECONDS)
+				.finishWithAResult();
+		assertThat(result).isNotNull();
+	}
 }

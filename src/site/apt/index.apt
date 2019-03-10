@@ -1,0 +1,5 @@
+PowerUnit Extension Async
+
+ This library provides support for async operation in x-unit test. The idea is
+ to do a static import from <<<ch.powerunit.extensions.async.WaitResult>>> and
+ then use the various methods to start some asynchronous operations.
