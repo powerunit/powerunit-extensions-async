@@ -4,10 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ch.powerunit.extensions</groupId>
 	<artifactId>powerunit-extensions-async</artifactId>
-	<version>0.3.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 
-	<name>Powerunit - Java Testing framework for JDK 1.8 - Extension to provide async operation in unit test.</name>
-	<description>This is a test framework for the JDK 1.8 - Extension to provide async operation in unit test.</description>
+	<name>Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.</name>
+	<description>This is a test framework for the JDK 1.9 - Extension to provide async operation in unit test.</description>
 
 	<packaging>jar</packaging>
 	<issueManagement>
@@ -57,14 +57,15 @@
 	</scm>
 
 	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>9</maven.compiler.source>
+		<maven.compiler.target>9</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<hamcrest.version>1.3</hamcrest.version>
 		<surefire.version>2.22.1</surefire.version>
 		<deploy.url>https://oss.sonatype.org/content/repositories/snapshots</deploy.url>
 		<deploy.id>oss-snapshots</deploy.id>
 		<powerunit.version>0.5.0</powerunit.version>
+		<jaxb-api.version>2.3.0</jaxb-api.version>
 	</properties>
 
 	<build>
@@ -490,5 +491,30 @@
 			<version>${powerunit.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb-api.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${jaxb-api.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>${jaxb-api.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+             <groupId>javax.annotation</groupId>
+             <artifactId>javax.annotation-api</artifactId>
+             <version>1.3.2</version>
+             <scope>test</scope>
+             <optional>true</optional>
+        </dependency>
 	</dependencies>
 </project>
