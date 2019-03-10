@@ -68,7 +68,7 @@ public interface WaitResultBuilder5<T> {
 	 * @return the value if available
 	 * 
 	 * @throws AssertionError
-	 *             In case of not ignored exception.
+	 *             In case of not ignored exception or missing result.
 	 */
 	default T finishWithAResult() {
 		return finish().orElseThrow(() -> new AssertionError("No result is available"));
