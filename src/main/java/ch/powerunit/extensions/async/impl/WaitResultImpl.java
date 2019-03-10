@@ -6,11 +6,8 @@ package ch.powerunit.extensions.async.impl;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import ch.powerunit.extensions.async.lang.WaitResultBuilder;
 
@@ -18,7 +15,7 @@ import ch.powerunit.extensions.async.lang.WaitResultBuilder;
  * @author borettim
  *
  */
-public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Supplier<Optional<T>>, Callable<Optional<T>> {
+public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<Optional<T>> {
 
 	private final Callable<T> action;
 
@@ -113,18 +110,6 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Supplier<O
 	@Override
 	public WaitResultImpl<T> every(int value, TimeUnit unit) {
 		return new WaitResultImpl<T>(this, Objects.requireNonNull(unit, "unit can't be null").toMillis(value));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * ch.powerunit.extensions.async.lang.WaitResultBuilder5#asyncExec(java.util.
-	 * concurrent.Executor)
-	 */
-	@Override
-	public CompletableFuture<Optional<T>> asyncExec(Executor executor) {
-		return CompletableFuture.supplyAsync(this);
 	}
 
 	private void sleepBetweenRetry() {

@@ -129,4 +129,13 @@ public class WaitResultTest implements TestSuite {
 				.finishWithAResult();
 		assertThat(result).isNotNull();
 	}
+
+	// samethread
+	@Test
+	public void testObjectMethodDirectlyOKInSameThread() {
+		Optional<Object> result = WaitResult.on(new Object()).expecting(o -> true).repeat(100)
+				.every(10, TimeUnit.MILLISECONDS).get();
+		assertThat(result).isNotNull();
+		assertThat(result.isPresent()).is(true);
+	}
 }

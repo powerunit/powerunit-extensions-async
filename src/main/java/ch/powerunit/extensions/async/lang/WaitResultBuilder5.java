@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Supplier;
 
 /**
  * Last Step of the builder of {@link CompletableFuture} to create the
@@ -17,7 +18,20 @@ import java.util.concurrent.ForkJoinPool;
  *            The type of result of the {@link CompletableFuture}
  *
  */
-public interface WaitResultBuilder5<T> {
+public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
+
+	/**
+	 * Directly wait for the result of this execution (the execution is run in this
+	 * thread). In case of not ignored exception, an {@link AssertionError} is
+	 * thrown.
+	 * 
+	 * @return the {@link Optional} with the result of the execution
+	 * 
+	 * @throws AssertionError
+	 *             In case of not ignored exception.
+	 */
+	@Override
+	Optional<T> get();
 
 	/**
 	 * Create and start the async execution of the {@link CompletableFuture}.
@@ -26,7 +40,9 @@ public interface WaitResultBuilder5<T> {
 	 *            the executor to be used.
 	 * @return the {@link CompletableFuture}
 	 */
-	CompletableFuture<Optional<T>> asyncExec(Executor executor);
+	default CompletableFuture<Optional<T>> asyncExec(Executor executor) {
+		return CompletableFuture.supplyAsync(this);
+	}
 
 	/**
 	 * Create and start the async execution of the {@link CompletableFuture} using
