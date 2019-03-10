@@ -47,7 +47,7 @@
 
 	<ciManagement>
 		<system>travis-ci</system>
-		<url>https://travis-ci.org/powerunit/powerunit-extensions-async</url>
+		<url>https://travis-com.org/powerunit/powerunit-extensions-async</url>
 	</ciManagement>
 
 	<scm>
