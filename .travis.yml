@@ -15,6 +15,7 @@ addons:
     apt:
       update: true
 before_install:
+ - cp .travis.settings.xml $HOME/.m2/settings.xml
  - if [[ "$TRAVIS_OS_NAME" = linux ]]; then sudo apt-get install jshon ; fi
 install:
 - "mvn dependency:resolve dependency:resolve-plugins"
@@ -32,9 +33,8 @@ before_deploy:
 - git config --local user.name "powerunitci"
 - git config --local user.email "powerunitci@powerunit.ch"
 - if [[ "$TRAVIS_TAG" =~ powerunit-extensions-async-[0-9].[0-9].[0-9] ]]; then echo "No tag to be created" ; else git tag -m "Create ci tag [ci skip]" -f "ci/$TRAVIS_BRANCH/$TRAVIS_BUILD_NUMBER"; fi
-#- "mvn org.apache.maven.plugins:maven-changes-plugin:announcement-generate"
-#- export RELEASE_NOTES=$(jshon -s "$(cat target/announcement/announcement.vm)")
-- export RELEASE_NOTES=$(jshon -s "Initial version")
+- "mvn org.apache.maven.plugins:maven-changes-plugin:announcement-generate"
+- export RELEASE_NOTES=$(jshon -s "$(cat target/announcement/announcement.vm)")
 deploy:
   - provider: pages
     skip-cleanup: true
