@@ -58,14 +58,17 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * Directly wait for the result of this execution. In case of not ignored
 	 * exception, an {@link AssertionError} is thrown.
 	 * 
+	 * @param executor
+	 *            the executor to be used.
+	 * 
 	 * @return the {@link Optional} with the result of the execution
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception.
 	 */
-	default Optional<T> finish() {
+	default Optional<T> finish(Executor executor) {
 		try {
-			return asyncExec().get();
+			return asyncExec(executor).get();
 		} catch (InterruptedException e) {
 			throw new AssertionError("Unable to get the result, because of " + e.getMessage(), e);
 		} catch (ExecutionException e) {
@@ -77,9 +80,40 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	}
 
 	/**
+	 * Directly wait for the result of this execution using
+	 * {@link ForkJoinPool#commonPool()}. In case of not ignored exception, an
+	 * {@link AssertionError} is thrown.
+	 * 
+	 * @return the {@link Optional} with the result of the execution
+	 * 
+	 * @throws AssertionError
+	 *             In case of not ignored exception.
+	 */
+	default Optional<T> finish() {
+		return finish(ForkJoinPool.commonPool());
+	}
+
+	/**
 	 * Directly wait for a positive result of this execution. In case of not ignored
 	 * exception, or when no result are available, an {@link AssertionError} is
 	 * thrown.
+	 * 
+	 * @param executor
+	 *            the executor to be used.
+	 * 
+	 * @return the value if available
+	 * 
+	 * @throws AssertionError
+	 *             In case of not ignored exception or missing result.
+	 */
+	default T finishWithAResult(Executor executor) {
+		return finish(executor).orElseThrow(() -> new AssertionError("No result is available"));
+	}
+
+	/**
+	 * Directly wait for a positive result of this execution using
+	 * {@link ForkJoinPool#commonPool()}. In case of not ignored exception, or when
+	 * no result are available, an {@link AssertionError} is thrown.
 	 * 
 	 * @return the value if available
 	 * 
@@ -87,7 +121,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 *             In case of not ignored exception or missing result.
 	 */
 	default T finishWithAResult() {
-		return finish().orElseThrow(() -> new AssertionError("No result is available"));
+		return finishWithAResult(ForkJoinPool.commonPool());
 	}
 
 }
