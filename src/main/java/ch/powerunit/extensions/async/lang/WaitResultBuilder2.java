@@ -34,6 +34,7 @@ public interface WaitResultBuilder2<T> {
 	 *            the object to compare with. May be null.
 	 * @return {@link WaitResultBuilder3 the next step of the builder}
 	 * @see Predicate#isEqual(Object)
+	 * @since 1.0.0
 	 */
 	default WaitResultBuilder3<T> expectingEqualsTo(T other) {
 		return expecting(Predicate.isEqual(other));
