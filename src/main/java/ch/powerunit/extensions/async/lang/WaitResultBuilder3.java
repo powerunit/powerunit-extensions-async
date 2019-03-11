@@ -15,14 +15,6 @@ import java.util.concurrent.CompletableFuture;
  *
  */
 public interface WaitResultBuilder3<T> {
-	/**
-	 * Specify the maximal number of retry.
-	 * 
-	 * @param count
-	 *            the number of retry
-	 * @return {@link WaitResultBuilder4 the next step of the builder}
-	 */
-	WaitResultBuilder4<T> repeat(int count);
 
 	/**
 	 * Specify a retry clause.
@@ -36,6 +28,17 @@ public interface WaitResultBuilder3<T> {
 	 * @since 1.0.0
 	 */
 	WaitResultBuilder5<T> repeat(RetryClause retry);
+
+	/**
+	 * Specify the maximal number of retry.
+	 * 
+	 * @param count
+	 *            the number of retry
+	 * @return {@link WaitResultBuilder4 the next step of the builder}
+	 */
+	default WaitResultBuilder4<T> repeat(int count) {
+		return value -> repeat(RetryClause.of(count, value));
+	}
 
 	/**
 	 * Specify that only one retry will be done (so only one execution and one

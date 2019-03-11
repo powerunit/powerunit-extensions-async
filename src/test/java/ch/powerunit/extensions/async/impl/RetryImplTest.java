@@ -118,7 +118,7 @@ public class RetryImplTest implements TestSuite {
 		LocalDateTime end = LocalDateTime.now();
 		long duration = Duration.between(start, end).toMillis();
 		assertThat(duration).is(lessThan(10000L));
-		assertThat(duration).is(greaterThan(5000L));
+		assertThat(duration).is(greaterThanOrEqualTo(5000L));
 	}
 
 }

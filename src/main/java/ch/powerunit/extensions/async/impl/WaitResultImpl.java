@@ -84,26 +84,6 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 		return new WaitResultImpl<T>(this, Objects.requireNonNull(retry, "retry can't be null"));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.powerunit.extensions.async.lang.WaitResultBuilder3#repeat(int)
-	 */
-	@Override
-	public WaitResultImpl<T> repeat(int count) {
-		return new WaitResultImpl<T>(this, RetryClause.of(count, 1));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.powerunit.extensions.async.lang.WaitResultBuilder4#everyMs(long)
-	 */
-	@Override
-	public WaitResultImpl<T> everyMs(long value) {
-		return new WaitResultImpl<T>(this, retryClause.withMs(value));
-	}
-
 	@Override
 	public Optional<T> get() {
 		RetryImpl<T> retry = new RetryImpl<>(retryClause, this);

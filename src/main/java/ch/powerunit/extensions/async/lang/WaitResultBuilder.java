@@ -6,7 +6,6 @@ package ch.powerunit.extensions.async.lang;
  * @param <T>
  *            Le target.
  */
-public interface WaitResultBuilder<T>
-		extends WaitResultBuilder1<T>, WaitResultBuilder3<T>, WaitResultBuilder4<T>, WaitResultBuilder5<T> {
+public interface WaitResultBuilder<T> extends WaitResultBuilder1<T>, WaitResultBuilder3<T>, WaitResultBuilder5<T> {
 
 }
