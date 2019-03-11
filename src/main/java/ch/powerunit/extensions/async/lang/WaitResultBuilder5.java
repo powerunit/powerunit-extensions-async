@@ -8,6 +8,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -124,4 +126,93 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 		return finishWithAResult(ForkJoinPool.commonPool());
 	}
 
+	/**
+	 * Shortcut method to the join of the {@link CompletableFuture}.
+	 * <p>
+	 * Only runtime exception in case of error.
+	 * 
+	 * @return the result of the wait
+	 * @since 1.0.0
+	 * @see CompletableFuture#join()
+	 */
+	default Optional<T> join() {
+		return join(ForkJoinPool.commonPool());
+	}
+
+	/**
+	 * Shortcut method to the join of the {@link CompletableFuture}.
+	 * <p>
+	 * Only runtime exception in case of error.
+	 * 
+	 * @param executor
+	 *            the executor to be used.
+	 * @return the result of the wait
+	 * @since 1.0.0
+	 * @see CompletableFuture#join()
+	 */
+	default Optional<T> join(Executor executor) {
+		return asyncExec(executor).join();
+	}
+
+	/**
+	 * Create and start the async execution of the {@link CompletableFuture} and
+	 * directly register a Consumer on the result.
+	 * 
+	 * @param executor
+	 *            the executor to be used.
+	 * @param action
+	 *            the action to be done on the result
+	 * @return the {@link CompletableFuture}
+	 * @since 1.0.0
+	 * @see CompletableFuture#thenAccept(Consumer)
+	 */
+	default CompletableFuture<Void> thenAccept(Executor executor, Consumer<? super Optional<T>> action) {
+		return asyncExec(executor).thenAccept(action);
+	}
+
+	/**
+	 * Create and start the async execution of the {@link CompletableFuture} using
+	 * {@link ForkJoinPool#commonPool()} and directly register a Consumer on the
+	 * result.
+	 * 
+	 * @param action
+	 *            the action to be done on the result
+	 * @return the {@link CompletableFuture}
+	 * @since 1.0.0
+	 * @see CompletableFuture#thenAccept(Consumer)
+	 */
+	default CompletableFuture<Void> thenAccept(Consumer<? super Optional<T>> action) {
+		return thenAccept(ForkJoinPool.commonPool(), action);
+	}
+
+	/**
+	 * Create and start the async execution of the {@link CompletableFuture} and
+	 * directly register a Function on the result.
+	 * 
+	 * @param executor
+	 *            the executor to be used.
+	 * @param fn
+	 *            then function to be applied
+	 * @return the {@link CompletableFuture}
+	 * @since 1.0.0
+	 * @see CompletableFuture#thenApply(Function)
+	 */
+	default <U> CompletableFuture<U> thenApply(Executor executor, Function<? super Optional<T>, ? extends U> fn) {
+		return asyncExec(executor).thenApply(fn);
+	}
+
+	/**
+	 * Create and start the async execution of the {@link CompletableFuture} using
+	 * {@link ForkJoinPool#commonPool()} and directly register a Function on the
+	 * result.
+	 * 
+	 * @param fn
+	 *            then function to be applied
+	 * @return the {@link CompletableFuture}
+	 * @since 1.0.0
+	 * @see CompletableFuture#thenApply(Function)
+	 */
+	default <U> CompletableFuture<U> thenApply(Function<? super Optional<T>, ? extends U> fn) {
+		return thenApply(ForkJoinPool.commonPool(), fn);
+	}
 }
