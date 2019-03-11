@@ -28,6 +28,18 @@ public interface WaitResultBuilder2<T> {
 	WaitResultBuilder3<T> expecting(Predicate<T> acceptingClause);
 
 	/**
+	 * Specify that the returned result must be equals to the received object.
+	 * 
+	 * @param other
+	 *            the object to compare with. May be null.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @see Predicate#isEqual(Object)
+	 */
+	default WaitResultBuilder3<T> expectingEqualsTo(T other) {
+		return expecting(Predicate.isEqual(other));
+	}
+
+	/**
 	 * Specify the condition that doesn't accept the result.
 	 * 
 	 * @param notAcceptingClause
