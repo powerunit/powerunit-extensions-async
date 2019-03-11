@@ -26,10 +26,17 @@ public final class WaitResultImpl<T> implements WaitResultBuilder5<T>, Callable<
 
 	private final RetryClause retryClause;
 
-	public WaitResultImpl(Callable<T> action, boolean ignoreException, boolean alsoDontFailWhenNoResultAndException,
+	public WaitResultImpl(Callable<T> action, boolean alsoDontFailWhenNoResultAndException,
 			Predicate<T> acceptingClause, RetryClause retryClause) {
 		this.action = requireNonNull(action, "action can't be null");
-		this.exceptionHandler = new ExceptionHandler(ignoreException, alsoDontFailWhenNoResultAndException);
+		this.exceptionHandler = new ExceptionHandler(true, alsoDontFailWhenNoResultAndException);
+		this.acceptingClause = requireNonNull(acceptingClause, "acceptingClause can't be null");
+		this.retryClause = requireNonNull(retryClause, "retryClause can't be null");
+	}
+
+	public WaitResultImpl(Callable<T> action, Predicate<T> acceptingClause, RetryClause retryClause) {
+		this.action = requireNonNull(action, "action can't be null");
+		this.exceptionHandler = new ExceptionHandler(false, false);
 		this.acceptingClause = requireNonNull(acceptingClause, "acceptingClause can't be null");
 		this.retryClause = requireNonNull(retryClause, "retryClause can't be null");
 	}

@@ -47,12 +47,12 @@ public final class WaitResult {
 
 			@Override
 			public WaitResultBuilder3<T> expecting(Predicate<T> acceptingClause) {
-				return retry -> new WaitResultImpl<>(action, false, false, acceptingClause, retry);
+				return retry -> new WaitResultImpl<>(action, acceptingClause, retry);
 			}
 
 			@Override
 			public WaitResultBuilder2<T> ignoreException(boolean alsoDontFailWhenNoResultAndException) {
-				return predicate -> retry -> new WaitResultImpl<>(action, true, alsoDontFailWhenNoResultAndException,
+				return predicate -> retry -> new WaitResultImpl<>(action, alsoDontFailWhenNoResultAndException,
 						predicate, retry);
 			}
 		};
