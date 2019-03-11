@@ -8,15 +8,15 @@ import static java.util.Objects.requireNonNull;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import ch.powerunit.extensions.async.lang.RetryClause;
-import ch.powerunit.extensions.async.lang.WaitResultBuilder5;
 
 /**
  * @author borettim
  *
  */
-public final class WaitResultImpl<T> implements WaitResultBuilder5<T>, Callable<Optional<T>> {
+public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<Optional<T>> {
 
 	private final Callable<T> action;
 
