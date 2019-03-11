@@ -5,6 +5,7 @@ package ch.powerunit.extensions.async;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import ch.powerunit.extensions.async.impl.WaitResultImpl;
@@ -42,7 +43,19 @@ public final class WaitResult {
 	 * @return {@link WaitResultBuilder1 the next step of the builder}
 	 */
 	public static <T> WaitResultBuilder1<T> of(Callable<T> action) {
-		return new WaitResultImpl<T>(action);
+		return new WaitResultBuilder1<T>() {
+
+			@Override
+			public WaitResultBuilder3<T> expecting(Predicate<T> acceptingClause) {
+				return retry -> new WaitResultImpl<>(action, false, false, acceptingClause, retry);
+			}
+
+			@Override
+			public WaitResultBuilder2<T> ignoreException(boolean alsoDontFailWhenNoResultAndException) {
+				return predicate -> retry -> new WaitResultImpl<>(action, true, alsoDontFailWhenNoResultAndException,
+						predicate, retry);
+			}
+		};
 	}
 
 	/**

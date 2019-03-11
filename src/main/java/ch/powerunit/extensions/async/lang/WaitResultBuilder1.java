@@ -5,6 +5,7 @@ package ch.powerunit.extensions.async.lang;
 
 import java.util.concurrent.CompletableFuture;
 
+
 /**
  * First Step of the builder of {@link CompletableFuture} to skip, if necessary, the
  * error.
