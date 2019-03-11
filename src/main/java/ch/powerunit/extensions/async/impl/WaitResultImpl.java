@@ -5,11 +5,14 @@ package ch.powerunit.extensions.async.impl;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
+import ch.powerunit.extensions.async.lang.RetryClause;
 import ch.powerunit.extensions.async.lang.WaitResultBuilder;
+import ch.powerunit.extensions.async.lang.WaitResultBuilder5;
 
 /**
  * @author borettim
@@ -23,49 +26,35 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 
 	private final Predicate<T> acceptingClause;
 
-	private final int count;
-
-	private final long waitInMs;
+	private final RetryClause retryClause;
 
 	public WaitResultImpl(Callable<T> action) {
 		this.action = requireNonNull(action, "action can't be null");
 		this.exceptionHandler = new ExceptionHandler(false, false);
 		this.acceptingClause = null;
-		this.count = 0;
-		this.waitInMs = 0;
+		this.retryClause = null;
 	}
 
 	private WaitResultImpl(WaitResultImpl<T> prev, boolean ignoreException,
 			boolean alsoDontFailWhenNoResultAndException) {
 		this.action = prev.action;
 		this.acceptingClause = prev.acceptingClause;
-		this.count = prev.count;
-		this.waitInMs = prev.waitInMs;
+		this.retryClause = prev.retryClause;
 		this.exceptionHandler = new ExceptionHandler(ignoreException, alsoDontFailWhenNoResultAndException);
 	}
 
 	private WaitResultImpl(WaitResultImpl<T> prev, Predicate<T> acceptingClause) {
 		this.action = prev.action;
 		this.exceptionHandler = prev.exceptionHandler;
-		this.count = prev.count;
-		this.waitInMs = prev.waitInMs;
+		this.retryClause = prev.retryClause;
 		this.acceptingClause = acceptingClause;
 	}
 
-	private WaitResultImpl(WaitResultImpl<T> prev, int count) {
+	private WaitResultImpl(WaitResultImpl<T> prev, RetryClause retryClause) {
 		this.action = prev.action;
 		this.exceptionHandler = prev.exceptionHandler;
 		this.acceptingClause = prev.acceptingClause;
-		this.waitInMs = prev.waitInMs;
-		this.count = count;
-	}
-
-	private WaitResultImpl(WaitResultImpl<T> prev, long millis) {
-		this.action = prev.action;
-		this.exceptionHandler = prev.exceptionHandler;
-		this.acceptingClause = prev.acceptingClause;
-		this.count = prev.count;
-		this.waitInMs = millis;
+		this.retryClause = retryClause;
 	}
 
 	/*
@@ -91,6 +80,11 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 		return new WaitResultImpl<T>(this, acceptingClause);
 	}
 
+	@Override
+	public WaitResultBuilder5<T> repeat(RetryClause retry) {
+		return new WaitResultImpl<T>(this, Objects.requireNonNull(retry, "retry can't be null"));
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -98,7 +92,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 	 */
 	@Override
 	public WaitResultImpl<T> repeat(int count) {
-		return new WaitResultImpl<T>(this, count);
+		return new WaitResultImpl<T>(this, RetryClause.of(count, 1));
 	}
 
 	/*
@@ -108,12 +102,12 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 	 */
 	@Override
 	public WaitResultImpl<T> everyMs(long value) {
-		return new WaitResultImpl<T>(this, value);
+		return new WaitResultImpl<T>(this, retryClause.withMs(value));
 	}
 
 	private void sleepBetweenRetry() {
 		try {
-			Thread.sleep(waitInMs);
+			Thread.sleep(retryClause.getWaitInMs());
 		} catch (InterruptedException e) {
 			// ignore
 		}
@@ -122,7 +116,8 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 	@Override
 	public Optional<T> get() {
 		Exception prev = null;
-		for (int i = 0; i < count; i++) {
+		int maxCount = retryClause.getCount();
+		for (int i = 0; i < maxCount; i++) {
 			prev = null;
 			try {
 				Optional<T> result = call();
