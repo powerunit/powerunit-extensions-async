@@ -1,4 +1,4 @@
-package ch.powerunit.extensions.async;
+package ch.powerunit.extensions.async.lang;
 
 import java.time.Duration;
 import java.util.Optional;
