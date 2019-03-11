@@ -18,7 +18,7 @@ class ExceptionHandler {// package protected
 	}
 
 	public void handleException(Exception e) {
-		if (!ignoreException) {
+		if (e != null && !ignoreException) {
 			throw new AssertionError("Unable to obtains the result during one try, because of " + e.getMessage()
 					+ " ; Original error class is " + e.getClass(), e);
 		}

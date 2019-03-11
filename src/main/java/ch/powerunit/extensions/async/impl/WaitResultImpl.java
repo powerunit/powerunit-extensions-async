@@ -35,12 +35,11 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 		this.retryClause = null;
 	}
 
-	private WaitResultImpl(WaitResultImpl<T> prev, boolean ignoreException,
-			boolean alsoDontFailWhenNoResultAndException) {
+	private WaitResultImpl(WaitResultImpl<T> prev, ExceptionHandler exceptionHandler) {
 		this.action = prev.action;
 		this.acceptingClause = prev.acceptingClause;
 		this.retryClause = prev.retryClause;
-		this.exceptionHandler = new ExceptionHandler(ignoreException, alsoDontFailWhenNoResultAndException);
+		this.exceptionHandler = exceptionHandler;
 	}
 
 	private WaitResultImpl(WaitResultImpl<T> prev, Predicate<T> acceptingClause) {
@@ -65,7 +64,7 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 	 */
 	@Override
 	public WaitResultImpl<T> ignoreException(boolean alsoDontFailWhenNoResultAndException) {
-		return new WaitResultImpl<T>(this, true, alsoDontFailWhenNoResultAndException);
+		return new WaitResultImpl<T>(this, new ExceptionHandler(true, alsoDontFailWhenNoResultAndException));
 	}
 
 	/*
@@ -105,32 +104,17 @@ public final class WaitResultImpl<T> implements WaitResultBuilder<T>, Callable<O
 		return new WaitResultImpl<T>(this, retryClause.withMs(value));
 	}
 
-	private void sleepBetweenRetry() {
-		try {
-			Thread.sleep(retryClause.getWaitInMs());
-		} catch (InterruptedException e) {
-			// ignore
-		}
-	}
-
 	@Override
 	public Optional<T> get() {
-		Exception prev = null;
-		int maxCount = retryClause.getCount();
-		for (int i = 0; i < maxCount; i++) {
-			prev = null;
-			try {
-				Optional<T> result = call();
-				if (result.isPresent()) {
-					return result;
-				}
-			} catch (Exception e) {
-				prev = e;
-				exceptionHandler.handleException(e);
+		RetryImpl<T> retry = new RetryImpl<>(retryClause, this);
+		while (retry.next()) {
+			exceptionHandler.handleException(retry.getPreviousException());
+			Optional<T> result = retry.getResult();
+			if (result.isPresent()) {
+				return result;
 			}
-			sleepBetweenRetry();
 		}
-		exceptionHandler.handleFinalException(prev);
+		exceptionHandler.handleFinalException(retry.getPreviousException());
 		return Optional.empty();
 	}
 
