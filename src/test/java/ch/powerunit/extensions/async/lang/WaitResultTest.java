@@ -47,7 +47,7 @@ public class WaitResultTest implements TestSuite {
 	public void testNotIgnoreExceptionFirstThenException() {
 		CompletableFuture<Optional<Object>> exec = WaitResult.of(() -> {
 			throw new IllegalArgumentException("TEST");
-		}).expecting(o -> true).repeatOnlyOnce().asyncExec();
+		}).dontIgnoreException().expecting(o -> true).repeatOnlyOnce().asyncExec();
 		assertWhen(exec::get).throwException(exceptionMessage(containsString("TEST")));
 	}
 
