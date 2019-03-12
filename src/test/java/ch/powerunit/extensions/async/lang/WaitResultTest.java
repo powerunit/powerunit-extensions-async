@@ -23,7 +23,7 @@ public class WaitResultTest implements TestSuite {
 
 	@Test
 	public void testObjectMethodDirectlyOK() throws InterruptedException, ExecutionException {
-		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object()).expecting(o -> true).repeat(100)
+		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object()).expectingNotNull().repeat(100)
 				.everyMs(10).asyncExec();
 		Optional<Object> result = exec.get();
 		assertThat(result).isNotNull();

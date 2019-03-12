@@ -6,6 +6,7 @@ package ch.powerunit.extensions.async.lang;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -38,6 +39,17 @@ public interface WaitResultBuilder2<T> {
 	 */
 	default WaitResultBuilder3<T> expectingEqualsTo(T other) {
 		return expecting(Predicate.isEqual(other));
+	}
+
+	/**
+	 * Specify that the returned result must be not null.
+	 * 
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @see Objects#nonNull(Object)
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3<T> expectingNotNull() {
+		return expecting(Objects::nonNull);
 	}
 
 	/**
