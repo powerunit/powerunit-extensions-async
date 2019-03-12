@@ -27,4 +27,13 @@ public class RetryPolicyTest implements TestSuite {
 		LocalDateTime end = LocalDateTime.now();
 		assertThat(Duration.between(start, end).toMillis()).is(lessThan(5000L));
 	}
+
+	@Test
+	public void tetRetryPolicySleepFromMs() {
+		LocalDateTime start = LocalDateTime.now();
+		RetryPolicy.of(1, 5000).sleepBetweenRetry(1);
+		LocalDateTime end = LocalDateTime.now();
+		assertThat(Duration.between(start, end).toMillis()).is(greaterThanOrEqualTo(5000L));
+	}
+
 }
