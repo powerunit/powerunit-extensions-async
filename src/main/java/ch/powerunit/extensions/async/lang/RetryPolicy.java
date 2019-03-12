@@ -1,7 +1,6 @@
 package ch.powerunit.extensions.async.lang;
 
 import java.time.Duration;
-import java.util.Objects;
 
 /**
  * This interface can be used to specify retry configuration.
@@ -48,6 +47,6 @@ public interface RetryPolicy {
 	 * @return the RetryPolicy.
 	 */
 	static RetryPolicy of(int count, Duration waitDuration) {
-		return of(count, Objects.requireNonNull(waitDuration, "waitDuration can't be null").toMillis());
+		return RetryPolicies.of(count, waitDuration);
 	}
 }

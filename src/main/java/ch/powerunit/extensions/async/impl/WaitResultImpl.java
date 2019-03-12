@@ -16,34 +16,36 @@ import ch.powerunit.extensions.async.lang.RetryPolicy;
  * @author borettim
  *
  */
-public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<Optional<T>> {
+public final class WaitResultImpl<T> implements Supplier<Optional<T>> {
 
-	private final Callable<T> action;
+	private final Callable<Optional<T>> action;
 
 	private final ExceptionHandler exceptionHandler;
 
-	private final Predicate<T> acceptingClause;
-
 	private final RetryPolicy retryClause;
+
+	private static <T> Callable<Optional<T>> asCallable(Callable<T> action, Predicate<T> acceptingClause) {
+		requireNonNull(action, "action can't be null");
+		requireNonNull(acceptingClause, "acceptingClause can't be null");
+		return () -> Optional.ofNullable(action.call()).filter(acceptingClause);
+	}
 
 	public WaitResultImpl(Callable<T> action, boolean alsoDontFailWhenNoResultAndException,
 			Predicate<T> acceptingClause, RetryPolicy retryClause) {
-		this.action = requireNonNull(action, "action can't be null");
+		this.action = asCallable(action, acceptingClause);
 		this.exceptionHandler = new ExceptionHandler(true, alsoDontFailWhenNoResultAndException);
-		this.acceptingClause = requireNonNull(acceptingClause, "acceptingClause can't be null");
 		this.retryClause = requireNonNull(retryClause, "retryClause can't be null");
 	}
 
 	public WaitResultImpl(Callable<T> action, Predicate<T> acceptingClause, RetryPolicy retryClause) {
-		this.action = requireNonNull(action, "action can't be null");
+		this.action = asCallable(action, acceptingClause);
 		this.exceptionHandler = new ExceptionHandler(false, false);
-		this.acceptingClause = requireNonNull(acceptingClause, "acceptingClause can't be null");
 		this.retryClause = requireNonNull(retryClause, "retryClause can't be null");
 	}
 
 	@Override
 	public Optional<T> get() {
-		RetryImpl<T> retry = new RetryImpl<>(retryClause, this);
+		RetryImpl<T> retry = new RetryImpl<>(retryClause, action);
 		while (retry.next()) {
 			exceptionHandler.handleException(retry.getPreviousException());
 			Optional<T> result = retry.getResult();
@@ -53,11 +55,6 @@ public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<
 		}
 		exceptionHandler.handleFinalException(retry.getPreviousException());
 		return Optional.empty();
-	}
-
-	@Override
-	public Optional<T> call() throws Exception {
-		return Optional.ofNullable(action.call()).filter(acceptingClause);
 	}
 
 }
