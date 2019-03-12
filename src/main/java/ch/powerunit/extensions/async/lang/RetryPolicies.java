@@ -57,20 +57,6 @@ public final class RetryPolicies {
 	}
 
 	/**
-	 * Create a new RetryPolicy, that wait each time more time : first time the
-	 * received duration, second time twice, etc.
-	 * 
-	 * @param count
-	 *            the number of retry.
-	 * @param ms
-	 *            the time in ms that will be combined with the retry number
-	 * @return the RetryPolicy
-	 */
-	public static RetryPolicy ofIncremental(int count, long ms) {
-		return of(count, retry -> retry * ms);
-	}
-
-	/**
 	 * Create a new RetryPolicy.
 	 * 
 	 * @param count
@@ -92,6 +78,20 @@ public final class RetryPolicies {
 				return count;
 			}
 		};
+	}
+
+	/**
+	 * Create a new RetryPolicy, that wait each time more time : first time the
+	 * received duration, second time twice, etc.
+	 * 
+	 * @param count
+	 *            the number of retry.
+	 * @param ms
+	 *            the time in ms that will be combined with the retry number
+	 * @return the RetryPolicy
+	 */
+	public static RetryPolicy ofIncremental(int count, long ms) {
+		return of(count, retry -> retry * ms);
 	}
 
 	private static void sleepBetweenRetry(long ms) {
