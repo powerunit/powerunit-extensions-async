@@ -3,6 +3,7 @@ package ch.powerunit.extensions.async.lang;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.IntToLongFunction;
 
 /**
  * Helpers method to build {@link RetryPolicy}.
@@ -24,18 +25,7 @@ public final class RetryPolicies {
 	 * @return the RetryPolicy
 	 */
 	public static RetryPolicy of(int count, long ms) {
-		return new RetryPolicy() {
-
-			@Override
-			public void sleepBetweenRetry(int retry) {
-				RetryPolicies.sleepBetweenRetry(ms);
-			}
-
-			@Override
-			public int getCount() {
-				return count;
-			}
-		};
+		return of(count, l -> ms);
 	}
 
 	/**
@@ -77,11 +67,24 @@ public final class RetryPolicies {
 	 * @return the RetryPolicy
 	 */
 	public static RetryPolicy ofIncremental(int count, long ms) {
+		return of(count, retry -> retry * ms);
+	}
+
+	/**
+	 * Create a new RetryPolicy.
+	 * 
+	 * @param count
+	 *            the number of retry.
+	 * @param retryToWaitTime
+	 *            the function to compute the wait time based on the retry.
+	 * @return the RetryPolicy
+	 */
+	public static RetryPolicy of(int count, IntToLongFunction retryToWaitTime) {
 		return new RetryPolicy() {
 
 			@Override
 			public void sleepBetweenRetry(int retry) {
-				RetryPolicies.sleepBetweenRetry(ms * retry);
+				RetryPolicies.sleepBetweenRetry(retryToWaitTime.applyAsLong(retry));
 			}
 
 			@Override
