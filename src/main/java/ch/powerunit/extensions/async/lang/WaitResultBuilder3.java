@@ -27,7 +27,7 @@ public interface WaitResultBuilder3<T> {
 	 * @return {@link WaitResultBuilder5 the final step of the builder}
 	 * @since 1.0.0
 	 */
-	WaitResultBuilder5<T> repeat(RetryClause retry);
+	WaitResultBuilder5<T> repeat(RetryPolicy retry);
 
 	/**
 	 * Specify the maximal number of retry.
@@ -37,7 +37,7 @@ public interface WaitResultBuilder3<T> {
 	 * @return {@link WaitResultBuilder4 the next step of the builder}
 	 */
 	default WaitResultBuilder4<T> repeat(int count) {
-		return value -> repeat(RetryClause.of(count, value));
+		return value -> repeat(RetryPolicy.of(count, value));
 	}
 
 	/**
@@ -47,6 +47,6 @@ public interface WaitResultBuilder3<T> {
 	 * @return {@link WaitResultBuilder5 the final step of the builder}
 	 */
 	default WaitResultBuilder5<T> repeatOnlyOnce() {
-		return repeat(RetryClause.of(1, Duration.ofMillis(1)));
+		return repeat(RetryPolicy.of(1, Duration.ofMillis(1)));
 	}
 }

@@ -3,10 +3,10 @@ package ch.powerunit.extensions.async.impl;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-import ch.powerunit.extensions.async.lang.RetryClause;
+import ch.powerunit.extensions.async.lang.RetryPolicy;
 
 class RetryImpl<T> { // package protected
-	private final RetryClause retryClause;
+	private final RetryPolicy retryClause;
 
 	private final Callable<Optional<T>> callable;
 
@@ -16,7 +16,7 @@ class RetryImpl<T> { // package protected
 
 	private Exception previousException;
 
-	public RetryImpl(RetryClause retryClause, Callable<Optional<T>> callable) {
+	public RetryImpl(RetryPolicy retryClause, Callable<Optional<T>> callable) {
 		this.retryClause = retryClause;
 		this.callable = callable;
 		this.retryCount = 0;
@@ -27,7 +27,7 @@ class RetryImpl<T> { // package protected
 			return false;
 		}
 		if (retryCount > 0) {
-			sleepBetweenRetry();
+			retryClause.sleepBetweenRetry(retryCount);
 		}
 		retryCount++;
 		previousException = null;
@@ -46,14 +46,6 @@ class RetryImpl<T> { // package protected
 
 	public Exception getPreviousException() {
 		return previousException;
-	}
-
-	private void sleepBetweenRetry() {
-		try {
-			Thread.sleep(retryClause.getWaitInMs());
-		} catch (InterruptedException e) {
-			// ignore
-		}
 	}
 
 }

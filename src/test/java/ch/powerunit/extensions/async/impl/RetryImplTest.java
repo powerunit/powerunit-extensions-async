@@ -7,7 +7,7 @@ import java.util.concurrent.Callable;
 
 import ch.powerunit.Test;
 import ch.powerunit.TestSuite;
-import ch.powerunit.extensions.async.lang.RetryClause;
+import ch.powerunit.extensions.async.lang.RetryPolicy;
 
 public class RetryImplTest implements TestSuite {
 
@@ -26,7 +26,7 @@ public class RetryImplTest implements TestSuite {
 
 	@Test
 	public void testOneRetryOK() {
-		RetryImpl<String> retry = new RetryImpl<>(RetryClause.of(1, 10000), () -> Optional.of("X"));
+		RetryImpl<String> retry = new RetryImpl<>(RetryPolicy.of(1, 10000), () -> Optional.of("X"));
 		LocalDateTime start = LocalDateTime.now();
 		// First
 		assertThat(retry.next()).is(true);
@@ -47,7 +47,7 @@ public class RetryImplTest implements TestSuite {
 
 	@Test
 	public void testOneRetryKO() {
-		RetryImpl<String> retry = new RetryImpl<>(RetryClause.of(1, 10000), () -> Optional.empty());
+		RetryImpl<String> retry = new RetryImpl<>(RetryPolicy.of(1, 10000), () -> Optional.empty());
 		LocalDateTime start = LocalDateTime.now();
 		// First
 		assertThat(retry.next()).is(true);
@@ -68,7 +68,7 @@ public class RetryImplTest implements TestSuite {
 
 	@Test
 	public void testOneRetryException() {
-		RetryImpl<String> retry = new RetryImpl<>(RetryClause.of(1, 10000), () -> {
+		RetryImpl<String> retry = new RetryImpl<>(RetryPolicy.of(1, 10000), () -> {
 			throw new IllegalArgumentException("test");
 		});
 		LocalDateTime start = LocalDateTime.now();
@@ -93,7 +93,7 @@ public class RetryImplTest implements TestSuite {
 	@Test
 	public void testTwoRetryOK() {
 		MyCallable test1 = new MyCallable();
-		RetryImpl<String> retry = new RetryImpl<>(RetryClause.of(2, 5000), test1);
+		RetryImpl<String> retry = new RetryImpl<>(RetryPolicy.of(2, 5000), test1);
 		LocalDateTime start = LocalDateTime.now();
 		// First
 		assertThat(retry.next()).is(true);

@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import ch.powerunit.extensions.async.lang.RetryClause;
+import ch.powerunit.extensions.async.lang.RetryPolicy;
 
 /**
  * @author borettim
@@ -24,17 +24,17 @@ public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<
 
 	private final Predicate<T> acceptingClause;
 
-	private final RetryClause retryClause;
+	private final RetryPolicy retryClause;
 
 	public WaitResultImpl(Callable<T> action, boolean alsoDontFailWhenNoResultAndException,
-			Predicate<T> acceptingClause, RetryClause retryClause) {
+			Predicate<T> acceptingClause, RetryPolicy retryClause) {
 		this.action = requireNonNull(action, "action can't be null");
 		this.exceptionHandler = new ExceptionHandler(true, alsoDontFailWhenNoResultAndException);
 		this.acceptingClause = requireNonNull(acceptingClause, "acceptingClause can't be null");
 		this.retryClause = requireNonNull(retryClause, "retryClause can't be null");
 	}
 
-	public WaitResultImpl(Callable<T> action, Predicate<T> acceptingClause, RetryClause retryClause) {
+	public WaitResultImpl(Callable<T> action, Predicate<T> acceptingClause, RetryPolicy retryClause) {
 		this.action = requireNonNull(action, "action can't be null");
 		this.exceptionHandler = new ExceptionHandler(false, false);
 		this.acceptingClause = requireNonNull(acceptingClause, "acceptingClause can't be null");
