@@ -21,9 +21,9 @@ import ch.powerunit.extensions.async.lang.WaitResultBuilder3;
  * condition.
  * 
  * @since 1.0.0 - Before, this class was under
- *        {@link ch.powerunit.extensions.async}. This change is to as to use
- *        module in java 9, it will not be possible to have the implementation
- *        in a sub package of the exported one.
+ *        {@link ch.powerunit.extensions.async}. This change is linked with java
+ *        9 module, as it will not be possible to have the implementation in a
+ *        sub package of the exported one.
  */
 public final class WaitResult {
 	private WaitResult() {
