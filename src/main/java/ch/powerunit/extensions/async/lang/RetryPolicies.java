@@ -1,7 +1,8 @@
 package ch.powerunit.extensions.async.lang;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.Duration;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.IntToLongFunction;
 
@@ -47,7 +48,7 @@ public final class RetryPolicies {
 	 * @return the RetryPolicy
 	 */
 	public static RetryPolicy of(int count, long value, TimeUnit unit) {
-		return of(count, Objects.requireNonNull(unit, "unit can't be null").toMillis(value));
+		return of(count, requireNonNull(unit, "unit can't be null").toMillis(value));
 	}
 
 	/**
@@ -60,7 +61,7 @@ public final class RetryPolicies {
 	 * @return the RetryPolicy
 	 */
 	public static RetryPolicy of(int count, Duration duration) {
-		return of(count, Objects.requireNonNull(duration, "duration can't be null").toMillis());
+		return of(count, requireNonNull(duration, "duration can't be null").toMillis());
 	}
 
 	/**
@@ -112,7 +113,7 @@ public final class RetryPolicies {
 	 * @return the RetryPolicy
 	 */
 	public static RetryPolicy ofIncremental(int count, Duration duration) {
-		return ofIncremental(count, Objects.requireNonNull(duration, "duration can't be null").toMillis());
+		return ofIncremental(count, requireNonNull(duration, "duration can't be null").toMillis());
 	}
 
 	private static void sleepBetweenRetry(long ms) {
