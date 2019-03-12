@@ -36,6 +36,16 @@ public interface WaitResultBuilder4<T> {
 	}
 
 	/**
+	 * Specify to retry every second.
+	 * 
+	 * @return {@link WaitResultBuilder5 the last step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder5<T> everySecond() {
+		return every(Duration.ofSeconds(1));
+	}
+
+	/**
 	 * Specify the amount of time between retry.
 	 * 
 	 * @param value

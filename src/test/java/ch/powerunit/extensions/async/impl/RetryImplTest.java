@@ -68,7 +68,7 @@ public class RetryImplTest implements TestSuite {
 
 	@Test
 	public void testOneRetryException() {
-		RetryImpl<String> retry = new RetryImpl<>(RetryPolicy.of(1, 10000), () -> {
+		RetryImpl<String> retry = new RetryImpl<>(RetryPolicy.of(1, Duration.ofSeconds(10)), () -> {
 			throw new IllegalArgumentException("test");
 		});
 		LocalDateTime start = LocalDateTime.now();

@@ -3,7 +3,6 @@
  */
 package ch.powerunit.extensions.async.lang;
 
-import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -47,6 +46,6 @@ public interface WaitResultBuilder3<T> {
 	 * @return {@link WaitResultBuilder5 the final step of the builder}
 	 */
 	default WaitResultBuilder5<T> repeatOnlyOnce() {
-		return repeat(RetryPolicy.of(1, Duration.ofMillis(1)));
+		return repeat(RetryPolicies.RETRY_ONLY_ONCE);
 	}
 }

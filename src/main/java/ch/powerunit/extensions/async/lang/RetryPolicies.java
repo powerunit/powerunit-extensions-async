@@ -16,6 +16,13 @@ public final class RetryPolicies {
 	}
 
 	/**
+	 * Retry Policy to just to one try.
+	 * 
+	 * @since 1.0.0
+	 */
+	public static final RetryPolicy RETRY_ONLY_ONCE = of(1, 1);
+
+	/**
 	 * Create a new RetryPolicy.
 	 * 
 	 * @param count
@@ -92,6 +99,20 @@ public final class RetryPolicies {
 	 */
 	public static RetryPolicy ofIncremental(int count, long ms) {
 		return of(count, retry -> retry * ms);
+	}
+
+	/**
+	 * Create a new RetryPolicy, that wait each time more time : first time the
+	 * received duration, second time twice, etc.
+	 * 
+	 * @param count
+	 *            the number of retry.
+	 * @param duration
+	 *            the duration that will be combined with the retry number
+	 * @return the RetryPolicy
+	 */
+	public static RetryPolicy ofIncremental(int count, Duration duration) {
+		return ofIncremental(count, Objects.requireNonNull(duration, "duration can't be null").toMillis());
 	}
 
 	private static void sleepBetweenRetry(long ms) {

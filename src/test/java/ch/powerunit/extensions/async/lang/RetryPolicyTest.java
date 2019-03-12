@@ -16,7 +16,7 @@ public class RetryPolicyTest implements TestSuite {
 	}
 
 	@Test
-	public void tetRetryPolicyInterrupt() throws InterruptedException {
+	public void testRetryPolicyInterrupt() throws InterruptedException {
 		LocalDateTime start = LocalDateTime.now();
 		Thread subThread = new Thread(() -> {
 			RetryPolicy.of(1, 10000).sleepBetweenRetry(1);
@@ -29,7 +29,7 @@ public class RetryPolicyTest implements TestSuite {
 	}
 
 	@Test
-	public void tetRetryPolicySleepFromMs() {
+	public void testRetryPolicySleepFromMs() {
 		LocalDateTime start = LocalDateTime.now();
 		RetryPolicy.of(1, 2000).sleepBetweenRetry(1);
 		LocalDateTime end = LocalDateTime.now();
