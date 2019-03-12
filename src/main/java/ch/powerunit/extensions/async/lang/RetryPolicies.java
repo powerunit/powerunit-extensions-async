@@ -13,8 +13,6 @@ import java.util.function.IntToLongFunction;
  *
  */
 public final class RetryPolicies {
-	private RetryPolicies() {
-	}
 
 	/**
 	 * Retry Policy to just to one try.
@@ -22,6 +20,9 @@ public final class RetryPolicies {
 	 * @since 1.0.0
 	 */
 	public static final RetryPolicy RETRY_ONLY_ONCE = of(1, 1);
+
+	private RetryPolicies() {
+	}
 
 	/**
 	 * Create a new RetryPolicy.

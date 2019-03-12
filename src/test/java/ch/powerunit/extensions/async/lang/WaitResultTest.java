@@ -33,7 +33,7 @@ public class WaitResultTest implements TestSuite {
 	@Test
 	public void testObjectMethodDirectlyOKWithEquals() throws InterruptedException, ExecutionException {
 		CompletableFuture<Optional<String>> exec = WaitResult.on("X")
-				.expectingEqualsTo(new StringBuilder("X").toString()).repeat(100).everyMs(10).asyncExec();
+				.expectingEqualsTo(new StringBuilder("X").toString()).repeat(100).asFastAsPossible().asyncExec();
 		Optional<String> result = exec.get();
 		assertThat(result).isNotNull();
 		assertThat(result.isPresent()).is(true);

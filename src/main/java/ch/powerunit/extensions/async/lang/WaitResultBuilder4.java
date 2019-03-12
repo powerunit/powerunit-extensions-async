@@ -69,4 +69,15 @@ public interface WaitResultBuilder4<T> {
 	default WaitResultBuilder5<T> every(Duration delay) {
 		return everyMs(requireNonNull(delay, "delay can't be null").toMillis());
 	}
+
+	/**
+	 * Repeat as fast as possible.
+	 * 
+	 * @return {@link WaitResultBuilder5 the last step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder5<T> asFastAsPossible() {
+		return everyMs(1);
+	}
+
 }
