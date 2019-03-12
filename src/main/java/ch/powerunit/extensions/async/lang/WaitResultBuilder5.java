@@ -150,6 +150,21 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * @since 1.0.0
 	 * @see CompletableFuture#join()
 	 */
+	default Optional<T> join(Executor executor) {
+		return asyncExec(executor).join();
+	}
+
+	/**
+	 * Shortcut method to the join of the {@link CompletableFuture}.
+	 * <p>
+	 * Only runtime exception in case of error.
+	 * 
+	 * @param executor
+	 *            the executor to be used.
+	 * @return the result of the wait
+	 * @since 1.0.0
+	 * @see CompletableFuture#join()
+	 */
 	default T joinWithAResult(Executor executor) {
 		return join(executor).orElseThrow(() -> new AssertionError("No result is available when one is expected"));
 	}
@@ -166,21 +181,6 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 */
 	default T joinWithAResult() {
 		return joinWithAResult(ForkJoinPool.commonPool());
-	}
-
-	/**
-	 * Shortcut method to the join of the {@link CompletableFuture}.
-	 * <p>
-	 * Only runtime exception in case of error.
-	 * 
-	 * @param executor
-	 *            the executor to be used.
-	 * @return the result of the wait
-	 * @since 1.0.0
-	 * @see CompletableFuture#join()
-	 */
-	default Optional<T> join(Executor executor) {
-		return asyncExec(executor).join();
 	}
 
 	/**
