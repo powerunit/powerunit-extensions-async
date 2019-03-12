@@ -242,8 +242,19 @@ public class WaitResultTest implements TestSuite {
 
 	// Shortcut
 	@Test
-	public void testjoin() {
+	public void testJoin() {
 		assertThat(WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().join()).is(optionalIsPresent());
+	}
+
+	@Test
+	public void testJoinWithAResult() {
+		assertThat(WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().joinWithAResult()).is(true);
+	}
+
+	@Test
+	public void testJoinWithAResultMissing() {
+		assertWhen(() -> WaitResult.on(false).expecting(b -> b).repeatOnlyOnce().joinWithAResult())
+				.throwException(instanceOf(AssertionError.class));
 	}
 
 }
