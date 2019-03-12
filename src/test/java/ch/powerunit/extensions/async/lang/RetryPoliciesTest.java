@@ -29,6 +29,7 @@ public class RetryPoliciesTest implements TestSuite {
 	public void testRetryPolicySleepIncremental() {
 		LocalDateTime start = LocalDateTime.now();
 		RetryPolicy rp = RetryPolicies.ofIncremental(3, 1000);
+		assertThat(rp.getCount()).is(3);
 		rp.sleepBetweenRetry(1);
 		rp.sleepBetweenRetry(2);
 		LocalDateTime end = LocalDateTime.now();

@@ -193,6 +193,9 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 *            the executor to be used.
 	 * @param fn
 	 *            then function to be applied
+	 * 
+	 * @param <U>
+	 *            The new return type
 	 * @return the {@link CompletableFuture}
 	 * @since 1.0.0
 	 * @see CompletableFuture#thenApply(Function)
@@ -208,6 +211,8 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * 
 	 * @param fn
 	 *            then function to be applied
+	 * @param <U>
+	 *            The new return type
 	 * @return the {@link CompletableFuture}
 	 * @since 1.0.0
 	 * @see CompletableFuture#thenApply(Function)
