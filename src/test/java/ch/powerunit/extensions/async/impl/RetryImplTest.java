@@ -93,7 +93,7 @@ public class RetryImplTest implements TestSuite {
 	@Test
 	public void testTwoRetryOK() {
 		MyCallable test1 = new MyCallable();
-		RetryImpl<String> retry = new RetryImpl<>(RetryPolicy.of(2, 5000), test1);
+		RetryImpl<String> retry = new RetryImpl<>(RetryPolicy.of(2, 2000), test1);
 		LocalDateTime start = LocalDateTime.now();
 		// First
 		assertThat(retry.next()).is(true);
@@ -117,8 +117,8 @@ public class RetryImplTest implements TestSuite {
 		// Time
 		LocalDateTime end = LocalDateTime.now();
 		long duration = Duration.between(start, end).toMillis();
-		assertThat(duration).is(lessThan(10000L));
-		assertThat(duration).is(greaterThanOrEqualTo(5000L));
+		assertThat(duration).is(lessThan(4000L));
+		assertThat(duration).is(greaterThanOrEqualTo(2000L));
 	}
 
 }
