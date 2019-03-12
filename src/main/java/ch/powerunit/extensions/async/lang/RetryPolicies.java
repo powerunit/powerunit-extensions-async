@@ -23,7 +23,7 @@ public final class RetryPolicies {
 	 *            the wait time in ms.
 	 * @return the RetryPolicy
 	 */
-	static RetryPolicy of(int count, long ms) {
+	public static RetryPolicy of(int count, long ms) {
 		return new RetryPolicy() {
 
 			@Override
@@ -49,7 +49,7 @@ public final class RetryPolicies {
 	 *            the unit of the wait time.
 	 * @return the RetryPolicy
 	 */
-	static RetryPolicy of(int count, long value, TimeUnit unit) {
+	public static RetryPolicy of(int count, long value, TimeUnit unit) {
 		return of(count, Objects.requireNonNull(unit, "unit can't be null").toMillis(value));
 	}
 
@@ -62,7 +62,7 @@ public final class RetryPolicies {
 	 *            the duration to wait.
 	 * @return the RetryPolicy
 	 */
-	static RetryPolicy of(int count, Duration duration) {
+	public static RetryPolicy of(int count, Duration duration) {
 		return of(count, Objects.requireNonNull(duration, "duration can't be null").toMillis());
 	}
 
@@ -76,7 +76,7 @@ public final class RetryPolicies {
 	 *            the time in ms that will be combined with the retry number
 	 * @return the RetryPolicy
 	 */
-	static RetryPolicy ofIncremental(int count, long ms) {
+	public static RetryPolicy ofIncremental(int count, long ms) {
 		return new RetryPolicy() {
 
 			@Override
