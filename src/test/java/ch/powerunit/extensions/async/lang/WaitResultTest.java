@@ -226,4 +226,24 @@ public class WaitResultTest implements TestSuite {
 		assertWhen(exec::get).throwException(instanceOf(CancellationException.class));
 	}
 
+	// Shortcut
+	@Test
+	public void testApply() throws InterruptedException, ExecutionException {
+		assertThat(WaitResult.on(true).expecting(b -> b).repeatOnlyOnce()
+				.thenApply(o -> o.map(Object::toString).orElse("")).get()).is("true");
+	}
+
+	@Test
+	public void testAccept() throws InterruptedException, ExecutionException {
+		StringBuilder sb = new StringBuilder();
+		WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().thenAccept(sb::append).get();
+		assertThat(sb.toString()).equals("true");
+	}
+
+	// Shortcut
+	@Test
+	public void testjoin() {
+		assertThat(WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().join()).is(optionalIsPresent());
+	}
+
 }
