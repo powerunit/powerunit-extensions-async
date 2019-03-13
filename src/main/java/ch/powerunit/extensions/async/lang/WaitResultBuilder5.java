@@ -101,9 +101,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception.
-	 * @deprecated Replaced by {@code usingDefaultExecutor().finish()}
 	 */
-	@Deprecated
 	default Optional<T> finish() {
 		return usingDefaultExecutor().finish();
 	}
@@ -136,9 +134,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception or missing result.
-	 * @deprecated Replaced by {@code usingDefaultExecutor().finishWithAResult()}
 	 */
-	@Deprecated
 	default T finishWithAResult() {
 		return usingDefaultExecutor().finishWithAResult();
 	}
