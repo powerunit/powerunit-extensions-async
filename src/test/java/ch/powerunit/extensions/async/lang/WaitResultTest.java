@@ -310,11 +310,18 @@ public class WaitResultTest implements TestSuite {
 				.map(s -> "s" + s).asyncExec().join()).is(optionalIs("sx"));
 	}
 
-	// FIlter
+	// Filter
 	@Test
 	public void testFilter() {
 		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
 				.map(s -> "s" + s).filter(x -> false).asyncExec().join()).is(optionalIsNotPresent());
+	}
+
+	// or timeout
+	@Test
+	public void testOrTimeout() {
+		assertWhen(() -> WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> false).repeat(10).everyMinute()
+				.asyncExec().orTimeout(2, TimeUnit.SECONDS).get()).throwException(instanceOf(ExecutionException.class));
 	}
 
 }

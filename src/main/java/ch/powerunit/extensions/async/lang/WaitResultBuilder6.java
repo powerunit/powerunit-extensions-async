@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -117,5 +118,23 @@ public interface WaitResultBuilder6<T> {
 	 */
 	default <U> CompletableFuture<U> thenApply(Function<? super Optional<T>, ? extends U> fn) {
 		return asyncExec().thenApply(fn);
+	}
+
+	/**
+	 * Create and start the async execution of the {@link CompletableFuture} and
+	 * exceptionally completes this CompletableFuture with a TimeoutException if not
+	 * otherwise completed before the given timeout.
+	 * 
+	 * @param timeout
+	 *            how long to wait before completing exceptionally with a
+	 *            TimeoutException, in units of unit
+	 * @param unit
+	 *            a TimeUnit determining how to interpret the timeout parameter
+	 * @return the {@link CompletableFuture}
+	 * @since 1.0.0
+	 * @see CompletableFuture#orTimeout(long, TimeUnit)
+	 */
+	default CompletableFuture<Optional<T>> orTimeout(long timeout, TimeUnit unit) {
+		return asyncExec().orTimeout(timeout, unit);
 	}
 }
