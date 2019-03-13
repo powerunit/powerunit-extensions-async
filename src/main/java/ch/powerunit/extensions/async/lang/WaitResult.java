@@ -76,7 +76,7 @@ public final class WaitResult {
 	 * @return {@link WaitResultBuilder3 the next step of the builder}
 	 * @since 1.0.0
 	 */
-	public static WaitResultBuilder3<Boolean> of(Runnable action) {
+	public static WaitResultBuilder3<Boolean> ofRunnable(Runnable action) {
 		return of(Executors.callable(action, true)).ignoreException(true).expecting(b -> b);
 	}
 
@@ -112,4 +112,5 @@ public final class WaitResult {
 	public static WaitResultBuilder3<Boolean> onCondition(Supplier<Boolean> conditionSupplier) {
 		return of(conditionSupplier::get).expecting(b -> b);
 	}
+	
 }
