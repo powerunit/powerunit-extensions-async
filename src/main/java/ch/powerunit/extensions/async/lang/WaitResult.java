@@ -112,5 +112,24 @@ public final class WaitResult {
 	public static WaitResultBuilder3<Boolean> onCondition(Supplier<Boolean> conditionSupplier) {
 		return of(conditionSupplier::get).expecting(b -> b);
 	}
-	
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * repeated control of a call that is assumed as OK when an exception is thrown.
+	 * 
+	 * @param action
+	 *            the action that is expected to thrown an exception.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	public static WaitResultBuilder3<Exception> forException(Callable<?> action) {
+		return of(() -> {
+			try {
+				action.call();
+				return null;
+			} catch (Exception e) {
+				return e;
+			}
+		}).dontIgnoreException().expectingNotNull();
+	}
 }
