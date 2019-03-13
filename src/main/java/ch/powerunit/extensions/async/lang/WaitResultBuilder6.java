@@ -40,9 +40,7 @@ public interface WaitResultBuilder6<T> {
 	default Optional<T> finish() {
 		try {
 			return asyncExec().get();
-		} catch (InterruptedException e) {
-			throw new AssertionError("Unable to get the result, because of " + e.getMessage(), e);
-		} catch (ExecutionException e) {
+		} catch (InterruptedException | ExecutionException e) {
 			if (e.getCause() instanceof AssertionError) {
 				throw (AssertionError) e.getCause();
 			}
