@@ -81,7 +81,7 @@ public interface WaitResultBuilder2<T> {
 	}
 
 	/**
-	 * Specify that at alls conditions must accept the result.
+	 * Specify that at all conditions must accept the result.
 	 * 
 	 * @param acceptingClause1
 	 *            {@link Predicate first condition} to accept the result.
