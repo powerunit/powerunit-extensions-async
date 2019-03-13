@@ -69,9 +69,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * {@link ForkJoinPool#commonPool()}.
 	 * 
 	 * @return the {@link CompletableFuture}
-	 * @deprecated Replaced by {@code usingDefaultExecutor().asyncExec()}
 	 */
-	@Deprecated
 	default CompletableFuture<Optional<T>> asyncExec() {
 		return usingDefaultExecutor().asyncExec();
 	}
