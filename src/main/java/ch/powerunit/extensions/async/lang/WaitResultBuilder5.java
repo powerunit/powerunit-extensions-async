@@ -3,7 +3,6 @@
  */
 package ch.powerunit.extensions.async.lang;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -187,19 +186,16 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 
 			@Override
 			public WaitResultBuilder6<T> using(Executor executor) {
-				Objects.requireNonNull(executor, "executor can't be null");
 				return () -> CompletableFuture.supplyAsync(this, executor);
 			}
 
 			@Override
 			public <U> WaitResultBuilder5<U> map(Function<T, U> mapper) {
-				Objects.requireNonNull(mapper, "mapper can't be null");
 				return of(() -> get().map(mapper));
 			}
 
 			@Override
 			public WaitResultBuilder5<T> filter(Predicate<T> filter) {
-				Objects.requireNonNull(filter, "filter can't be null");
 				return of(() -> get().filter(filter));
 			}
 		};
