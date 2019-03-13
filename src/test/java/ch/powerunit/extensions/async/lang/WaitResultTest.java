@@ -270,4 +270,18 @@ public class WaitResultTest implements TestSuite {
 						.throwException(instanceOf(AssertionError.class));
 	}
 
+	// On runnable
+	@Test
+	public void testOnRunnableNoError() {
+		assertThat(WaitResult.of(() -> {
+		}).repeatOnlyOnce().asyncExec().join()).is(optionalIsPresent());
+	}
+
+	@Test
+	public void testOnRunnableError() {
+		assertThat(WaitResult.of((Runnable) () -> {
+			throw new IllegalArgumentException();
+		}).repeatOnlyOnce().asyncExec().join()).is(optionalIsNotPresent());
+	}
+
 }

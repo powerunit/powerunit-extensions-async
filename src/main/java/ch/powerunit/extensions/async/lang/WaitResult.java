@@ -5,6 +5,7 @@ package ch.powerunit.extensions.async.lang;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -60,6 +61,23 @@ public final class WaitResult {
 						.of(new WaitResultImpl<>(action, alsoDontFailWhenNoResultAndException, predicate, retry)::get);
 			}
 		};
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * execution of the received action, with repetition until some condition.
+	 * <p>
+	 * In this case, it is assumed that the received action throws unchecked
+	 * exception when the condition is not yet OK. The returned Optional will be
+	 * present in case of success.
+	 * 
+	 * @param action
+	 *            the {@link Runnable} to be executed.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	public static WaitResultBuilder3<Boolean> of(Runnable action) {
+		return of(Executors.callable(action, true)).ignoreException(true).expecting(b -> b);
 	}
 
 	/**
