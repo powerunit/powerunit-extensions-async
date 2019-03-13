@@ -321,7 +321,8 @@ public class WaitResultTest implements TestSuite {
 	@Test
 	public void testOrTimeout() {
 		assertWhen(() -> WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> false).repeat(10).everyMinute()
-				.asyncExec().orTimeout(2, TimeUnit.SECONDS).get()).throwException(instanceOf(ExecutionException.class));
+				.usingDefaultExecutor().orTimeout(2, TimeUnit.SECONDS).get())
+						.throwException(instanceOf(ExecutionException.class));
 	}
 
 }
