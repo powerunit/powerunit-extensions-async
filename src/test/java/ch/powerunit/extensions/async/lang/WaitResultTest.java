@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import ch.powerunit.Test;
@@ -25,6 +26,15 @@ public class WaitResultTest implements TestSuite {
 	public void testObjectMethodDirectlyOK() throws InterruptedException, ExecutionException {
 		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object()).expectingNotNull().repeat(100)
 				.everySecond().asyncExec();
+		Optional<Object> result = exec.get();
+		assertThat(result).isNotNull();
+		assertThat(result.isPresent()).is(true);
+	}
+
+	@Test
+	public void testObjectMethodDirectlyOKExec() throws InterruptedException, ExecutionException {
+		CompletableFuture<Optional<Object>> exec = WaitResult.on(new Object()).expectingNotNull().repeat(100)
+				.everySecond().asyncExec(Executors.newFixedThreadPool(2));
 		Optional<Object> result = exec.get();
 		assertThat(result).isNotNull();
 		assertThat(result.isPresent()).is(true);
@@ -88,7 +98,7 @@ public class WaitResultTest implements TestSuite {
 	@Test
 	public void testObjectMethodDirectlyOKWithFinish() {
 		Optional<Object> result = WaitResult.on(new Object()).expecting(o -> true).repeat(100)
-				.every(10, TimeUnit.MILLISECONDS).finish();
+				.every(10, TimeUnit.MILLISECONDS).finish(Executors.newCachedThreadPool());
 		assertThat(result).isNotNull();
 		assertThat(result.isPresent()).is(true);
 	}
@@ -115,7 +125,7 @@ public class WaitResultTest implements TestSuite {
 	@Test
 	public void testObjectMethodDirectlyOKWithFinishWithAResult() {
 		Object result = WaitResult.on(new Object()).expecting(o -> true).repeat(100).every(10, TimeUnit.MILLISECONDS)
-				.finishWithAResult();
+				.finishWithAResult(Executors.newSingleThreadExecutor());
 		assertThat(result).isNotNull();
 	}
 
@@ -229,32 +239,35 @@ public class WaitResultTest implements TestSuite {
 	// Shortcut
 	@Test
 	public void testApply() throws InterruptedException, ExecutionException {
-		assertThat(WaitResult.on(true).expecting(b -> b).repeatOnlyOnce()
+		assertThat(WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().usingDefaultExecutor()
 				.thenApply(o -> o.map(Object::toString).orElse("")).get()).is("true");
 	}
 
 	@Test
 	public void testAccept() throws InterruptedException, ExecutionException {
 		StringBuilder sb = new StringBuilder();
-		WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().thenAccept(sb::append).get();
+		WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().usingDefaultExecutor().thenAccept(sb::append).get();
 		assertThat(sb.toString()).equals("true");
 	}
 
 	// Shortcut
 	@Test
 	public void testJoin() {
-		assertThat(WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().join()).is(optionalIsPresent());
+		assertThat(WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().usingDefaultExecutor().join())
+				.is(optionalIsPresent());
 	}
 
 	@Test
 	public void testJoinWithAResult() {
-		assertThat(WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().joinWithAResult()).is(true);
+		assertThat(WaitResult.on(true).expecting(b -> b).repeatOnlyOnce().usingDefaultExecutor().joinWithAResult())
+				.is(true);
 	}
 
 	@Test
 	public void testJoinWithAResultMissing() {
-		assertWhen(() -> WaitResult.on(false).expecting(b -> b).repeatOnlyOnce().joinWithAResult())
-				.throwException(instanceOf(AssertionError.class));
+		assertWhen(
+				() -> WaitResult.on(false).expecting(b -> b).repeatOnlyOnce().usingDefaultExecutor().joinWithAResult())
+						.throwException(instanceOf(AssertionError.class));
 	}
 
 }

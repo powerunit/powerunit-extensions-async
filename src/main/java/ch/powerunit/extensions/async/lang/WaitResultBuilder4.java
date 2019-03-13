@@ -20,7 +20,7 @@ public interface WaitResultBuilder4<T> {
 	 * 
 	 * @param value
 	 *            the ms delay
-	 * @return {@link WaitResultBuilder5 the last step of the builder}
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
 	 * @since 1.0.0
 	 */
 	WaitResultBuilder5<T> everyMs(long value);
@@ -28,7 +28,7 @@ public interface WaitResultBuilder4<T> {
 	/**
 	 * Specify to retry every minute.
 	 * 
-	 * @return {@link WaitResultBuilder5 the last step of the builder}
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
 	 * @since 1.0.0
 	 */
 	default WaitResultBuilder5<T> everyMinute() {
@@ -38,7 +38,7 @@ public interface WaitResultBuilder4<T> {
 	/**
 	 * Specify to retry every second.
 	 * 
-	 * @return {@link WaitResultBuilder5 the last step of the builder}
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
 	 * @since 1.0.0
 	 */
 	default WaitResultBuilder5<T> everySecond() {
@@ -52,7 +52,7 @@ public interface WaitResultBuilder4<T> {
 	 *            the amount
 	 * @param unit
 	 *            the time unit
-	 * @return {@link WaitResultBuilder5 the last step of the builder}
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
 	 */
 	default WaitResultBuilder5<T> every(int value, TimeUnit unit) {
 		return everyMs(requireNonNull(unit, "unit can't be null").toMillis(value));
@@ -63,7 +63,7 @@ public interface WaitResultBuilder4<T> {
 	 * 
 	 * @param delay
 	 *            the duration to be used
-	 * @return {@link WaitResultBuilder5 the last step of the builder}
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
 	 * @since 1.0.0
 	 */
 	default WaitResultBuilder5<T> every(Duration delay) {
@@ -73,7 +73,7 @@ public interface WaitResultBuilder4<T> {
 	/**
 	 * Repeat as fast as possible.
 	 * 
-	 * @return {@link WaitResultBuilder5 the last step of the builder}
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
 	 * @since 1.0.0
 	 */
 	default WaitResultBuilder5<T> asFastAsPossible() {
