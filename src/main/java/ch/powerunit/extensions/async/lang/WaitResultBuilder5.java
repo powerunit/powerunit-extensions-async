@@ -3,11 +3,13 @@
  */
 package ch.powerunit.extensions.async.lang;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -149,9 +151,22 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * @param <U>
 	 *            the target of the mapper.
 	 * @return the {@link WaitResultBuilder5} continuation of the builder
+	 * @see Optional#map(Function)
 	 * @since 1.0.0
 	 */
 	<U> WaitResultBuilder5<U> map(Function<T, U> mapper);
+
+	/**
+	 * Add a filter predicate, on the result, if applicable. This filter is executed
+	 * in the target thread.
+	 * 
+	 * @param filter
+	 *            the filter
+	 * @return the {@link WaitResultBuilder5} continuation of the builder
+	 * @see Optional#filter(Predicate)
+	 * @since 1.0.0
+	 */
+	WaitResultBuilder5<T> filter(Predicate<T> filter);
 
 	/**
 	 * Used internally to create the builder
@@ -172,12 +187,20 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 
 			@Override
 			public WaitResultBuilder6<T> using(Executor executor) {
+				Objects.requireNonNull(executor, "executor can't be null");
 				return () -> CompletableFuture.supplyAsync(this, executor);
 			}
 
 			@Override
 			public <U> WaitResultBuilder5<U> map(Function<T, U> mapper) {
+				Objects.requireNonNull(mapper, "mapper can't be null");
 				return of(() -> get().map(mapper));
+			}
+
+			@Override
+			public WaitResultBuilder5<T> filter(Predicate<T> filter) {
+				Objects.requireNonNull(filter, "filter can't be null");
+				return of(() -> get().filter(filter));
 			}
 		};
 	}
