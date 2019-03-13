@@ -285,11 +285,12 @@ public class WaitResultTest implements TestSuite {
 	}
 
 	// Exception
+	@Test
 	public void testOnExeptionMissing() {
 		assertThat(WaitResult.forException(() -> "x").repeatOnlyOnce().asyncExec().join()).is(optionalIsNotPresent());
 	}
 
-	// Exception
+	@Test
 	public void testOnExeptionNotMissing() {
 		assertThat(WaitResult.forException(() -> {
 			throw new IllegalArgumentException("x");
