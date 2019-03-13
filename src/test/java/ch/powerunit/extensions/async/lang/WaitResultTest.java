@@ -297,4 +297,17 @@ public class WaitResultTest implements TestSuite {
 		}).repeatOnlyOnce().asyncExec().join()).is(optionalIsPresent());
 	}
 
+	// Map
+	@Test
+	public void testMapNotPresent() {
+		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> false).repeatOnlyOnce()
+				.map(s -> "s" + s).asyncExec().join()).is(optionalIsNotPresent());
+	}
+
+	@Test
+	public void testMapPresent() {
+		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
+				.map(s -> "s" + s).asyncExec().join()).is(optionalIs("sx"));
+	}
+
 }

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -140,6 +141,19 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	}
 
 	/**
+	 * Add a mapper fonction, on the result, if applicable. This mapper is executed
+	 * in the target thread.
+	 * 
+	 * @param mapper
+	 *            the function to convert the result.
+	 * @param <U>
+	 *            the target of the mapper.
+	 * @return the {@link WaitResultBuilder5} continuation of the builder
+	 * @since 1.0.0
+	 */
+	<U> WaitResultBuilder5<U> map(Function<T, U> mapper);
+
+	/**
 	 * Used internally to create the builder
 	 * 
 	 * @param supplier
@@ -159,6 +173,11 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 			@Override
 			public WaitResultBuilder6<T> using(Executor executor) {
 				return () -> CompletableFuture.supplyAsync(this, executor);
+			}
+
+			@Override
+			public <U> WaitResultBuilder5<U> map(Function<T, U> mapper) {
+				return of(() -> get().map(mapper));
 			}
 		};
 	}

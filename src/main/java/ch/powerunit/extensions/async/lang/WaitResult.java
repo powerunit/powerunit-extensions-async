@@ -132,4 +132,5 @@ public final class WaitResult {
 			}
 		}).dontIgnoreException().expectingNotNull();
 	}
+
 }
