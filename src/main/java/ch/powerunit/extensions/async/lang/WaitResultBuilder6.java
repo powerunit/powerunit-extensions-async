@@ -4,6 +4,7 @@
 package ch.powerunit.extensions.async.lang;
 
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
@@ -149,5 +150,23 @@ public interface WaitResultBuilder6<T> {
 	 */
 	default CompletionStage<Optional<T>> minimalCompletionStage​() {
 		return asyncExec().minimalCompletionStage();
+	}
+
+	/**
+	 * Waits if necessary for the produced future to complete, and then returns its
+	 * result.
+	 *
+	 * @return the result value
+	 * @throws CancellationException
+	 *             if the produced future was cancelled
+	 * @throws ExecutionException
+	 *             if the produced future completed exceptionally
+	 * @throws InterruptedException
+	 *             if the current thread was interrupted while waiting
+	 * @see CompletableFuture#get()
+	 * @since 1.0.0
+	 */
+	default Optional<T> get() throws InterruptedException, ExecutionException {
+		return asyncExec().get();
 	}
 }

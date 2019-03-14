@@ -329,8 +329,14 @@ public class WaitResultTest implements TestSuite {
 	@Test
 	public void testMinimalCompletionStage() {
 		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
-				.usingDefaultExecutor().minimalCompletionStage​().toCompletableFuture().join())
-						.is(optionalIs("x"));
+				.usingDefaultExecutor().minimalCompletionStage​().toCompletableFuture().join()).is(optionalIs("x"));
+	}
+
+	// Final get
+	@Test
+	public void testFinalGet() throws InterruptedException, ExecutionException {
+		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
+				.usingDefaultExecutor().get()).is(optionalIs("x"));
 	}
 
 }
