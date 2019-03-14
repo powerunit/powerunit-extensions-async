@@ -46,6 +46,21 @@
  * <h1>Options</h1>
  * It is also possible to specify with the DSL, if error must be ignored or not, 
  * and which executor must be used for the asynchronous operations.
+ * <p>
+ * The general form to use this DSL is :
+ * <pre>
+ * {@code
+ * Optional<MyResultClass> result = 
+ *   WaitResult.
+ *     of(MyCallable). <-- Specify the action to be repeated
+ *     [ignoreException().] <-- May specify how to handle the exception
+ *     expecting(MyPredicate). <-- Specify the way to control the result
+ *     repeat(2). <-- Specify how much time the retry should be done
+ *     every(2,TimeUnit.MILLISECONDS). <--Specify how much time to wait between the retry
+ *     usingDefaultExecutor(). <-- Specify the executor to be used for the asynchronous actions
+ *     asyncExec(); <-- Finally return the way to wait for the result
+ * }
+ * </pre>
  * 
  * @since 1.0.0 Before this version, the main package was
  *        ch.powerunit.extensions.async ; Also starting from version 1.0.0 this
