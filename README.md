@@ -1,4 +1,4 @@
-powerunit-extensions-async
+powerunit-extensions-async - Starting from version 1.0.0, only supporting Java 9 and newer
 
 * Travis ci : [![Build Status](https://travis-ci.com/powerunit/powerunit-extensions-async.svg?branch=master)](https://travis-ci.com/powerunit/powerunit-extensions-async)
 * Vulnerabilities : [![Known Vulnerabilities](https://snyk.io/test/github/powerunit/powerunit-extensions-async/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/powerunit/powerunit-extensions-async?targetFile=pom.xml) [![DepShield Badge](https://depshield.sonatype.org/badges/powerunit/powerunit-extensions-async/depshield.svg)](https://depshield.github.io) [![Total alerts](https://img.shields.io/lgtm/alerts/g/powerunit/powerunit-extensions-async.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/powerunit/powerunit-extensions-async/alerts/)
