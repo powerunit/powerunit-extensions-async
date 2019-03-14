@@ -33,7 +33,6 @@ public final class WaitResult {
 	/**
 	 * Start the builder to create an instance of {@link CompletableFuture} based on
 	 * the result of the received action, with repetition until some condition.
-	 * <p>
 	 * <h1>Simple sample</h1>
 	 * 
 	 * <pre>
@@ -83,7 +82,6 @@ public final class WaitResult {
 	/**
 	 * Start the builder to create an instance of {@link CompletableFuture} based on
 	 * repeated control on the mutable object.
-	 * <p>
 	 * <h1>Simple sample</h1>
 	 * 
 	 * <pre>
