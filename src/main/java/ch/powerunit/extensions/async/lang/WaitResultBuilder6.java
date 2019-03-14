@@ -8,7 +8,6 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -24,8 +23,8 @@ import java.util.function.Function;
 public interface WaitResultBuilder6<T> {
 
 	/**
-	 * Create and start the async execution of the {@link CompletableFuture} using
-	 * {@link ForkJoinPool#commonPool()}.
+	 * Create and start the async execution of the {@link CompletableFuture} the
+	 * executor that was defined before.
 	 * 
 	 * @return the {@link CompletableFuture}
 	 */
@@ -79,7 +78,8 @@ public interface WaitResultBuilder6<T> {
 	}
 
 	/**
-	 * Shortcut method to the join of the {@link CompletableFuture}.
+	 * Shortcut method to the join of the {@link CompletableFuture}, that expect a
+	 * positive result.
 	 * <p>
 	 * Only runtime exception in case of error.
 	 * 
