@@ -5,6 +5,7 @@ package ch.powerunit.extensions.async.lang;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
@@ -136,5 +137,17 @@ public interface WaitResultBuilder6<T> {
 	 */
 	default CompletableFuture<Optional<T>> orTimeout(long timeout, TimeUnit unit) {
 		return asyncExec().orTimeout(timeout, unit);
+	}
+
+	/**
+	 * Returns a new CompletionStage that is completed normally based on this
+	 * {@link CompletableFuture}.
+	 *
+	 * @return the new CompletionStage
+	 * @since 1.0.0
+	 * @see CompletableFuture#minimalCompletionStage()
+	 */
+	default CompletionStage<Optional<T>> minimalCompletionStage​() {
+		return asyncExec().minimalCompletionStage();
 	}
 }

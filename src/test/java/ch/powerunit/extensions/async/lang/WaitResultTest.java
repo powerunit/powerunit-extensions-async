@@ -325,4 +325,12 @@ public class WaitResultTest implements TestSuite {
 						.throwException(instanceOf(ExecutionException.class));
 	}
 
+	// minimalCompletionStage
+	@Test
+	public void testMinimalCompletionStage() {
+		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
+				.usingDefaultExecutor().minimalCompletionStage​().toCompletableFuture().join())
+						.is(optionalIs("x"));
+	}
+
 }

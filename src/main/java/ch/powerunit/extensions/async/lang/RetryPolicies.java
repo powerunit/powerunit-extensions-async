@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.IntToLongFunction;
 
 /**
- * Helpers method to build {@link RetryPolicy}.
+ * Helpers methods to build {@link RetryPolicy}.
  * 
  * @since 1.0.0
  *
@@ -17,7 +17,6 @@ public final class RetryPolicies {
 	/**
 	 * Retry Policy to just to one try.
 	 * 
-	 * @since 1.0.0
 	 */
 	public static final RetryPolicy RETRY_ONLY_ONCE = of(1, 1);
 
