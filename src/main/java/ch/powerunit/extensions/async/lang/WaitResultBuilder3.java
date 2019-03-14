@@ -4,7 +4,6 @@
 package ch.powerunit.extensions.async.lang;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Third Step of the builder of {@link CompletableFuture} to specify the maximal
@@ -15,6 +14,20 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public interface WaitResultBuilder3<T> {
+
+	/**
+	 * Specify a retry clause.
+	 * <p>
+	 * The goal is here to define somewhere in the test a constant with this clause
+	 * and reuse it in the test.
+	 * 
+	 * @param retry
+	 *            the retry clause.
+	 * @return {@link WaitResultBuilder5 the final step of the builder}
+	 * @since 1.0.0
+	 */
+	WaitResultBuilder5<T> repeat(RetryPolicy retry);
+
 	/**
 	 * Specify the maximal number of retry.
 	 * 
@@ -22,7 +35,9 @@ public interface WaitResultBuilder3<T> {
 	 *            the number of retry
 	 * @return {@link WaitResultBuilder4 the next step of the builder}
 	 */
-	WaitResultBuilder4<T> repeat(int count);
+	default WaitResultBuilder4<T> repeat(int count) {
+		return value -> repeat(RetryPolicies.of(count, value));
+	}
 
 	/**
 	 * Specify that only one retry will be done (so only one execution and one
@@ -31,6 +46,16 @@ public interface WaitResultBuilder3<T> {
 	 * @return {@link WaitResultBuilder5 the final step of the builder}
 	 */
 	default WaitResultBuilder5<T> repeatOnlyOnce() {
-		return repeat(1).every(1, TimeUnit.MILLISECONDS);
+		return repeat(RetryPolicies.RETRY_ONLY_ONCE);
+	}
+
+	/**
+	 * Specify that only two retry will be done.
+	 * 
+	 * @return {@link WaitResultBuilder4 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder4<T> repeatTwice() {
+		return repeat(2);
 	}
 }

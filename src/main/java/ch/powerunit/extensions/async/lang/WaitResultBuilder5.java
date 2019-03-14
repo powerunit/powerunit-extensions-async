@@ -5,14 +5,15 @@ package ch.powerunit.extensions.async.lang;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * Last Step of the builder of {@link CompletableFuture} to create the
- * completable operation it self.
+ * Almost final Step of the builder of {@link CompletableFuture} to define the
+ * executor it self.
  * 
  * @param <T>
  *            The type of result of the {@link CompletableFuture}
@@ -34,14 +35,35 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	Optional<T> get();
 
 	/**
+	 * Define the executor to be used for the async part.
+	 * 
+	 * @param executor
+	 *            the executor to be used.
+	 * @return {@link WaitResultBuilder6 the final step}
+	 */
+	WaitResultBuilder6<T> using(Executor executor);
+
+	/**
+	 * Define the executor to be used for the async part as using
+	 * {@link ForkJoinPool#commonPool()}.
+	 * 
+	 * @return {@link WaitResultBuilder6 the final step}
+	 */
+	default WaitResultBuilder6<T> usingDefaultExecutor() {
+		return using(ForkJoinPool.commonPool());
+	}
+
+	/**
 	 * Create and start the async execution of the {@link CompletableFuture}.
 	 * 
 	 * @param executor
 	 *            the executor to be used.
 	 * @return the {@link CompletableFuture}
+	 * @deprecated Replaced by {@code using(executor).asyncExec()}
 	 */
+	@Deprecated
 	default CompletableFuture<Optional<T>> asyncExec(Executor executor) {
-		return CompletableFuture.supplyAsync(this);
+		return using(executor).asyncExec();
 	}
 
 	/**
@@ -51,7 +73,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * @return the {@link CompletableFuture}
 	 */
 	default CompletableFuture<Optional<T>> asyncExec() {
-		return asyncExec(ForkJoinPool.commonPool());
+		return usingDefaultExecutor().asyncExec();
 	}
 
 	/**
@@ -65,18 +87,11 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception.
+	 * @deprecated Replaced by {@code using(executor).finish()}
 	 */
+	@Deprecated
 	default Optional<T> finish(Executor executor) {
-		try {
-			return asyncExec(executor).get();
-		} catch (InterruptedException e) {
-			throw new AssertionError("Unable to get the result, because of " + e.getMessage(), e);
-		} catch (ExecutionException e) {
-			if (e.getCause() instanceof AssertionError) {
-				throw (AssertionError) e.getCause();
-			}
-			throw new AssertionError("Unexpected error " + e.getMessage(), e);
-		}
+		return using(executor).finish();
 	}
 
 	/**
@@ -90,7 +105,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 *             In case of not ignored exception.
 	 */
 	default Optional<T> finish() {
-		return finish(ForkJoinPool.commonPool());
+		return usingDefaultExecutor().finish();
 	}
 
 	/**
@@ -105,9 +120,11 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception or missing result.
+	 * @deprecated Replaced by {@code using(executor).finishWithAResult()}
 	 */
+	@Deprecated
 	default T finishWithAResult(Executor executor) {
-		return finish(executor).orElseThrow(() -> new AssertionError("No result is available"));
+		return using(executor).finishWithAResult();
 	}
 
 	/**
@@ -121,7 +138,66 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 *             In case of not ignored exception or missing result.
 	 */
 	default T finishWithAResult() {
-		return finishWithAResult(ForkJoinPool.commonPool());
+		return usingDefaultExecutor().finishWithAResult();
 	}
 
+	/**
+	 * Add a mapper fonction, on the result, if applicable. This mapper is executed
+	 * in the target thread.
+	 * 
+	 * @param mapper
+	 *            the function to convert the result.
+	 * @param <U>
+	 *            the target of the mapper.
+	 * @return the {@link WaitResultBuilder5} continuation of the builder
+	 * @see Optional#map(Function)
+	 * @since 1.0.0
+	 */
+	<U> WaitResultBuilder5<U> map(Function<T, U> mapper);
+
+	/**
+	 * Add a filter predicate, on the result, if applicable. This filter is executed
+	 * in the target thread.
+	 * 
+	 * @param filter
+	 *            the filter
+	 * @return the {@link WaitResultBuilder5} continuation of the builder
+	 * @see Optional#filter(Predicate)
+	 * @since 1.0.0
+	 */
+	WaitResultBuilder5<T> filter(Predicate<T> filter);
+
+	/**
+	 * Used internally to create the builder
+	 * 
+	 * @param supplier
+	 *            the supplier
+	 * @param <T>
+	 *            The type of the target optional
+	 * @return the instance
+	 */
+	static <T> WaitResultBuilder5<T> of(Supplier<Optional<T>> supplier) {
+		return new WaitResultBuilder5<T>() {
+
+			@Override
+			public Optional<T> get() {
+				return supplier.get();
+			}
+
+			@Override
+			public WaitResultBuilder6<T> using(Executor executor) {
+				return () -> CompletableFuture.supplyAsync(this, executor);
+			}
+
+			@Override
+			public <U> WaitResultBuilder5<U> map(Function<T, U> mapper) {
+				return of(() -> get().map(mapper));
+			}
+
+			@Override
+			public WaitResultBuilder5<T> filter(Predicate<T> filter) {
+				return of(() -> get().filter(filter));
+			}
+		};
+	}
 }

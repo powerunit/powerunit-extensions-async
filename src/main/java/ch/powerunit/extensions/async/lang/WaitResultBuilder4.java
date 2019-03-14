@@ -1,5 +1,8 @@
 package ch.powerunit.extensions.async.lang;
 
+import static java.util.Objects.requireNonNull;
+
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -16,10 +19,65 @@ public interface WaitResultBuilder4<T> {
 	 * Specify the amount of time between retry.
 	 * 
 	 * @param value
+	 *            the ms delay
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	WaitResultBuilder5<T> everyMs(long value);
+
+	/**
+	 * Specify to retry every minute.
+	 * 
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder5<T> everyMinute() {
+		return every(Duration.ofMinutes(1));
+	}
+
+	/**
+	 * Specify to retry every second.
+	 * 
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder5<T> everySecond() {
+		return every(Duration.ofSeconds(1));
+	}
+
+	/**
+	 * Specify the amount of time between retry.
+	 * 
+	 * @param value
 	 *            the amount
 	 * @param unit
 	 *            the time unit
-	 * @return {@link WaitResultBuilder5 the last step of the builder}
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
 	 */
-	WaitResultBuilder5<T> every(int value, TimeUnit unit);
+	default WaitResultBuilder5<T> every(int value, TimeUnit unit) {
+		return everyMs(requireNonNull(unit, "unit can't be null").toMillis(value));
+	}
+
+	/**
+	 * Specify the amount of time between retry.
+	 * 
+	 * @param delay
+	 *            the duration to be used
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder5<T> every(Duration delay) {
+		return everyMs(requireNonNull(delay, "delay can't be null").toMillis());
+	}
+
+	/**
+	 * Repeat as fast as possible.
+	 * 
+	 * @return {@link WaitResultBuilder5 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder5<T> asFastAsPossible() {
+		return everyMs(1);
+	}
+
 }
