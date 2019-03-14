@@ -15,7 +15,7 @@ import java.util.function.IntToLongFunction;
 public final class RetryPolicies {
 
 	/**
-	 * Retry Policy to just to one try.
+	 * Retry Policy to just do one try.
 	 * 
 	 */
 	public static final RetryPolicy RETRY_ONLY_ONCE = of(1, 1);
