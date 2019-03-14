@@ -48,4 +48,14 @@ public interface WaitResultBuilder3<T> {
 	default WaitResultBuilder5<T> repeatOnlyOnce() {
 		return repeat(RetryPolicies.RETRY_ONLY_ONCE);
 	}
+
+	/**
+	 * Specify that only two retry will be done.
+	 * 
+	 * @return {@link WaitResultBuilder4 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder4<T> repeatTwice() {
+		return repeat(2);
+	}
 }

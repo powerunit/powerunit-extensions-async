@@ -107,7 +107,7 @@ public class WaitResultTest implements TestSuite {
 	public void testNotIgnoreExceptionThenExceptionWithFinish() {
 		WaitResultBuilder5<Object> exec = WaitResult.of(() -> {
 			throw new IllegalArgumentException("TEST");
-		}).expecting(o -> true).repeat(10).every(10, TimeUnit.MILLISECONDS);
+		}).expecting(o -> true).repeatTwice().every(10, TimeUnit.MILLISECONDS);
 		assertWhen((Callable<Optional<Object>>) exec::finish).throwException(exceptionMessage(containsString("TEST")));
 	}
 
