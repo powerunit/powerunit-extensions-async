@@ -16,7 +16,7 @@ import ch.powerunit.extensions.async.lang.RetryPolicy;
  * @author borettim
  *
  */
-public final class WaitResultImpl<T> implements Supplier<Optional<T>> {
+public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<Optional<T>> {
 
 	private final Callable<Optional<T>> action;
 
@@ -45,7 +45,7 @@ public final class WaitResultImpl<T> implements Supplier<Optional<T>> {
 
 	@Override
 	public Optional<T> get() {
-		RetryImpl<T> retry = new RetryImpl<>(retryClause, action);
+		RetryImpl<T> retry = new RetryImpl<>(this);
 		while (retry.next()) {
 			exceptionHandler.handleException(retry.getPreviousException());
 			Optional<T> result = retry.getResult();
@@ -55,6 +55,15 @@ public final class WaitResultImpl<T> implements Supplier<Optional<T>> {
 		}
 		exceptionHandler.handleFinalException(retry.getPreviousException());
 		return Optional.empty();
+	}
+
+	public RetryPolicy getRetryClause() {
+		return retryClause;
+	}
+
+	@Override
+	public Optional<T> call() throws Exception {
+		return action.call();
 	}
 
 }
