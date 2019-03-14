@@ -36,7 +36,7 @@ public interface WaitResultBuilder3<T> {
 	 * @return {@link WaitResultBuilder4 the next step of the builder}
 	 */
 	default WaitResultBuilder4<T> repeat(int count) {
-		return value -> repeat(RetryPolicy.of(count, value));
+		return value -> repeat(RetryPolicies.of(count, value));
 	}
 
 	/**
