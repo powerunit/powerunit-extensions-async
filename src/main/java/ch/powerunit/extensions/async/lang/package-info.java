@@ -17,7 +17,7 @@
  *   get();
  * }
  * </pre>
- * This sample defines an execution of maximal 2 retry, waiting 2 second 
+ * This sample defines an execution of maximal 2 retry, waiting 2 ms 
  * between the retry and return the result of the execution. The 
  * {@link java.util.Optional} will be present if a result is accepted by 
  * the predicate. In case of error during the execution of the 
@@ -31,7 +31,7 @@
  * <li>Verify of the result of the execution is accepted by the Predicate.
  * If this is the case, return it as an Optional (the actions are terminated).
  * </li>
- * <li>Wait for 2 seconds by sleeping the thread</li>
+ * <li>Wait for 2 ms by sleeping the thread</li>
  * <li>Execution of the Callable. In case of Exception, an AssertionError 
  * is thrown (the actions are terminated).</li>
  * <li>Verify of the result of the execution is accepted by the Predicate.
