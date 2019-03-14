@@ -50,7 +50,7 @@
  * The general form to use this DSL is :
  * <pre>
  * {@code
- * Optional<MyResultClass> result = 
+ * ... result = 
  *   WaitResult.
  *     of(MyCallable). <-- Specify the action to be repeated
  *     [ignoreException().] <-- May specify how to handle the exception
