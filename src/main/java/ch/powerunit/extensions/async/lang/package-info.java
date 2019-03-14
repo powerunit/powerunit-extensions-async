@@ -4,7 +4,10 @@
  * exposes easy async test operation.
  * <p>
  * The framework exposes DSL to do repeated test of condition (possibly in
- * another thread), for example to wait of an asynchronously result.
+ * another thread), for example to wait of an asynchronously result. The 
+ * builder mainly returns {@link java.util.concurrent.CompletableFuture}
+ * and let the caller handle it, but also provides some <i>shortcut</i>
+ * methods to directly retrieve the result.
  * <h1>Basic usage</h1>
  * 
  * <pre>
@@ -49,6 +52,7 @@
  *        library doesn't support version before Java 9.
  * @see ch.powerunit.extensions.async.lang.WaitResult WaitResult which is the
  *      main entry point of this library.
+ * @see java.util.concurrent.CompletableFuture
  */
 package ch.powerunit.extensions.async.lang;
 //@formatter:on
