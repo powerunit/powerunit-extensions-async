@@ -57,6 +57,12 @@ deploy:
       branch: master
       tags: false
       condition: $TRAVIS_JDK_VERSION = oraclejdk9
+  - provider: script
+    script: mvn deploy -DskipTests=true -B
+    on:
+      branch: master
+      tags: false
+      condition: $TRAVIS_JDK_VERSION = oraclejdk9
   - provider: releases
     api_key: $GITHUB_TOKEN
     file_glob: true

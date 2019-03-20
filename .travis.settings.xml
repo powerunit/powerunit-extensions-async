@@ -4,5 +4,10 @@
       <id>github</id>
       <password>${env.GITHUB_API_TOKEN}</password>
     </server>
+    <server>
+        <id>oss-snapshots</id>
+        <username>${env.SONATYPE_USERNAME}</username>
+        <password>${env.SONATYPE_PASSWORD}</password>
+    </server>
   </servers>
 </settings>
