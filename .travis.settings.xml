@@ -10,4 +10,12 @@
         <password>${env.SONATYPE_PASSWORD}</password>
     </server>
   </servers>
+ <profiles>
+		<profile>
+			<id>sign</id>
+			<properties>
+				<powerunit.passphrase>${env.GPG_PASSPHRASE}</powerunit.passphrase>
+			</properties>
+		</profile>
+	</profiles>
 </settings>
