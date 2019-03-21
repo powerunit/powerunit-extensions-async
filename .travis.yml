@@ -17,8 +17,8 @@ addons:
 before_install:
  - cp .travis.settings.xml $HOME/.m2/settings.xml
  - if [[ "$TRAVIS_OS_NAME" = linux ]]; then sudo apt-get install jshon ; fi
- - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
- - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
+ - if [[ "$TRAVIS_TAG" =~ powerunit-extensions-async-[0-9].[0-9].[0-9] ]]; then echo $GPG_SECRET_KEYS | base64 --decode | gpg --import ; fi
+ - if [[ "$TRAVIS_TAG" =~ powerunit-extensions-async-[0-9].[0-9].[0-9] ]]; then echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust ; fi
 install:
 - "mvn dependency:resolve dependency:resolve-plugins dependency:go-offline"
 script:
@@ -61,6 +61,7 @@ deploy:
       condition: $TRAVIS_JDK_VERSION = oraclejdk9
   - provider: script
     script: mvn deploy -DskipTests=true -B
+    skip-cleanup: true
     on:
       branch: master
       tags: false
