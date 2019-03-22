@@ -179,6 +179,20 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	}
 
 	/**
+	 * Add a or operation, on the result, if applicable. This or is executed in the
+	 * target thread.
+	 * 
+	 * @param supplier
+	 *            the function to convert the result
+	 * @return the {@link WaitResultBuilder5} continuation of the builder
+	 * @see Optional#or(Supplier)
+	 * @since 1.1.0
+	 */
+	default WaitResultBuilder5<T> or(Supplier<? extends Optional<? extends T>> supplier) {
+		return () -> get().or(supplier);
+	}
+
+	/**
 	 * Add a filter predicate, on the result, if applicable. This filter is executed
 	 * in the target thread.
 	 * 
