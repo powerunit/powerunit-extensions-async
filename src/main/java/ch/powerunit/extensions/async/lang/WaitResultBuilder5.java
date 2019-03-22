@@ -41,7 +41,9 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 *            the executor to be used.
 	 * @return {@link WaitResultBuilder6 the final step}
 	 */
-	WaitResultBuilder6<T> using(Executor executor);
+	default WaitResultBuilder6<T> using(Executor executor) {
+		return () -> CompletableFuture.supplyAsync(this, executor);
+	}
 
 	/**
 	 * Define the executor to be used for the async part as using
@@ -153,7 +155,9 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * @see Optional#map(Function)
 	 * @since 1.0.0
 	 */
-	<U> WaitResultBuilder5<U> map(Function<T, U> mapper);
+	default <U> WaitResultBuilder5<U> map(Function<T, U> mapper) {
+		return () -> get().map(mapper);
+	}
 
 	/**
 	 * Add a filter predicate, on the result, if applicable. This filter is executed
@@ -165,39 +169,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * @see Optional#filter(Predicate)
 	 * @since 1.0.0
 	 */
-	WaitResultBuilder5<T> filter(Predicate<T> filter);
-
-	/**
-	 * Used internally to create the builder
-	 * 
-	 * @param supplier
-	 *            the supplier
-	 * @param <T>
-	 *            The type of the target optional
-	 * @return the instance
-	 */
-	static <T> WaitResultBuilder5<T> of(Supplier<Optional<T>> supplier) {
-		return new WaitResultBuilder5<T>() {
-
-			@Override
-			public Optional<T> get() {
-				return supplier.get();
-			}
-
-			@Override
-			public WaitResultBuilder6<T> using(Executor executor) {
-				return () -> CompletableFuture.supplyAsync(this, executor);
-			}
-
-			@Override
-			public <U> WaitResultBuilder5<U> map(Function<T, U> mapper) {
-				return of(() -> get().map(mapper));
-			}
-
-			@Override
-			public WaitResultBuilder5<T> filter(Predicate<T> filter) {
-				return of(() -> get().filter(filter));
-			}
-		};
+	default WaitResultBuilder5<T> filter(Predicate<T> filter) {
+		return () -> get().filter(filter);
 	}
 }
