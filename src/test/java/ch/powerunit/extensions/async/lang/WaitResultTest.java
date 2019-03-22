@@ -309,6 +309,12 @@ public class WaitResultTest implements TestSuite {
 		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
 				.map(s -> "s" + s).asyncExec().join()).is(optionalIs("sx"));
 	}
+	
+	@Test
+	public void testFlatMapPresent() {
+		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
+				.flatMap(s -> Optional.of("s" + s)).asyncExec().join()).is(optionalIs("sx"));
+	}
 
 	// Filter
 	@Test

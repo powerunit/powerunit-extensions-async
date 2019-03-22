@@ -163,6 +163,22 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	}
 
 	/**
+	 * Add a flat mapper fonction, on the result, if applicable. This mapper is
+	 * executed in the target thread.
+	 * 
+	 * @param mapper
+	 *            the function to convert the result.
+	 * @param <U>
+	 *            the target of the mapper.
+	 * @return the {@link WaitResultBuilder5} continuation of the builder
+	 * @see Optional#flatMap(Function)
+	 * @since 1.1.0
+	 */
+	default <U> WaitResultBuilder5<U> flatMap(Function<T, Optional<U>> mapper) {
+		return () -> get().flatMap(mapper);
+	}
+
+	/**
 	 * Add a filter predicate, on the result, if applicable. This filter is executed
 	 * in the target thread.
 	 * 
