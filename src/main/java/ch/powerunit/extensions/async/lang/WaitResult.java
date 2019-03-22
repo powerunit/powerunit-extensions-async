@@ -3,9 +3,10 @@
  */
 package ch.powerunit.extensions.async.lang;
 
+import static java.util.concurrent.Executors.callable;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -76,7 +77,7 @@ public final class WaitResult {
 	 * @since 1.0.0
 	 */
 	public static WaitResultBuilder3<Boolean> ofRunnable(Runnable action) {
-		return of(Executors.callable(action, true)).ignoreException(true).expecting(b -> b);
+		return of(callable(action, true)).ignoreException(true).expecting(b -> b);
 	}
 
 	/**

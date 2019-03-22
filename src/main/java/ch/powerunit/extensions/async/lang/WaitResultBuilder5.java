@@ -3,6 +3,9 @@
  */
 package ch.powerunit.extensions.async.lang;
 
+import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static java.util.concurrent.ForkJoinPool.commonPool;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -42,7 +45,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * @return {@link WaitResultBuilder6 the final step}
 	 */
 	default WaitResultBuilder6<T> using(Executor executor) {
-		return () -> CompletableFuture.supplyAsync(this, executor);
+		return () -> supplyAsync(this, executor);
 	}
 
 	/**
@@ -52,7 +55,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * @return {@link WaitResultBuilder6 the final step}
 	 */
 	default WaitResultBuilder6<T> usingDefaultExecutor() {
-		return using(ForkJoinPool.commonPool());
+		return using(commonPool());
 	}
 
 	/**
