@@ -4,6 +4,8 @@
 package ch.powerunit.extensions.async.impl;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -27,7 +29,7 @@ public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<
 	private static <T> Callable<Optional<T>> asCallable(Callable<T> action, Predicate<T> acceptingClause) {
 		requireNonNull(action, "action can't be null");
 		requireNonNull(acceptingClause, "acceptingClause can't be null");
-		return () -> Optional.ofNullable(action.call()).filter(acceptingClause);
+		return () -> ofNullable(action.call()).filter(acceptingClause);
 	}
 
 	public WaitResultImpl(Callable<T> action, boolean alsoDontFailWhenNoResultAndException,
@@ -54,7 +56,7 @@ public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<
 			}
 		}
 		exceptionHandler.handleFinalException(retry.getPreviousException());
-		return Optional.empty();
+		return empty();
 	}
 
 	public RetryPolicy getRetryClause() {

@@ -1,6 +1,5 @@
 package ch.powerunit.extensions.async.lang;
 
-
 /**
  * This interface can be used to specify retry configuration.
  * 
@@ -23,5 +22,4 @@ public interface RetryPolicy {
 	 *            the current retry (start at 1).
 	 */
 	void sleepBetweenRetry(int retry);
-
 }

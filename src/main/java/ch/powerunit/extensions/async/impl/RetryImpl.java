@@ -1,5 +1,7 @@
 package ch.powerunit.extensions.async.impl;
 
+import static java.util.Optional.empty;
+
 import java.util.Optional;
 
 import ch.powerunit.extensions.async.lang.RetryPolicy;
@@ -31,7 +33,7 @@ class RetryImpl<T> { // package protected
 		try {
 			result = on.call();
 		} catch (Exception e) {
-			result = Optional.empty();
+			result = empty();
 			previousException = e;
 		}
 		return true;
