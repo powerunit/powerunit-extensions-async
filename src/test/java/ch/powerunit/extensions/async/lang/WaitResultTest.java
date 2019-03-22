@@ -351,5 +351,15 @@ public class WaitResultTest implements TestSuite {
 		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
 				.usingDefaultExecutor().get()).is(optionalIs("x"));
 	}
+	
+	// supplier
+	@Test
+	public void testNotIgnoreExceptionFirstThenExceptionWithSupplierAndUnchecked() {
+		CompletableFuture<Optional<Object>> exec = WaitResult.ofSupplier(() -> {
+			throw new IllegalArgumentException("TEST");
+		}).dontIgnoreException().expecting(o -> true).repeatOnlyOnce().asyncExec();
+		assertWhen(exec::get).throwException(exceptionMessage(containsString("TEST")));
+	}
+
 
 }

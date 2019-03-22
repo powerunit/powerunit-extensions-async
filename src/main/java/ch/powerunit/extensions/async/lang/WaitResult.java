@@ -67,6 +67,22 @@ public final class WaitResult {
 	 * Start the builder to create an instance of {@link CompletableFuture} based on
 	 * execution of the received action, with repetition until some condition.
 	 * <p>
+	 * 
+	 * @param supplier
+	 *            the {@link Supplier} to be executed.
+	 * @param <T>
+	 *            The type of the result.
+	 * @return {@link WaitResultBuilder1 the next step of the builder}
+	 * @since 1.1.0
+	 */
+	public static <T> WaitResultBuilder1<T> ofSupplier(Supplier<T> supplier) {
+		return of(supplier::get);
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * execution of the received action, with repetition until some condition.
+	 * <p>
 	 * In this case, it is assumed that the received action throws unchecked
 	 * exception when the condition is not yet OK. The returned Optional will be
 	 * present in case of success.
