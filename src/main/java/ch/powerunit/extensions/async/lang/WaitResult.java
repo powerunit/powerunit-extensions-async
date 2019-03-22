@@ -3,6 +3,7 @@
  */
 package ch.powerunit.extensions.async.lang;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.callable;
 
 import java.util.concurrent.Callable;
@@ -146,6 +147,37 @@ public final class WaitResult {
 				return e;
 			}
 		}).dontIgnoreException().expectingNotNull();
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * repeated control of a call that is assumed as done when an exception a
+	 * specific exception is throw.
+	 * 
+	 * @param action
+	 *            the action that is expected to thrown an exception.
+	 * @param targetException
+	 *            the expected Exception class
+	 * @param <T>
+	 *            the expected exception type
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.1.0
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Exception> WaitResultBuilder2<T> forException(Callable<?> action,
+			Class<T> targetException) {
+		requireNonNull(targetException, "targetException can't be null");
+		return of(() -> {
+			try {
+				action.call();
+				return null;
+			} catch (Exception e) {
+				if (targetException.isAssignableFrom(e.getClass())) {
+					return (T) e;
+				}
+				throw e;
+			}
+		}).dontIgnoreException();
 	}
 
 }

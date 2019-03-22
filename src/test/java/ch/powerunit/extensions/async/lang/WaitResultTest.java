@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -297,6 +298,28 @@ public class WaitResultTest implements TestSuite {
 		}).repeatOnlyOnce().asyncExec().join()).is(optionalIsPresent());
 	}
 
+	@Test
+	public void testOnSpecificExeptionMissing1() {
+		assertThat(WaitResult.forException(() -> "x", IllegalArgumentException.class).expectingNotNull()
+				.repeatOnlyOnce().asyncExec().join()).is(optionalIsNotPresent());
+	}
+
+	@Test
+	public void testOnSpecificExeptionMissing2() {
+		assertWhen(() -> WaitResult.forException(() -> {
+			throw new NullPointerException();
+		}, IllegalArgumentException.class).expectingNotNull().repeatOnlyOnce().asyncExec().join())
+				.throwException(instanceOf(CompletionException.class));
+	}
+
+	@Test
+	public void testOnSpecifiExeptionNotMissing() {
+		assertThat(WaitResult.forException(() -> {
+			throw new IllegalArgumentException("x");
+		}, IllegalArgumentException.class).expectingNotNull().repeatOnlyOnce().asyncExec().join())
+				.is(optionalIsPresent());
+	}
+
 	// Map
 	@Test
 	public void testMapNotPresent() {
@@ -351,7 +374,7 @@ public class WaitResultTest implements TestSuite {
 		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
 				.usingDefaultExecutor().get()).is(optionalIs("x"));
 	}
-	
+
 	// supplier
 	@Test
 	public void testNotIgnoreExceptionFirstThenExceptionWithSupplierAndUnchecked() {
@@ -360,6 +383,5 @@ public class WaitResultTest implements TestSuite {
 		}).dontIgnoreException().expecting(o -> true).repeatOnlyOnce().asyncExec();
 		assertWhen(exec::get).throwException(exceptionMessage(containsString("TEST")));
 	}
-
 
 }
