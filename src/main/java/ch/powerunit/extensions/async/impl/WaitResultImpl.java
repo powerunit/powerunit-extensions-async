@@ -1,9 +1,26 @@
 /**
- * 
- */
-package ch.powerunit.extensions.async.impl;
+ * Powerunit - A JDK1.8 test framework
+ * Copyright (C) 2014 Mathieu Boretti.
+ *
+ * This file is part of Powerunit
+ *
+ * Powerunit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Powerunit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Powerunit. If not, see <http://www.gnu.org/licenses/>.
+ */package ch.powerunit.extensions.async.impl;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -27,7 +44,7 @@ public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<
 	private static <T> Callable<Optional<T>> asCallable(Callable<T> action, Predicate<T> acceptingClause) {
 		requireNonNull(action, "action can't be null");
 		requireNonNull(acceptingClause, "acceptingClause can't be null");
-		return () -> Optional.ofNullable(action.call()).filter(acceptingClause);
+		return () -> ofNullable(action.call()).filter(acceptingClause);
 	}
 
 	public WaitResultImpl(Callable<T> action, boolean alsoDontFailWhenNoResultAndException,
@@ -54,7 +71,7 @@ public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<
 			}
 		}
 		exceptionHandler.handleFinalException(retry.getPreviousException());
-		return Optional.empty();
+		return empty();
 	}
 
 	public RetryPolicy getRetryClause() {

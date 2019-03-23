@@ -1,3 +1,22 @@
+/**
+ * Powerunit - A JDK1.8 test framework
+ * Copyright (C) 2014 Mathieu Boretti.
+ *
+ * This file is part of Powerunit
+ *
+ * Powerunit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Powerunit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Powerunit. If not, see <http://www.gnu.org/licenses/>.
+ */
 package ch.powerunit.extensions.async.lang;
 
 import java.time.Duration;
@@ -5,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -297,6 +317,28 @@ public class WaitResultTest implements TestSuite {
 		}).repeatOnlyOnce().asyncExec().join()).is(optionalIsPresent());
 	}
 
+	@Test
+	public void testOnSpecificExeptionMissing1() {
+		assertThat(WaitResult.forException(() -> "x", IllegalArgumentException.class).expectingNotNull()
+				.repeatOnlyOnce().asyncExec().join()).is(optionalIsNotPresent());
+	}
+
+	@Test
+	public void testOnSpecificExeptionMissing2() {
+		assertWhen(() -> WaitResult.forException(() -> {
+			throw new NullPointerException();
+		}, IllegalArgumentException.class).expectingNotNull().repeatOnlyOnce().asyncExec().join())
+				.throwException(instanceOf(CompletionException.class));
+	}
+
+	@Test
+	public void testOnSpecifiExeptionNotMissing() {
+		assertThat(WaitResult.forException(() -> {
+			throw new IllegalArgumentException("x");
+		}, IllegalArgumentException.class).expectingNotNull().repeatOnlyOnce().asyncExec().join())
+				.is(optionalIsPresent());
+	}
+
 	// Map
 	@Test
 	public void testMapNotPresent() {
@@ -308,6 +350,19 @@ public class WaitResultTest implements TestSuite {
 	public void testMapPresent() {
 		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
 				.map(s -> "s" + s).asyncExec().join()).is(optionalIs("sx"));
+	}
+
+	@Test
+	public void testFlatMapPresent() {
+		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
+				.flatMap(s -> Optional.of("s" + s)).asyncExec().join()).is(optionalIs("sx"));
+	}
+
+	// or
+	@Test
+	public void testOrNotPresent() {
+		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> false).repeatOnlyOnce()
+				.or(() -> Optional.ofNullable("y")).asyncExec().join()).is(optionalIs("y"));
 	}
 
 	// Filter
@@ -337,6 +392,15 @@ public class WaitResultTest implements TestSuite {
 	public void testFinalGet() throws InterruptedException, ExecutionException {
 		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
 				.usingDefaultExecutor().get()).is(optionalIs("x"));
+	}
+
+	// supplier
+	@Test
+	public void testNotIgnoreExceptionFirstThenExceptionWithSupplierAndUnchecked() {
+		CompletableFuture<Optional<Object>> exec = WaitResult.ofSupplier(() -> {
+			throw new IllegalArgumentException("TEST");
+		}).dontIgnoreException().expecting(o -> true).repeatOnlyOnce().asyncExec();
+		assertWhen(exec::get).throwException(exceptionMessage(containsString("TEST")));
 	}
 
 }

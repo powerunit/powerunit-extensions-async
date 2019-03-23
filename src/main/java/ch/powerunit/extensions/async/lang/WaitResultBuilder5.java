@@ -1,7 +1,26 @@
 /**
- * 
+ * Powerunit - A JDK1.8 test framework
+ * Copyright (C) 2014 Mathieu Boretti.
+ *
+ * This file is part of Powerunit
+ *
+ * Powerunit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Powerunit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Powerunit. If not, see <http://www.gnu.org/licenses/>.
  */
 package ch.powerunit.extensions.async.lang;
+
+import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static java.util.concurrent.ForkJoinPool.commonPool;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +44,21 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * Directly wait for the result of this execution (the execution is run in this
 	 * thread). In case of not ignored exception, an {@link AssertionError} is
 	 * thrown.
+	 * <p>
+	 * 
+	 * For example :
+	 * 
+	 * <pre>
+	 * WaitResult.of(myCallable).dontIgnoreException().expecting(myPredicate).repeat(2)
+	 * 		.every(1000, TimeUnit.MILLISECONDS).get()
+	 * </pre>
+	 * <ul>
+	 * <li>If an exception occurs in {@code myCallable}, an {@link AssertionError}
+	 * is thrown</li>
+	 * <li>If no result is available, after the 2 try, an empty {@link Optional} is
+	 * returned.</li>
+	 * <li>Or the result is available in the returned {@link Optional}.</li>
+	 * </ul>
 	 * 
 	 * @return the {@link Optional} with the result of the execution
 	 * 
@@ -36,21 +70,30 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 
 	/**
 	 * Define the executor to be used for the async part.
+	 * <p>
+	 * Both the action to retry and the control on the result will be executed on
+	 * the thread provided by the executor.
 	 * 
 	 * @param executor
 	 *            the executor to be used.
 	 * @return {@link WaitResultBuilder6 the final step}
 	 */
-	WaitResultBuilder6<T> using(Executor executor);
+	default WaitResultBuilder6<T> using(Executor executor) {
+		return () -> supplyAsync(this, executor);
+	}
 
 	/**
 	 * Define the executor to be used for the async part as using
 	 * {@link ForkJoinPool#commonPool()}.
+	 * <p>
+	 * Both the action to retry and the control on the result will be executed on
+	 * the thread provided by the executor.
 	 * 
 	 * @return {@link WaitResultBuilder6 the final step}
+	 * @see ForkJoinPool#commonPool()
 	 */
 	default WaitResultBuilder6<T> usingDefaultExecutor() {
-		return using(ForkJoinPool.commonPool());
+		return using(commonPool());
 	}
 
 	/**
@@ -153,7 +196,39 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * @see Optional#map(Function)
 	 * @since 1.0.0
 	 */
-	<U> WaitResultBuilder5<U> map(Function<T, U> mapper);
+	default <U> WaitResultBuilder5<U> map(Function<T, U> mapper) {
+		return () -> get().map(mapper);
+	}
+
+	/**
+	 * Add a flat mapper fonction, on the result, if applicable. This mapper is
+	 * executed in the target thread.
+	 * 
+	 * @param mapper
+	 *            the function to convert the result.
+	 * @param <U>
+	 *            the target of the mapper.
+	 * @return the {@link WaitResultBuilder5} continuation of the builder
+	 * @see Optional#flatMap(Function)
+	 * @since 1.1.0
+	 */
+	default <U> WaitResultBuilder5<U> flatMap(Function<T, Optional<U>> mapper) {
+		return () -> get().flatMap(mapper);
+	}
+
+	/**
+	 * Add a or operation, on the result, if applicable. This or is executed in the
+	 * target thread.
+	 * 
+	 * @param supplier
+	 *            the function to convert the result
+	 * @return the {@link WaitResultBuilder5} continuation of the builder
+	 * @see Optional#or(Supplier)
+	 * @since 1.1.0
+	 */
+	default WaitResultBuilder5<T> or(Supplier<? extends Optional<? extends T>> supplier) {
+		return () -> get().or(supplier);
+	}
 
 	/**
 	 * Add a filter predicate, on the result, if applicable. This filter is executed
@@ -165,39 +240,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * @see Optional#filter(Predicate)
 	 * @since 1.0.0
 	 */
-	WaitResultBuilder5<T> filter(Predicate<T> filter);
-
-	/**
-	 * Used internally to create the builder
-	 * 
-	 * @param supplier
-	 *            the supplier
-	 * @param <T>
-	 *            The type of the target optional
-	 * @return the instance
-	 */
-	static <T> WaitResultBuilder5<T> of(Supplier<Optional<T>> supplier) {
-		return new WaitResultBuilder5<T>() {
-
-			@Override
-			public Optional<T> get() {
-				return supplier.get();
-			}
-
-			@Override
-			public WaitResultBuilder6<T> using(Executor executor) {
-				return () -> CompletableFuture.supplyAsync(this, executor);
-			}
-
-			@Override
-			public <U> WaitResultBuilder5<U> map(Function<T, U> mapper) {
-				return of(() -> get().map(mapper));
-			}
-
-			@Override
-			public WaitResultBuilder5<T> filter(Predicate<T> filter) {
-				return of(() -> get().filter(filter));
-			}
-		};
+	default WaitResultBuilder5<T> filter(Predicate<T> filter) {
+		return () -> get().filter(filter);
 	}
 }
