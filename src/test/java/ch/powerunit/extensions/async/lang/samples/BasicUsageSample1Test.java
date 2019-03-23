@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import ch.powerunit.Rule;
@@ -67,6 +68,13 @@ public class BasicUsageSample1Test implements TestSuite {
 		return t -> {
 			output.println("predicate:" + Thread.currentThread().getName());
 			return predicate.test(t);
+		};
+	}
+
+	private <T> Consumer<T> displayThreadConsumer(Consumer<T> consumer) {
+		return t -> {
+			output.println("consumer:" + Thread.currentThread().getName());
+			consumer.accept(t);
 		};
 	}
 
@@ -127,5 +135,19 @@ public class BasicUsageSample1Test implements TestSuite {
 			every(1000, TimeUnit.MILLISECONDS);
 		//@formatter:on
 		assertWhen(executor::get).throwException(instanceOf(AssertionError.class));
+	}
+
+	@Test
+	public void testWaitResultOfBasicSampleAsyncAccept() {
+		output.println(Thread.currentThread().getName());
+		//@formatter:off
+		WaitResult.
+			of(displayThread(myCallable)).
+			dontIgnoreException().
+			expecting(displayThread(s->"x".equals(s))).
+			repeat(2).
+			every(1000, TimeUnit.MILLISECONDS).
+			usingDefaultExecutor().thenAccept(displayThreadConsumer(x->{})).join();
+		//@formatter:on
 	}
 }
