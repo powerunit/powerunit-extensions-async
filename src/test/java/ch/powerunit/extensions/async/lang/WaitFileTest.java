@@ -49,6 +49,18 @@ public class WaitFileTest implements TestSuite {
 	}
 
 	@Test
+	public void testFoundNamed() throws IOException, InterruptedException {
+		Path test = folder.newFolder();
+		CompletableFuture<Optional<Path>> wait = WaitFile.newFileNamedIn(test, "test2").expecting(l -> true).repeat(5)
+				.everySecond().usingDefaultExecutor().asyncExec();
+		Thread.sleep(500);
+		new File(test.toFile(), "test").mkdir();
+		Thread.sleep(700);
+		new File(test.toFile(), "test2").mkdir();
+		assertThat(wait.join()).is(optionalIsPresent());
+	}
+
+	@Test
 	public void testNeverFound() throws IOException, InterruptedException {
 		Path test = folder.newFolder();
 		CompletableFuture<Optional<Collection<Path>>> wait = WaitFile.newFileIn(test).expecting(l -> !l.isEmpty())

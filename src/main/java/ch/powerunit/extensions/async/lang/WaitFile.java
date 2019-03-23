@@ -30,6 +30,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import ch.powerunit.extensions.async.impl.FilePool;
@@ -78,6 +79,24 @@ public final class WaitFile {
 	}
 
 	/**
+	 * Wait for a folder to contains new entry based on his name.
+	 * <p>
+	 * The wait starts at the first try to get the result.
+	 * 
+	 * @param directory
+	 *            the directory to be verified.
+	 * @param name
+	 *            the expected name
+	 * @return {@link WaitResultBuilder1} the next step of the builder.
+	 */
+	public static WaitResultBuilder1<Path> newFileNamedIn(Path directory, String name) {
+		requireNonNull(directory, "directory can't be null");
+		requireNonNull(name, "name can't be null");
+		FilePool filePool = new FilePool(directory, ENTRY_CREATE);
+		return WaitResult.of(toPathByName(toPathCollection(filePool), name), filePool::close);
+	}
+
+	/**
 	 * Wait for a folder to have entry removed.
 	 * <p>
 	 * The wait starts at the first try to get the result.
@@ -95,6 +114,11 @@ public final class WaitFile {
 	private static Callable<Collection<Path>> toPathCollection(Callable<Collection<WatchEvent<Path>>> callable) {
 		return () -> callable.call().stream().map(WatchEvent::context)
 				.collect(collectingAndThen(toList(), Collections::unmodifiableList));
+	}
+
+	private static Callable<Path> toPathByName(Callable<Collection<Path>> callable, String name) {
+		return () -> callable.call().stream()
+				.filter(p -> Objects.equals(p.getName(p.getNameCount() - 1).toString(), name)).findFirst().orElse(null);
 	}
 
 }
