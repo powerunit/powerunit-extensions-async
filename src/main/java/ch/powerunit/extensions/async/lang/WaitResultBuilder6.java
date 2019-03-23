@@ -59,10 +59,9 @@ public interface WaitResultBuilder6<T> {
 		try {
 			return asyncExec().get();
 		} catch (InterruptedException | ExecutionException e) {
-			if (e.getCause() instanceof AssertionError) {
-				throw (AssertionError) e.getCause();
-			}
-			throw new AssertionError("Unexpected error " + e.getMessage(), e);
+			throw Optional.ofNullable(e.getCause()).filter(c -> c instanceof AssertionError)
+					.map(AssertionError.class::cast)
+					.orElseGet(() -> new AssertionError("Unexpected error " + e.getMessage(), e));
 		}
 	}
 
