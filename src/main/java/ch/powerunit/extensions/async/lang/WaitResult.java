@@ -22,6 +22,7 @@ package ch.powerunit.extensions.async.lang;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.callable;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -191,13 +192,13 @@ public final class WaitResult {
 	 *            the expected Exception class
 	 * @param <T>
 	 *            the expected exception type
-	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @return {@link WaitResultBuilder1 the next step of the builder}
 	 * @since 1.1.0
 	 * @throws NullPointerException
 	 *             if action or targetException is null
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Exception> WaitResultBuilder2<T> forException(Callable<?> action,
+	public static <T extends Exception> WaitResultBuilder1<T> forException(Callable<?> action,
 			Class<T> targetException) {
 		requireNonNull(action, "action can't be null");
 		requireNonNull(targetException, "targetException can't be null");
@@ -206,12 +207,10 @@ public final class WaitResult {
 				action.call();
 				return null;
 			} catch (Exception e) {
-				if (targetException.isAssignableFrom(e.getClass())) {
-					return (T) e;
-				}
-				throw e;
+				return (T) Optional.of(e).filter(c -> targetException.isAssignableFrom(c.getClass()))
+						.orElseThrow(() -> e);
 			}
-		}).dontIgnoreException();
+		});
 	}
 
 }
