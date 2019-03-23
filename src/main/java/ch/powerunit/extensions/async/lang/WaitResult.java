@@ -47,8 +47,11 @@ public final class WaitResult {
 	 * @param <T>
 	 *            The type of the result.
 	 * @return {@link WaitResultBuilder1 the next step of the builder}
+	 * @throws NullPointerException
+	 *             if action is null
 	 */
 	public static <T> WaitResultBuilder1<T> of(Callable<T> action) {
+		requireNonNull(action, "action can't be null");
 		return new WaitResultBuilder1<T>() {
 
 			@Override
@@ -75,8 +78,11 @@ public final class WaitResult {
 	 *            The type of the result.
 	 * @return {@link WaitResultBuilder1 the next step of the builder}
 	 * @since 1.1.0
+	 * @throws NullPointerException
+	 *             if supplier is null
 	 */
 	public static <T> WaitResultBuilder1<T> ofSupplier(Supplier<T> supplier) {
+		requireNonNull(supplier, "supplier can't be null");
 		return of(supplier::get);
 	}
 
@@ -92,8 +98,11 @@ public final class WaitResult {
 	 *            the {@link Runnable} to be executed.
 	 * @return {@link WaitResultBuilder3 the next step of the builder}
 	 * @since 1.0.0
+	 * @throws NullPointerException
+	 *             if action is null
 	 */
 	public static WaitResultBuilder3<Boolean> ofRunnable(Runnable action) {
+		requireNonNull(action, "action can't be null");
 		return of(callable(action, true)).ignoreException(true).expecting(b -> b);
 	}
 
@@ -124,8 +133,11 @@ public final class WaitResult {
 	 * @param conditionSupplier
 	 *            the boolean supplier
 	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @throws NullPointerException
+	 *             if conditionSupplier is null
 	 */
 	public static WaitResultBuilder3<Boolean> onCondition(Supplier<Boolean> conditionSupplier) {
+		requireNonNull(conditionSupplier, "conditionSupplier can't be null");
 		return of(conditionSupplier::get).expecting(b -> b);
 	}
 
@@ -137,8 +149,11 @@ public final class WaitResult {
 	 *            the action that is expected to thrown an exception.
 	 * @return {@link WaitResultBuilder3 the next step of the builder}
 	 * @since 1.0.0
+	 * @throws NullPointerException
+	 *             if action is null
 	 */
 	public static WaitResultBuilder3<Exception> forException(Callable<?> action) {
+		requireNonNull(action, "action can't be null");
 		return of(() -> {
 			try {
 				action.call();
@@ -162,10 +177,13 @@ public final class WaitResult {
 	 *            the expected exception type
 	 * @return {@link WaitResultBuilder3 the next step of the builder}
 	 * @since 1.1.0
+	 * @throws NullPointerException
+	 *             if action or targetException is null
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends Exception> WaitResultBuilder2<T> forException(Callable<?> action,
 			Class<T> targetException) {
+		requireNonNull(action, "action can't be null");
 		requireNonNull(targetException, "targetException can't be null");
 		return of(() -> {
 			try {
