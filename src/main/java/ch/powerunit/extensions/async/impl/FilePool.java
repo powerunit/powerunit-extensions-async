@@ -14,8 +14,15 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public final class FilePool implements Callable<Collection<WatchEvent<Path>>> {
+
+	private static final Predicate<WatchEvent<?>> IGNORE_OVERFLOW = e -> !Objects.equals(e.kind(), OVERFLOW);
+
+	@SuppressWarnings("unchecked")
+	private static final Function<WatchEvent<?>, WatchEvent<Path>> COERCE_TO_PATH = e -> (WatchEvent<Path>) e;
 
 	private final Path directory;
 	private final WatchEvent.Kind<?> events[];
@@ -28,7 +35,6 @@ public final class FilePool implements Callable<Collection<WatchEvent<Path>>> {
 		this.events = events;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<WatchEvent<Path>> call() throws Exception {
 		if (watcher == null) {
@@ -36,8 +42,8 @@ public final class FilePool implements Callable<Collection<WatchEvent<Path>>> {
 			key = directory.register(watcher, events);
 		}
 		try {
-			return key.pollEvents().stream().filter(e -> !Objects.equals(e.kind(), OVERFLOW))
-					.map(e -> (WatchEvent<Path>) e).collect(collectingAndThen(toList(), Collections::unmodifiableList));
+			return key.pollEvents().stream().filter(IGNORE_OVERFLOW).map(COERCE_TO_PATH)
+					.collect(collectingAndThen(toList(), Collections::unmodifiableList));
 		} finally {
 			key.reset();
 		}
