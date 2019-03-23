@@ -24,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.Predicate;
 
 import ch.powerunit.Test;
 import ch.powerunit.TestSuite;
