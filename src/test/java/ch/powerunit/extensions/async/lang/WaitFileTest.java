@@ -22,6 +22,8 @@ package ch.powerunit.extensions.async.lang;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -79,6 +81,26 @@ public class WaitFileTest implements TestSuite {
 		Path test = folder.newFolder();
 		CompletableFuture<Optional<Collection<Path>>> wait = WaitFile.removeFileFrom(test).expecting(l -> !l.isEmpty())
 				.repeat(5).everySecond().usingDefaultExecutor().asyncExec();
+		assertThat(wait.join()).is(optionalIsNotPresent());
+	}
+
+	@Test
+	public void testEventFound() throws IOException, InterruptedException {
+		Path test = folder.newFolder();
+		CompletableFuture<Optional<Collection<WatchEvent<Path>>>> wait = WaitFile
+				.eventIn(test, StandardWatchEventKinds.ENTRY_CREATE).expecting(l -> !l.isEmpty()).repeat(5)
+				.everySecond().usingDefaultExecutor().asyncExec();
+		Thread.sleep(1010);
+		new File(test.toFile(), "test").mkdir();
+		assertThat(wait.join()).is(optionalIsPresent());
+	}
+
+	@Test
+	public void testEventNeverFound() throws IOException, InterruptedException {
+		Path test = folder.newFolder();
+		CompletableFuture<Optional<Collection<WatchEvent<Path>>>> wait = WaitFile
+				.eventIn(test, StandardWatchEventKinds.ENTRY_CREATE).expecting(l -> !l.isEmpty()).repeat(5)
+				.everySecond().usingDefaultExecutor().asyncExec();
 		assertThat(wait.join()).is(optionalIsNotPresent());
 	}
 

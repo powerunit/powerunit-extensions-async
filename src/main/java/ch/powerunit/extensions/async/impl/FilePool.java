@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-public final class FilePool implements Callable<Collection<Path>> {
+public final class FilePool implements Callable<Collection<WatchEvent<Path>>> {
 
 	private final Path directory;
 	private final WatchEvent.Kind<?> events[];
@@ -28,15 +28,16 @@ public final class FilePool implements Callable<Collection<Path>> {
 		this.events = events;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Collection<Path> call() throws Exception {
+	public Collection<WatchEvent<Path>> call() throws Exception {
 		if (watcher == null) {
 			watcher = directory.getFileSystem().newWatchService();
 			key = directory.register(watcher, events);
 		}
 		try {
-			return key.pollEvents().stream().filter(e -> !Objects.equals(e.kind(), OVERFLOW)).map(WatchEvent::context)
-					.map(Path.class::cast).collect(collectingAndThen(toList(), Collections::unmodifiableList));
+			return key.pollEvents().stream().filter(e -> !Objects.equals(e.kind(), OVERFLOW))
+					.map(e -> (WatchEvent<Path>) e).collect(collectingAndThen(toList(), Collections::unmodifiableList));
 		} finally {
 			key.reset();
 		}

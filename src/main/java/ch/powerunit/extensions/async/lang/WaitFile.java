@@ -22,9 +22,15 @@ package ch.powerunit.extensions.async.lang;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 import java.nio.file.Path;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchEvent.Kind;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.Callable;
 
 import ch.powerunit.extensions.async.impl.FilePool;
 
@@ -39,6 +45,24 @@ public final class WaitFile {
 	}
 
 	/**
+	 * Wait for a folder to have some event.
+	 * <p>
+	 * The wait starts at the first try to get the result.
+	 * 
+	 * @param directory
+	 *            the directory to be verified.
+	 * @param events
+	 *            the events to wait for.
+	 * @return {@link WaitResultBuilder1} the next step of the builder.
+	 */
+	@SafeVarargs
+	public static WaitResultBuilder1<Collection<WatchEvent<Path>>> eventIn(Path directory, Kind<Path>... events) {
+		requireNonNull(directory, "directory can't be null");
+		FilePool filePool = new FilePool(directory, events);
+		return WaitResult.of(filePool, filePool::close);
+	}
+
+	/**
 	 * Wait for a folder to contains new entry.
 	 * <p>
 	 * The wait starts at the first try to get the result.
@@ -50,7 +74,7 @@ public final class WaitFile {
 	public static WaitResultBuilder1<Collection<Path>> newFileIn(Path directory) {
 		requireNonNull(directory, "directory can't be null");
 		FilePool filePool = new FilePool(directory, ENTRY_CREATE);
-		return WaitResult.of(filePool, filePool::close);
+		return WaitResult.of(toPathCollection(filePool), filePool::close);
 	}
 
 	/**
@@ -65,7 +89,12 @@ public final class WaitFile {
 	public static WaitResultBuilder1<Collection<Path>> removeFileFrom(Path directory) {
 		requireNonNull(directory, "directory can't be null");
 		FilePool filePool = new FilePool(directory, ENTRY_DELETE);
-		return WaitResult.of(filePool, filePool::close);
+		return WaitResult.of(toPathCollection(filePool), filePool::close);
+	}
+
+	private static Callable<Collection<Path>> toPathCollection(Callable<Collection<WatchEvent<Path>>> callable) {
+		return () -> callable.call().stream().map(WatchEvent::context)
+				.collect(collectingAndThen(toList(), Collections::unmodifiableList));
 	}
 
 }
