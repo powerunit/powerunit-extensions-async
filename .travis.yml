@@ -1,5 +1,9 @@
 if: NOT tag =~ ^ci/
 language: java
+notifications:
+ slack: 
+  rooms:
+   - "$slack_key#async"
 matrix:
  include:
   - os: linux
