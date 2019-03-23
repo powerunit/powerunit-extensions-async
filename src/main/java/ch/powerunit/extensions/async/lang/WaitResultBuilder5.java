@@ -69,15 +69,15 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	Optional<T> get();
 
 	/**
-	 * Register on action to be done when the retrieval is finish (in success or
+	 * Register an action to be done when the retrieval is finish (in success or
 	 * not).
 	 * <p>
-	 * This may be used, for example, to release some resource.
+	 * This may be used, for example, to release resources.
 	 * 
 	 * @param action
 	 *            the action to be done.
-	 * @return a new instance of {@link WaitResultBuilder5} this is new action to be
-	 *         done at the end.
+	 * @return a new instance of {@link WaitResultBuilder5} with this new action to
+	 *         be done at the end.
 	 * @since 1.1.0
 	 */
 	default WaitResultBuilder5<T> onFinish(Runnable action) {
