@@ -37,10 +37,7 @@ public final class FilePool implements Callable<Collection<WatchEvent<Path>>> {
 
 	@Override
 	public Collection<WatchEvent<Path>> call() throws Exception {
-		if (watcher == null) {
-			watcher = directory.getFileSystem().newWatchService();
-			key = directory.register(watcher, events);
-		}
+		initIfNeeded();
 		try {
 			return key.pollEvents().stream().filter(IGNORE_OVERFLOW).map(COERCE_TO_PATH)
 					.collect(collectingAndThen(toList(), Collections::unmodifiableList));
@@ -51,6 +48,13 @@ public final class FilePool implements Callable<Collection<WatchEvent<Path>>> {
 
 	public void close() {
 		Optional.ofNullable(watcher).ifPresent(FilePool::safeCloseWatchService);
+	}
+
+	private void initIfNeeded() throws IOException {
+		if (watcher == null) {
+			watcher = directory.getFileSystem().newWatchService();
+			key = directory.register(watcher, events);
+		}
 	}
 
 	private static void safeCloseWatchService(WatchService watcher) {
