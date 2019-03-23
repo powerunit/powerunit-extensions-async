@@ -17,28 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Powerunit. If not, see <http://www.gnu.org/licenses/>.
  */
-package ch.powerunit.extensions.async.lang;
+package ch.powerunit.extensions.async.lang.samples;
 
-/**
- * This interface can be used to specify retry configuration.
- * 
- * @author borettim
- * @since 1.0.0
- * @see RetryPolicies
- */
-public interface RetryPolicy {
-	/**
-	 * This is the number of retry to be done.
-	 * 
-	 * @return the number of retry.
-	 */
-	int getCount();
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
-	/**
-	 * This is the method called to wait between a retry.
-	 * 
-	 * @param retry
-	 *            the current retry (start at 1).
-	 */
-	void sleepBetweenRetry(int retry);
+import ch.powerunit.Test;
+import ch.powerunit.TestSuite;
+import ch.powerunit.extensions.async.lang.WaitResult;
+
+public class BasicUsageSample1Test implements TestSuite {
+
+	private Callable<String> myCallable = () -> "x";
+
+	@Test
+	public void testWaitResultOfBasicSample() {
+		//@formatter:off
+		Optional<String> result = WaitResult.
+			of(myCallable).
+			dontIgnoreException().
+			expecting(s->"x".equals(s)).
+			repeat(2).
+			every(1000, TimeUnit.MILLISECONDS).
+			get();
+		//@formatter:on
+		assertThat(result).is(optionalIs("x"));
+	}
 }
