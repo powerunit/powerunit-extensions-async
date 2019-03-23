@@ -90,6 +90,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * the thread provided by the executor.
 	 * 
 	 * @return {@link WaitResultBuilder6 the final step}
+	 * @see ForkJoinPool#commonPool()
 	 */
 	default WaitResultBuilder6<T> usingDefaultExecutor() {
 		return using(commonPool());
