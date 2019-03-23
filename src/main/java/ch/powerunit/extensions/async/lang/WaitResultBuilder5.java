@@ -75,12 +75,15 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * This may be used, for example, to release resources.
 	 * 
 	 * @param action
-	 *            the action to be done.
+	 *            the action to be done. May be null (ignored).
 	 * @return a new instance of {@link WaitResultBuilder5} with this new action to
 	 *         be done at the end.
 	 * @since 1.1.0
 	 */
 	default WaitResultBuilder5<T> onFinish(Runnable action) {
+		if (action == null) {
+			return this;
+		}
 		return () -> {
 			try {
 				return get();
