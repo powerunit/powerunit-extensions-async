@@ -20,6 +20,7 @@
 package ch.powerunit.extensions.async.lang;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.concurrent.Executors.callable;
 
 import java.util.Optional;
@@ -68,20 +69,48 @@ public final class WaitResult {
 	 *             if action is null
 	 */
 	public static <T> WaitResultBuilder1<T> of(Callable<T> action) {
+		return of(action, null);
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * the result of the received action, with repetition until some condition.
+	 * 
+	 * @param action
+	 *            the {@link Callable} providing the result.
+	 * @param actionOnFinish
+	 *            register an action after the result is retrieved (success or
+	 *            failure). This may be used to register some resource cleanup.
+	 * @param <T>
+	 *            The type of the result.
+	 * @return {@link WaitResultBuilder1 the next step of the builder}
+	 * @throws NullPointerException
+	 *             if action is null
+	 * @since 1.1.0
+	 */
+	public static <T> WaitResultBuilder1<T> of(Callable<T> action, Runnable actionOnFinish) {
 		requireNonNull(action, "action can't be null");
 		return new WaitResultBuilder1<T>() {
 
 			@Override
 			public WaitResultBuilder3<T> expecting(Predicate<T> acceptingClause) {
-				return retry -> new WaitResultImpl<>(action, acceptingClause, retry)::get;
+				return retry -> ((WaitResultBuilder5<T>) new WaitResultImpl<>(
+						asFilteredCallable(action, acceptingClause), retry)::get).onFinish(actionOnFinish);
 			}
 
 			@Override
 			public WaitResultBuilder2<T> ignoreException(boolean alsoDontFailWhenNoResultAndException) {
-				return predicate -> retry -> new WaitResultImpl<>(action, alsoDontFailWhenNoResultAndException,
-						predicate, retry)::get;
+				return predicate -> retry -> ((WaitResultBuilder5<T>) new WaitResultImpl<>(
+						asFilteredCallable(action, predicate), alsoDontFailWhenNoResultAndException, retry)::get)
+								.onFinish(actionOnFinish);
 			}
 		};
+	}
+
+	private static <T> Callable<Optional<T>> asFilteredCallable(Callable<T> action, Predicate<T> acceptingClause) {
+		requireNonNull(action, "action can't be null");
+		requireNonNull(acceptingClause, "acceptingClause can't be null");
+		return () -> ofNullable(action.call()).filter(acceptingClause);
 	}
 
 	/**

@@ -21,18 +21,15 @@ package ch.powerunit.extensions.async.impl;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.Predicate;
 
 import ch.powerunit.Test;
 import ch.powerunit.TestSuite;
 import ch.powerunit.extensions.async.lang.RetryPolicies;
 
 public class RetryImplTest implements TestSuite {
-
-	private Predicate<String> TRUE = x -> true;
-
-	private Predicate<String> FALSE = x -> false;
 
 	private static class MyCallable implements Callable<String> {
 
@@ -50,7 +47,7 @@ public class RetryImplTest implements TestSuite {
 	@Test
 	public void testOneRetryOK() {
 		RetryImpl<String> retry = new RetryImpl<String>(
-				new WaitResultImpl<>(() -> "X", TRUE, RetryPolicies.of(1, 10000)));
+				new WaitResultImpl<>(() -> Optional.of("X"), RetryPolicies.of(1, 10000)));
 		LocalDateTime start = LocalDateTime.now();
 		// First
 		assertThat(retry.next()).is(true);
@@ -72,7 +69,7 @@ public class RetryImplTest implements TestSuite {
 	@Test
 	public void testOneRetryKO() {
 		RetryImpl<String> retry = new RetryImpl<String>(
-				new WaitResultImpl<>(() -> "X", FALSE, RetryPolicies.of(1, 10000)));
+				new WaitResultImpl<>(Optional::empty, RetryPolicies.of(1, 10000)));
 		LocalDateTime start = LocalDateTime.now();
 		// First
 		assertThat(retry.next()).is(true);
@@ -96,7 +93,7 @@ public class RetryImplTest implements TestSuite {
 
 		RetryImpl<String> retry = new RetryImpl<String>(new WaitResultImpl<>(() -> {
 			throw new IllegalArgumentException("test");
-		}, TRUE, RetryPolicies.of(1, Duration.ofSeconds(10))));
+		}, RetryPolicies.of(1, Duration.ofSeconds(10))));
 		LocalDateTime start = LocalDateTime.now();
 		// First
 		assertThat(retry.next()).is(true);
@@ -119,8 +116,8 @@ public class RetryImplTest implements TestSuite {
 	@Test
 	public void testTwoRetryOK() {
 		MyCallable test1 = new MyCallable();
-		RetryImpl<String> retry = new RetryImpl<>(
-				new WaitResultImpl<>(test1, s -> s != null, RetryPolicies.of(2, 2000)));
+		RetryImpl<String> retry = new RetryImpl<>(new WaitResultImpl<>(
+				() -> Optional.ofNullable(test1.call()).filter(Objects::nonNull), RetryPolicies.of(2, 2000)));
 		LocalDateTime start = LocalDateTime.now();
 		// First
 		assertThat(retry.next()).is(true);

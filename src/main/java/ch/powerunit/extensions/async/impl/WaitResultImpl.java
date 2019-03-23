@@ -16,15 +16,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Powerunit. If not, see <http://www.gnu.org/licenses/>.
- */package ch.powerunit.extensions.async.impl;
+ */
+package ch.powerunit.extensions.async.impl;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import ch.powerunit.extensions.async.lang.RetryPolicy;
@@ -41,21 +40,15 @@ public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<
 
 	private final RetryPolicy retryClause;
 
-	private static <T> Callable<Optional<T>> asCallable(Callable<T> action, Predicate<T> acceptingClause) {
-		requireNonNull(action, "action can't be null");
-		requireNonNull(acceptingClause, "acceptingClause can't be null");
-		return () -> ofNullable(action.call()).filter(acceptingClause);
-	}
-
-	public WaitResultImpl(Callable<T> action, boolean alsoDontFailWhenNoResultAndException,
-			Predicate<T> acceptingClause, RetryPolicy retryClause) {
-		this.action = asCallable(action, acceptingClause);
+	public WaitResultImpl(Callable<Optional<T>> action, boolean alsoDontFailWhenNoResultAndException,
+			RetryPolicy retryClause) {
+		this.action = requireNonNull(action, "action can't be null");
 		this.exceptionHandler = new ExceptionHandler(true, alsoDontFailWhenNoResultAndException);
 		this.retryClause = requireNonNull(retryClause, "retryClause can't be null");
 	}
 
-	public WaitResultImpl(Callable<T> action, Predicate<T> acceptingClause, RetryPolicy retryClause) {
-		this.action = asCallable(action, acceptingClause);
+	public WaitResultImpl(Callable<Optional<T>> action, RetryPolicy retryClause) {
+		this.action = requireNonNull(action, "action can't be null");
 		this.exceptionHandler = new ExceptionHandler(false, false);
 		this.retryClause = requireNonNull(retryClause, "retryClause can't be null");
 	}
