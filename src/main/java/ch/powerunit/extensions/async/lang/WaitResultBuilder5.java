@@ -70,6 +70,9 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 
 	/**
 	 * Define the executor to be used for the async part.
+	 * <p>
+	 * Both the action to retry and the control on the result will be executed on
+	 * the thread provided by the executor.
 	 * 
 	 * @param executor
 	 *            the executor to be used.
@@ -82,6 +85,9 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	/**
 	 * Define the executor to be used for the async part as using
 	 * {@link ForkJoinPool#commonPool()}.
+	 * <p>
+	 * Both the action to retry and the control on the result will be executed on
+	 * the thread provided by the executor.
 	 * 
 	 * @return {@link WaitResultBuilder6 the final step}
 	 */
