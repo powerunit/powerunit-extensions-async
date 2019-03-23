@@ -52,14 +52,14 @@ public class WaitFileTest implements TestSuite {
 	public void testNeverFound() throws IOException, InterruptedException {
 		Path test = folder.newFolder();
 		CompletableFuture<Optional<Collection<Path>>> wait = WaitFile.newFileIn(test).expecting(l -> !l.isEmpty())
-				.repeat(5).everySecond().usingDefaultExecutor().asyncExec();
+				.repeat(2).everySecond().usingDefaultExecutor().asyncExec();
 		assertThat(wait.join()).is(optionalIsNotPresent());
 	}
 
 	@Test
 	public void testNeverFoundButCreateBeforeStartOfExecution() throws IOException, InterruptedException {
 		Path test = folder.newFolder();
-		WaitResultBuilder6<Collection<Path>> wait = WaitFile.newFileIn(test).expecting(l -> !l.isEmpty()).repeat(5)
+		WaitResultBuilder6<Collection<Path>> wait = WaitFile.newFileIn(test).expecting(l -> !l.isEmpty()).repeat(2)
 				.everySecond().usingDefaultExecutor();
 		new File(test.toFile(), "test").mkdir();
 		assertThat(wait.join()).is(optionalIsNotPresent());
@@ -70,7 +70,7 @@ public class WaitFileTest implements TestSuite {
 		Path test = folder.newFolder();
 		new File(test.toFile(), "test").mkdir();
 		CompletableFuture<Optional<Collection<Path>>> wait = WaitFile.removeFileFrom(test).expecting(l -> !l.isEmpty())
-				.repeat(5).everySecond().usingDefaultExecutor().asyncExec();
+				.repeat(3).everySecond().usingDefaultExecutor().asyncExec();
 		Thread.sleep(1010);
 		new File(test.toFile(), "test").delete();
 		assertThat(wait.join()).is(optionalIsPresent());
@@ -80,7 +80,7 @@ public class WaitFileTest implements TestSuite {
 	public void testNeverRemoved() throws IOException, InterruptedException {
 		Path test = folder.newFolder();
 		CompletableFuture<Optional<Collection<Path>>> wait = WaitFile.removeFileFrom(test).expecting(l -> !l.isEmpty())
-				.repeat(5).everySecond().usingDefaultExecutor().asyncExec();
+				.repeat(2).everySecond().usingDefaultExecutor().asyncExec();
 		assertThat(wait.join()).is(optionalIsNotPresent());
 	}
 
@@ -88,7 +88,7 @@ public class WaitFileTest implements TestSuite {
 	public void testEventFound() throws IOException, InterruptedException {
 		Path test = folder.newFolder();
 		CompletableFuture<Optional<Collection<WatchEvent<Path>>>> wait = WaitFile
-				.eventIn(test, StandardWatchEventKinds.ENTRY_CREATE).expecting(l -> !l.isEmpty()).repeat(5)
+				.eventIn(test, StandardWatchEventKinds.ENTRY_CREATE).expecting(l -> !l.isEmpty()).repeat(3)
 				.everySecond().usingDefaultExecutor().asyncExec();
 		Thread.sleep(1010);
 		new File(test.toFile(), "test").mkdir();
@@ -99,7 +99,7 @@ public class WaitFileTest implements TestSuite {
 	public void testEventNeverFound() throws IOException, InterruptedException {
 		Path test = folder.newFolder();
 		CompletableFuture<Optional<Collection<WatchEvent<Path>>>> wait = WaitFile
-				.eventIn(test, StandardWatchEventKinds.ENTRY_CREATE).expecting(l -> !l.isEmpty()).repeat(5)
+				.eventIn(test, StandardWatchEventKinds.ENTRY_CREATE).expecting(l -> !l.isEmpty()).repeat(2)
 				.everySecond().usingDefaultExecutor().asyncExec();
 		assertThat(wait.join()).is(optionalIsNotPresent());
 	}
