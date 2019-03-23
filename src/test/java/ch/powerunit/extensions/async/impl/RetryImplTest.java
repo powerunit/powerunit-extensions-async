@@ -32,10 +32,6 @@ import ch.powerunit.extensions.async.lang.RetryPolicies;
 
 public class RetryImplTest implements TestSuite {
 
-	private Predicate<String> TRUE = x -> true;
-
-	private Predicate<String> FALSE = x -> false;
-
 	private static class MyCallable implements Callable<String> {
 
 		public String result;
