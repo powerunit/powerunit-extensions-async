@@ -403,4 +403,14 @@ public class WaitResultTest implements TestSuite {
 		assertWhen(exec::get).throwException(exceptionMessage(containsString("TEST")));
 	}
 
+	// onFinish
+	@Test
+	public void testOnFinish() throws InterruptedException, ExecutionException {
+		Handler h = new Handler();
+		h.ok = false;
+		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
+				.onFinish(() -> h.ok = true).usingDefaultExecutor().get()).is(optionalIs("x"));
+		assertThat(h.ok).is(true);
+	}
+
 }
