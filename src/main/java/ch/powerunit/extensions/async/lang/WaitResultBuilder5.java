@@ -44,6 +44,21 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * Directly wait for the result of this execution (the execution is run in this
 	 * thread). In case of not ignored exception, an {@link AssertionError} is
 	 * thrown.
+	 * <p>
+	 * 
+	 * For example :
+	 * 
+	 * <pre>
+	 * WaitResult.of(myCallable).dontIgnoreException().expecting(myPredicate).repeat(2)
+	 * 		.every(1000, TimeUnit.MILLISECONDS).get()
+	 * </pre>
+	 * <ul>
+	 * <li>If an exception occurs in {@code myCallable}, an {@link AssertionError}
+	 * is thrown</li>
+	 * <li>If no result is available, after the 2 try, an empty {@link Optional} is
+	 * returned.</li>
+	 * <li>Or the result is available in the returned {@link Optional}.</li>
+	 * </ul>
 	 * 
 	 * @return the {@link Optional} with the result of the execution
 	 * 
