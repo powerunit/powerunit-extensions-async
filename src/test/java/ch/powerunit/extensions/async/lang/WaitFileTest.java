@@ -62,4 +62,24 @@ public class WaitFileTest implements TestSuite {
 		new File(test.toFile(), "test").mkdir();
 		assertThat(wait.join()).is(optionalIsNotPresent());
 	}
+
+	@Test
+	public void testRemoved() throws IOException, InterruptedException {
+		Path test = folder.newFolder();
+		new File(test.toFile(), "test").mkdir();
+		CompletableFuture<Optional<Collection<Path>>> wait = WaitFile.removeFileFrom(test).expecting(l -> !l.isEmpty())
+				.repeat(5).everySecond().usingDefaultExecutor().asyncExec();
+		Thread.sleep(1010);
+		new File(test.toFile(), "test").delete();
+		assertThat(wait.join()).is(optionalIsPresent());
+	}
+
+	@Test
+	public void testNeverRemoved() throws IOException, InterruptedException {
+		Path test = folder.newFolder();
+		CompletableFuture<Optional<Collection<Path>>> wait = WaitFile.removeFileFrom(test).expecting(l -> !l.isEmpty())
+				.repeat(5).everySecond().usingDefaultExecutor().asyncExec();
+		assertThat(wait.join()).is(optionalIsNotPresent());
+	}
+
 }

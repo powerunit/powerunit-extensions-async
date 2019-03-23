@@ -20,6 +20,7 @@
 package ch.powerunit.extensions.async.lang;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
@@ -40,7 +41,7 @@ public final class WaitFile {
 	/**
 	 * Wait for a folder to contains new entry.
 	 * <p>
-	 * The wait start at the first try to get the result.
+	 * The wait starts at the first try to get the result.
 	 * 
 	 * @param directory
 	 *            the directory to be verified.
@@ -49,6 +50,21 @@ public final class WaitFile {
 	public static WaitResultBuilder1<Collection<Path>> newFileIn(Path directory) {
 		requireNonNull(directory, "directory can't be null");
 		FilePool filePool = new FilePool(directory, ENTRY_CREATE);
+		return WaitResult.of(filePool, filePool::close);
+	}
+
+	/**
+	 * Wait for a folder to have entry removed.
+	 * <p>
+	 * The wait starts at the first try to get the result.
+	 * 
+	 * @param directory
+	 *            the directory to be verified.
+	 * @return {@link WaitResultBuilder1} the next step of the builder.
+	 */
+	public static WaitResultBuilder1<Collection<Path>> removeFileFrom(Path directory) {
+		requireNonNull(directory, "directory can't be null");
+		FilePool filePool = new FilePool(directory, ENTRY_DELETE);
 		return WaitResult.of(filePool, filePool::close);
 	}
 
