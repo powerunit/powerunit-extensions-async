@@ -26,10 +26,15 @@ import java.util.concurrent.TimeUnit;
 import ch.powerunit.Test;
 import ch.powerunit.TestSuite;
 import ch.powerunit.extensions.async.lang.WaitResult;
+import ch.powerunit.extensions.async.lang.WaitResultBuilder5;
 
 public class BasicUsageSample1Test implements TestSuite {
 
 	private Callable<String> myCallable = () -> "x";
+
+	private Callable<String> myCallableWithException = () -> {
+		throw new Exception("Sample");
+	};
 
 	@Test
 	public void testWaitResultOfBasicSample() {
@@ -43,5 +48,18 @@ public class BasicUsageSample1Test implements TestSuite {
 			get();
 		//@formatter:on
 		assertThat(result).is(optionalIs("x"));
+	}
+
+	@Test
+	public void testWaitResultOfBasicSampleWithExcetpion() {
+		//@formatter:off
+		WaitResultBuilder5<String> executor = WaitResult.
+			of(myCallableWithException).
+			dontIgnoreException().
+			expecting(s->"x".equals(s)).
+			repeat(2).
+			every(1000, TimeUnit.MILLISECONDS);
+		//@formatter:on
+		assertWhen(executor::get).throwException(instanceOf(AssertionError.class));
 	}
 }

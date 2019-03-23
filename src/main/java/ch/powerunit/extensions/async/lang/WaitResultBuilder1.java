@@ -20,6 +20,7 @@
 package ch.powerunit.extensions.async.lang;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * First Step of the builder of {@link CompletableFuture} to skip, if necessary,
@@ -55,6 +56,15 @@ public interface WaitResultBuilder1<T> extends WaitResultBuilder2<T> {
 	 * <p>
 	 * This this the normal behaviour. This method may be used to make it explicit
 	 * in the code.
+	 * <p>
+	 * For example, the following code :
+	 * 
+	 * <pre>
+	 * WaitResult.of(myCallable).dontIgnoreException().expecting(myPredicate).repeat(2)
+	 * 		.every(1000, TimeUnit.MILLISECONDS).get()
+	 * </pre>
+	 * 
+	 * Throws an {@link AssertionError} if {@code myCallable} throws an exception.
 	 * 
 	 * @return {@link WaitResultBuilder2 the next step of the builder}
 	 * @since 1.0.0
