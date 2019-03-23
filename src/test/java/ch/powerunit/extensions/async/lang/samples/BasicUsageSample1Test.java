@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -95,6 +96,21 @@ public class BasicUsageSample1Test implements TestSuite {
 			repeat(2).
 			every(1000, TimeUnit.MILLISECONDS).
 			asyncExec().join();
+		//@formatter:on
+		assertThat(result).is(optionalIs("x"));
+	}
+
+	@Test
+	public void testWaitResultOfBasicSampleManualAsync() {
+		output.println(Thread.currentThread().getName());
+		//@formatter:off
+		Optional<String> result = WaitResult.
+			of(displayThread(myCallable)).
+			dontIgnoreException().
+			expecting(displayThread(s->"x".equals(s))).
+			repeat(2).
+			every(1000, TimeUnit.MILLISECONDS).
+			using(Executors.newFixedThreadPool(2)).join();
 		//@formatter:on
 		assertThat(result).is(optionalIs("x"));
 	}
