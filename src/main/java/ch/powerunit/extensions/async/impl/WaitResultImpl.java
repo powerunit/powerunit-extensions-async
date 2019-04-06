@@ -33,7 +33,7 @@ import ch.powerunit.extensions.async.lang.RetryPolicy;
  *
  */
 public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<Optional<T>> {
-
+	
 	private final Callable<Optional<T>> action;
 
 	private final ExceptionHandler exceptionHandler;
@@ -74,6 +74,11 @@ public final class WaitResultImpl<T> implements Supplier<Optional<T>>, Callable<
 	@Override
 	public Optional<T> call() throws Exception {
 		return action.call();
+	}
+
+	@Override
+	public String toString() {
+		return "WaitResultImpl [action=" + action + ", exceptionHandler=" + exceptionHandler + "]";
 	}
 
 }

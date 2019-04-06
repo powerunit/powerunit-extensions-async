@@ -21,11 +21,16 @@ package ch.powerunit.extensions.async.impl;
 
 import static java.util.Optional.empty;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.Optional;
 
 import ch.powerunit.extensions.async.lang.RetryPolicy;
 
 class RetryImpl<T> { // package protected
+
+	private static final Logger LOGGER = System.getLogger(RetryImpl.class.getName());
+
 	private final WaitResultImpl<T> on;
 
 	private int retryCount;
@@ -41,6 +46,7 @@ class RetryImpl<T> { // package protected
 
 	public boolean next() {
 		RetryPolicy retryClause = on.getRetryClause();
+		LOGGER.log(Level.INFO, "retry {0} using {1} on {2}", retryCount, retryClause, on);
 		if (retryCount >= retryClause.getCount()) {
 			return false;
 		}

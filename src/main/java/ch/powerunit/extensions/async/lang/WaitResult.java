@@ -110,7 +110,18 @@ public final class WaitResult {
 	private static <T> Callable<Optional<T>> asFilteredCallable(Callable<T> action, Predicate<T> acceptingClause) {
 		requireNonNull(action, "action can't be null");
 		requireNonNull(acceptingClause, "acceptingClause can't be null");
-		return () -> ofNullable(action.call()).filter(acceptingClause);
+		return new Callable<Optional<T>>() {
+
+			@Override
+			public Optional<T> call() throws Exception {
+				return ofNullable(action.call()).filter(acceptingClause);
+			}
+
+			@Override
+			public String toString() {
+				return String.format("Action = %s, AcceptingClause = %s", action, acceptingClause);
+			}
+		};
 	}
 
 	/**

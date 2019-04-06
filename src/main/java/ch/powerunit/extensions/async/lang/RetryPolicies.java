@@ -21,9 +21,12 @@ package ch.powerunit.extensions.async.lang;
 
 import static java.util.Objects.requireNonNull;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.function.IntToLongFunction;
+import java.util.function.Supplier;
 
 /**
  * Helpers methods to build {@link RetryPolicy}.
@@ -32,6 +35,8 @@ import java.util.function.IntToLongFunction;
  *
  */
 public final class RetryPolicies {
+
+	private static final Logger LOGGER = System.getLogger(RetryPolicies.class.getName());
 
 	/**
 	 * Retry Policy to just do one try.
@@ -52,7 +57,7 @@ public final class RetryPolicies {
 	 * @return the RetryPolicy
 	 */
 	public static RetryPolicy of(int count, long ms) {
-		return of(count, l -> ms);
+		return of(count, addToString(l -> ms, () -> String.format("Constant wait time of %s ms", ms)));
 	}
 
 	/**
@@ -104,6 +109,11 @@ public final class RetryPolicies {
 			public int getCount() {
 				return count;
 			}
+
+			@Override
+			public String toString() {
+				return String.format("total count = %s, with sleep method = %s", count, retryToWaitTime);
+			}
 		};
 	}
 
@@ -118,7 +128,7 @@ public final class RetryPolicies {
 	 * @return the RetryPolicy
 	 */
 	public static RetryPolicy ofIncremental(int count, long ms) {
-		return of(count, retry -> retry * ms);
+		return of(count, addToString(retry -> retry * ms, () -> String.format("Incremental retry based on %s ms", ms)));
 	}
 
 	/**
@@ -135,8 +145,24 @@ public final class RetryPolicies {
 		return ofIncremental(count, requireNonNull(duration, "duration can't be null").toMillis());
 	}
 
+	private static IntToLongFunction addToString(IntToLongFunction target, Supplier<String> toString) {
+		return new IntToLongFunction() {
+
+			@Override
+			public long applyAsLong(int value) {
+				return target.applyAsLong(value);
+			}
+
+			@Override
+			public String toString() {
+				return toString.get();
+			}
+		};
+	}
+
 	private static void sleepBetweenRetry(long ms) {
 		try {
+			LOGGER.log(Level.DEBUG, "Waiting {1} ms", ms);
 			Thread.sleep(ms);
 		} catch (InterruptedException e) {
 			// ignore

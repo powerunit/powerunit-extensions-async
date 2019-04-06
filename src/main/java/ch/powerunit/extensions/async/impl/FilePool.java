@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -48,6 +49,11 @@ public final class FilePool implements Callable<Collection<WatchEvent<Path>>> {
 
 	public void close() {
 		Optional.ofNullable(watcher).ifPresent(FilePool::safeCloseWatchService);
+	}
+
+	@Override
+	public String toString() {
+		return "FilePool [directory=" + directory + ", events=" + Arrays.toString(events) + "]";
 	}
 
 	private void initIfNeeded() throws IOException {
