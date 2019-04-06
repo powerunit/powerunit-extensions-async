@@ -26,6 +26,7 @@ import static java.util.concurrent.Executors.callable;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -208,14 +209,7 @@ public final class WaitResult {
 	 */
 	public static WaitResultBuilder3<Exception> forException(Callable<?> action) {
 		requireNonNull(action, "action can't be null");
-		return of(callableWithToString(() -> {
-			try {
-				action.call();
-				return null;
-			} catch (Exception e) {
-				return e;
-			}
-		}, () -> action.toString())).dontIgnoreException().expectingNotNull();
+		return of(asCallableForException(action, e -> e)).dontIgnoreException().expectingNotNull();
 	}
 
 	/**
@@ -239,15 +233,24 @@ public final class WaitResult {
 			Class<T> targetException) {
 		requireNonNull(action, "action can't be null");
 		requireNonNull(targetException, "targetException can't be null");
-		return of(callableWithToString(() -> {
+		return of(asCallableForException(action, e -> (T) Optional.of(e)
+				.filter(c -> targetException.isAssignableFrom(c.getClass())).orElseThrow(() -> e)));
+	}
+
+	private static interface ExceptionMapper<T extends Exception> {
+		T handleException(Exception e) throws Exception;
+	}
+
+	private static <T extends Exception> Callable<T> asCallableForException(Callable<?> action,
+			ExceptionMapper<T> exceptionHandler) {
+		return callableWithToString(() -> {
 			try {
 				action.call();
 				return null;
 			} catch (Exception e) {
-				return (T) Optional.of(e).filter(c -> targetException.isAssignableFrom(c.getClass()))
-						.orElseThrow(() -> e);
+				return exceptionHandler.handleException(e);
 			}
-		}, () -> action.toString()));
+		}, () -> action.toString());
 	}
 
 	// Helper method for logging
