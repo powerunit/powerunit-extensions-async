@@ -19,6 +19,8 @@
  */
 package ch.powerunit.extensions.async.lang;
 
+import static ch.powerunit.extensions.async.lang.WaitResult.callableWithToString;
+import static ch.powerunit.extensions.async.lang.WaitResult.of;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.util.Objects.requireNonNull;
@@ -60,7 +62,7 @@ public final class WaitFile {
 	public static WaitResultBuilder1<Collection<WatchEvent<Path>>> eventIn(Path directory, Kind<Path>... events) {
 		requireNonNull(directory, "directory can't be null");
 		FilePool filePool = new FilePool(directory, events);
-		return WaitResult.of(filePool, filePool::close);
+		return of(filePool, filePool::close);
 	}
 
 	/**
@@ -75,7 +77,7 @@ public final class WaitFile {
 	public static WaitResultBuilder1<Collection<Path>> newFileIn(Path directory) {
 		requireNonNull(directory, "directory can't be null");
 		FilePool filePool = new FilePool(directory, ENTRY_CREATE);
-		return WaitResult.of(toPathCollection(filePool), filePool::close);
+		return of(callableWithToString(toPathCollection(filePool), () -> "new file in " + filePool), filePool::close);
 	}
 
 	/**
@@ -93,7 +95,8 @@ public final class WaitFile {
 		requireNonNull(directory, "directory can't be null");
 		requireNonNull(name, "name can't be null");
 		FilePool filePool = new FilePool(directory, ENTRY_CREATE);
-		return WaitResult.of(toPathByName(toPathCollection(filePool), name), filePool::close);
+		return of(callableWithToString(toPathByName(toPathCollection(filePool), name),
+				() -> String.format("New file named %s in %s", name, filePool)), filePool::close);
 	}
 
 	/**
@@ -108,7 +111,8 @@ public final class WaitFile {
 	public static WaitResultBuilder1<Collection<Path>> removeFileFrom(Path directory) {
 		requireNonNull(directory, "directory can't be null");
 		FilePool filePool = new FilePool(directory, ENTRY_DELETE);
-		return WaitResult.of(toPathCollection(filePool), filePool::close);
+		return of(callableWithToString(toPathCollection(filePool), () -> "Removed file from " + directory),
+				filePool::close);
 	}
 
 	private static Callable<Collection<Path>> toPathCollection(Callable<Collection<WatchEvent<Path>>> callable) {

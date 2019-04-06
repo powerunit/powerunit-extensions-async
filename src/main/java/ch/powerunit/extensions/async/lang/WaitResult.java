@@ -135,7 +135,7 @@ public final class WaitResult {
 	 */
 	public static <T> WaitResultBuilder1<T> ofSupplier(Supplier<T> supplier) {
 		requireNonNull(supplier, "supplier can't be null");
-		return of(supplier::get);
+		return of(callableWithToString(supplier::get, () -> supplier.toString()));
 	}
 
 	/**
@@ -155,7 +155,8 @@ public final class WaitResult {
 	 */
 	public static WaitResultBuilder3<Boolean> ofRunnable(Runnable action) {
 		requireNonNull(action, "action can't be null");
-		return of(callable(action, true)).ignoreException(true).expecting(b -> b);
+		return of(callableWithToString(callable(action, true), () -> action.toString())).ignoreException(true)
+				.expecting(predicateWithToString(b -> b, () -> "Expecting true"));
 	}
 
 	/**
@@ -190,7 +191,8 @@ public final class WaitResult {
 	 */
 	public static WaitResultBuilder3<Boolean> onCondition(Supplier<Boolean> conditionSupplier) {
 		requireNonNull(conditionSupplier, "conditionSupplier can't be null");
-		return of(conditionSupplier::get).expecting(b -> b);
+		return of(callableWithToString(conditionSupplier::get, () -> conditionSupplier.toString()))
+				.expecting(predicateWithToString(b -> b, () -> "Expecting true"));
 	}
 
 	/**
@@ -206,14 +208,14 @@ public final class WaitResult {
 	 */
 	public static WaitResultBuilder3<Exception> forException(Callable<?> action) {
 		requireNonNull(action, "action can't be null");
-		return of(() -> {
+		return of(callableWithToString(() -> {
 			try {
 				action.call();
 				return null;
 			} catch (Exception e) {
 				return e;
 			}
-		}).dontIgnoreException().expectingNotNull();
+		}, () -> action.toString())).dontIgnoreException().expectingNotNull();
 	}
 
 	/**
@@ -237,7 +239,7 @@ public final class WaitResult {
 			Class<T> targetException) {
 		requireNonNull(action, "action can't be null");
 		requireNonNull(targetException, "targetException can't be null");
-		return of(() -> {
+		return of(callableWithToString(() -> {
 			try {
 				action.call();
 				return null;
@@ -245,7 +247,7 @@ public final class WaitResult {
 				return (T) Optional.of(e).filter(c -> targetException.isAssignableFrom(c.getClass()))
 						.orElseThrow(() -> e);
 			}
-		});
+		}, () -> action.toString()));
 	}
 
 	// Helper method for logging
