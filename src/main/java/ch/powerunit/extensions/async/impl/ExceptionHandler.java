@@ -46,4 +46,10 @@ class ExceptionHandler {// package protected
 					+ " ; Original error class is " + e.getClass(), e);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "ExceptionHandler [ignoreException=" + ignoreException + ", alsoDontThrowLastExceptionWhenNoResult="
+				+ alsoDontThrowLastExceptionWhenNoResult + "]";
+	}
 }

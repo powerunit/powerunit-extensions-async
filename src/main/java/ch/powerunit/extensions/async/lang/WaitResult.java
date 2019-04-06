@@ -30,9 +30,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import ch.powerunit.extensions.async.impl.WaitResultImpl;
-import ch.powerunit.extensions.async.lang.WaitResultBuilder1;
-import ch.powerunit.extensions.async.lang.WaitResultBuilder2;
-import ch.powerunit.extensions.async.lang.WaitResultBuilder3;
 
 /**
  * This class is the entry point for this library to support async operation
@@ -45,6 +42,11 @@ import ch.powerunit.extensions.async.lang.WaitResultBuilder3;
  *        {@link ch.powerunit.extensions.async}. This change is linked with java
  *        9 module, as it will not be possible to have the implementation in a
  *        sub package of the exported one.
+ * @since 1.1.0 - Starting from version 1.1.0, the {@link System.Logger} feature
+ *        is used to do some logging of the system. One goal is to provide a way
+ *        to the user to see when the system is waiting for example. Also, some
+ *        methods were added to decorate {@link Callable} and {@link Predicate}
+ *        to add toString to describe them.
  */
 public final class WaitResult {
 	private WaitResult() {
@@ -110,7 +112,8 @@ public final class WaitResult {
 	private static <T> Callable<Optional<T>> asFilteredCallable(Callable<T> action, Predicate<T> acceptingClause) {
 		requireNonNull(action, "action can't be null");
 		requireNonNull(acceptingClause, "acceptingClause can't be null");
-		return () -> ofNullable(action.call()).filter(acceptingClause);
+		return callableWithToString(() -> ofNullable(action.call()).filter(acceptingClause),
+				() -> String.format("Action = %s, AcceptingClause = %s", action, acceptingClause));
 	}
 
 	/**
@@ -129,7 +132,7 @@ public final class WaitResult {
 	 */
 	public static <T> WaitResultBuilder1<T> ofSupplier(Supplier<T> supplier) {
 		requireNonNull(supplier, "supplier can't be null");
-		return of(supplier::get);
+		return of(callableWithToString(supplier::get, () -> supplier.toString()));
 	}
 
 	/**
@@ -149,7 +152,8 @@ public final class WaitResult {
 	 */
 	public static WaitResultBuilder3<Boolean> ofRunnable(Runnable action) {
 		requireNonNull(action, "action can't be null");
-		return of(callable(action, true)).ignoreException(true).expecting(b -> b);
+		return of(callableWithToString(callable(action, true), () -> action.toString())).ignoreException(true)
+				.expecting(predicateWithToString(b -> b, () -> "Expecting true"));
 	}
 
 	/**
@@ -169,7 +173,7 @@ public final class WaitResult {
 	 * @return {@link WaitResultBuilder2 the next step of the builder}
 	 */
 	public static <T> WaitResultBuilder2<T> on(T mutableObject) {
-		return of(() -> mutableObject);
+		return of(callableWithToString(() -> mutableObject, () -> String.format("on object %s", mutableObject)));
 	}
 
 	/**
@@ -184,7 +188,8 @@ public final class WaitResult {
 	 */
 	public static WaitResultBuilder3<Boolean> onCondition(Supplier<Boolean> conditionSupplier) {
 		requireNonNull(conditionSupplier, "conditionSupplier can't be null");
-		return of(conditionSupplier::get).expecting(b -> b);
+		return of(callableWithToString(conditionSupplier::get, () -> conditionSupplier.toString()))
+				.expecting(predicateWithToString(b -> b, () -> "Expecting true"));
 	}
 
 	/**
@@ -200,14 +205,7 @@ public final class WaitResult {
 	 */
 	public static WaitResultBuilder3<Exception> forException(Callable<?> action) {
 		requireNonNull(action, "action can't be null");
-		return of(() -> {
-			try {
-				action.call();
-				return null;
-			} catch (Exception e) {
-				return e;
-			}
-		}).dontIgnoreException().expectingNotNull();
+		return of(asCallableForException(action, e -> e)).dontIgnoreException().expectingNotNull();
 	}
 
 	/**
@@ -231,15 +229,83 @@ public final class WaitResult {
 			Class<T> targetException) {
 		requireNonNull(action, "action can't be null");
 		requireNonNull(targetException, "targetException can't be null");
-		return of(() -> {
+		return of(asCallableForException(action, e -> (T) Optional.of(e)
+				.filter(c -> targetException.isAssignableFrom(c.getClass())).orElseThrow(() -> e)));
+	}
+
+	private static interface ExceptionMapper<T extends Exception> {
+		T handleException(Exception e) throws Exception;
+	}
+
+	private static <T extends Exception> Callable<T> asCallableForException(Callable<?> action,
+			ExceptionMapper<T> exceptionHandler) {
+		return callableWithToString(() -> {
 			try {
 				action.call();
 				return null;
 			} catch (Exception e) {
-				return (T) Optional.of(e).filter(c -> targetException.isAssignableFrom(c.getClass()))
-						.orElseThrow(() -> e);
+				return exceptionHandler.handleException(e);
 			}
-		});
+		}, () -> action.toString());
+	}
+
+	// Helper method for logging
+	/**
+	 * Modify a Callable to add a toString.
+	 * 
+	 * @param callable
+	 *            the Callable to be decorated.
+	 * @param toString
+	 *            the Supplier to be used as toString method.
+	 * @return the decorated Callable.
+	 * @throws NullPointerException
+	 *             if callable or toString is null.
+	 * @since 1.1.0
+	 */
+	public static <T> Callable<T> callableWithToString(Callable<T> callable, Supplier<String> toString) {
+		requireNonNull(callable, "callable can't be null");
+		requireNonNull(toString, "toString can't be null");
+		return new Callable<T>() {
+
+			@Override
+			public T call() throws Exception {
+				return callable.call();
+			}
+
+			@Override
+			public String toString() {
+				return toString.get();
+			}
+		};
+	}
+
+	/**
+	 * Modify a Predicate to add a toString.
+	 * 
+	 * @param predicate
+	 *            the Predicate to be decorated.
+	 * @param toString
+	 *            the Supplier to be used as toString method.
+	 * @return the decorated Predicate.
+	 * @throws NullPointerException
+	 *             if predicate or toString is null.
+	 * @since 1.1.0
+	 */
+	public static <T> Predicate<T> predicateWithToString(Predicate<T> predicate, Supplier<String> toString) {
+		requireNonNull(predicate, "predicate can't be null");
+		requireNonNull(toString, "toString can't be null");
+		return new Predicate<T>() {
+
+			@Override
+			public boolean test(T t) {
+				return predicate.test(t);
+			}
+
+			@Override
+			public String toString() {
+				return toString.get();
+			}
+		};
 	}
 
 }
