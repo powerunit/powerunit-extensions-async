@@ -26,14 +26,10 @@ import static java.util.concurrent.Executors.callable;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import ch.powerunit.extensions.async.impl.WaitResultImpl;
-import ch.powerunit.extensions.async.lang.WaitResultBuilder1;
-import ch.powerunit.extensions.async.lang.WaitResultBuilder2;
-import ch.powerunit.extensions.async.lang.WaitResultBuilder3;
 
 /**
  * This class is the entry point for this library to support async operation
