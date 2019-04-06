@@ -46,10 +46,10 @@ class RetryImpl<T> { // package protected
 
 	public boolean next() {
 		RetryPolicy retryClause = on.getRetryClause();
-		LOGGER.log(Level.INFO, "retry {0} using {1} on {2}", retryCount, retryClause, on);
 		if (retryCount >= retryClause.getCount()) {
 			return false;
 		}
+		LOGGER.log(Level.INFO, "retry {0} using {1} on {2}", retryCount, retryClause, on);
 		if (retryCount > 0) {
 			retryClause.sleepBetweenRetry(retryCount);
 		}

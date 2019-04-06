@@ -45,6 +45,11 @@ import ch.powerunit.extensions.async.lang.WaitResultBuilder3;
  *        {@link ch.powerunit.extensions.async}. This change is linked with java
  *        9 module, as it will not be possible to have the implementation in a
  *        sub package of the exported one.
+ * @since 1.1.0 - Starting from version 1.1.0, the {@link System.Logger} feature
+ *        is used to do some logging of the system. One goal is to provide a way
+ *        to the user to see when the system is waiting for example. Also, some
+ *        methods were added to decorate {@link Callable} and {@link Predicate}
+ *        to add toString to describe them.
  */
 public final class WaitResult {
 	private WaitResult() {
@@ -254,7 +259,7 @@ public final class WaitResult {
 	 * @return the decorated Callable.
 	 * @throws NullPointerException
 	 *             if callable or toString is null.
-	 * @since 1.2.0
+	 * @since 1.1.0
 	 */
 	public static <T> Callable<T> callableWithToString(Callable<T> callable, Supplier<String> toString) {
 		requireNonNull(callable, "callable can't be null");
@@ -283,7 +288,7 @@ public final class WaitResult {
 	 * @return the decorated Predicate.
 	 * @throws NullPointerException
 	 *             if predicate or toString is null.
-	 * @since 1.2.0
+	 * @since 1.1.0
 	 */
 	public static <T> Predicate<T> predicateWithToString(Predicate<T> predicate, Supplier<String> toString) {
 		requireNonNull(predicate, "predicate can't be null");
