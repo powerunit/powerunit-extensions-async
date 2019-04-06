@@ -117,7 +117,8 @@ public class WaitResultTest implements TestSuite {
 
 	@Test
 	public void testObjectMethodDirectlyOKWithFinish() {
-		Optional<Object> result = WaitResult.on(new Object()).expecting(o -> true).repeat(100)
+		Optional<Object> result = WaitResult.on(new Object())
+				.expecting(WaitResult.predicateWithToString(o -> true, () -> "True everything")).repeat(100)
 				.every(10, TimeUnit.MILLISECONDS).finish(Executors.newCachedThreadPool());
 		assertThat(result).isNotNull();
 		assertThat(result.isPresent()).is(true);
@@ -125,9 +126,9 @@ public class WaitResultTest implements TestSuite {
 
 	@Test
 	public void testNotIgnoreExceptionThenExceptionWithFinish() {
-		WaitResultBuilder5<Object> exec = WaitResult.of(() -> {
+		WaitResultBuilder5<Object> exec = WaitResult.of(WaitResult.callableWithToString(() -> {
 			throw new IllegalArgumentException("TEST");
-		}).expecting(o -> true).repeatTwice().every(10, TimeUnit.MILLISECONDS);
+		}, () -> "Throw exception")).expecting(o -> true).repeatTwice().every(10, TimeUnit.MILLISECONDS);
 		assertWhen((Callable<Optional<Object>>) exec::finish).throwException(exceptionMessage(containsString("TEST")));
 	}
 

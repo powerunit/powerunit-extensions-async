@@ -110,18 +110,8 @@ public final class WaitResult {
 	private static <T> Callable<Optional<T>> asFilteredCallable(Callable<T> action, Predicate<T> acceptingClause) {
 		requireNonNull(action, "action can't be null");
 		requireNonNull(acceptingClause, "acceptingClause can't be null");
-		return new Callable<Optional<T>>() {
-
-			@Override
-			public Optional<T> call() throws Exception {
-				return ofNullable(action.call()).filter(acceptingClause);
-			}
-
-			@Override
-			public String toString() {
-				return String.format("Action = %s, AcceptingClause = %s", action, acceptingClause);
-			}
-		};
+		return callableWithToString(() -> ofNullable(action.call()).filter(acceptingClause),
+				() -> String.format("Action = %s, AcceptingClause = %s", action, acceptingClause));
 	}
 
 	/**
@@ -180,7 +170,7 @@ public final class WaitResult {
 	 * @return {@link WaitResultBuilder2 the next step of the builder}
 	 */
 	public static <T> WaitResultBuilder2<T> on(T mutableObject) {
-		return of(() -> mutableObject);
+		return of(callableWithToString(() -> mutableObject, () -> String.format("on object %s", mutableObject)));
 	}
 
 	/**
@@ -251,6 +241,65 @@ public final class WaitResult {
 						.orElseThrow(() -> e);
 			}
 		});
+	}
+
+	// Helper method for logging
+	/**
+	 * Modify a Callable to add a toString.
+	 * 
+	 * @param callable
+	 *            the Callable to be decorated.
+	 * @param toString
+	 *            the Supplier to be used as toString method.
+	 * @return the decorated Callable.
+	 * @throws NullPointerException
+	 *             if callable or toString is null.
+	 * @since 1.2.0
+	 */
+	public static <T> Callable<T> callableWithToString(Callable<T> callable, Supplier<String> toString) {
+		requireNonNull(callable, "callable can't be null");
+		requireNonNull(toString, "toString can't be null");
+		return new Callable<T>() {
+
+			@Override
+			public T call() throws Exception {
+				return callable.call();
+			}
+
+			@Override
+			public String toString() {
+				return toString.get();
+			}
+		};
+	}
+
+	/**
+	 * Modify a Predicate to add a toString.
+	 * 
+	 * @param predicate
+	 *            the Predicate to be decorated.
+	 * @param toString
+	 *            the Supplier to be used as toString method.
+	 * @return the decorated Predicate.
+	 * @throws NullPointerException
+	 *             if predicate or toString is null.
+	 * @since 1.2.0
+	 */
+	public static <T> Predicate<T> predicateWithToString(Predicate<T> predicate, Supplier<String> toString) {
+		requireNonNull(predicate, "predicate can't be null");
+		requireNonNull(toString, "toString can't be null");
+		return new Predicate<T>() {
+
+			@Override
+			public boolean test(T t) {
+				return predicate.test(t);
+			}
+
+			@Override
+			public String toString() {
+				return toString.get();
+			}
+		};
 	}
 
 }
