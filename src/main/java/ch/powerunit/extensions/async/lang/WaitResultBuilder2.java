@@ -19,6 +19,7 @@
  */
 package ch.powerunit.extensions.async.lang;
 
+import static ch.powerunit.extensions.async.lang.WaitResult.predicateWithToString;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 
@@ -54,7 +55,8 @@ public interface WaitResultBuilder2<T> {
 	 * @since 1.0.0
 	 */
 	default WaitResultBuilder3<T> expectingEqualsTo(T other) {
-		return expecting(Predicate.isEqual(other));
+		return expecting(
+				predicateWithToString(Predicate.isEqual(other), () -> String.format("is equals to %s", other)));
 	}
 
 	/**
@@ -65,7 +67,7 @@ public interface WaitResultBuilder2<T> {
 	 * @since 1.0.0
 	 */
 	default WaitResultBuilder3<T> expectingNotNull() {
-		return expecting(Objects::nonNull);
+		return expecting(predicateWithToString(Objects::nonNull, () -> "is not null"));
 	}
 
 	/**
@@ -77,7 +79,9 @@ public interface WaitResultBuilder2<T> {
 	 * @since 1.0.0
 	 */
 	default WaitResultBuilder3<T> expectingNot(Predicate<T> notAcceptingClause) {
-		return expecting(requireNonNull(notAcceptingClause, "notAcceptingClause can't be null").negate());
+		requireNonNull(notAcceptingClause, "notAcceptingClause can't be null");
+		return expecting(
+				predicateWithToString(notAcceptingClause.negate(), () -> String.format("not %s", notAcceptingClause)));
 	}
 
 	/**
