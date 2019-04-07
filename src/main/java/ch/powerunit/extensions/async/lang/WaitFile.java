@@ -86,7 +86,7 @@ public final class WaitFile {
 	 * <p>
 	 * The wait starts at the first try to get the result.
 	 * <p>
-	 * For exemple :
+	 * For example :
 	 * 
 	 * <pre>
 	 * CompletableFuture&lt;Optional&lt;Collection&lt;Path&gt;&gt;&gt; wait = WaitFile.newFileIn(test)
@@ -113,7 +113,7 @@ public final class WaitFile {
 	 * <p>
 	 * The wait starts at the first try to get the result.
 	 * <p>
-	 * For exemple :
+	 * For example :
 	 * 
 	 * <pre>
 	 * CompletableFuture&lt;Optional&lt;Path&gt;&gt; wait = WaitFile.newFileNamedIn(test, "test").expectingNotNull().repeat(3)
