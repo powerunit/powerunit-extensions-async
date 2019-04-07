@@ -51,6 +51,19 @@ public final class WaitFile {
 	 * Wait for a folder to have some event.
 	 * <p>
 	 * The wait starts at the first try to get the result.
+	 * <p>
+	 * For example :
+	 * 
+	 * <pre>
+	 * CompletableFuture&lt;Optional&lt;Collection&lt;WatchEvent&lt;Path&gt;&gt;&gt;&gt; wait = WaitFile
+	 * 		.eventIn(test, StandardWatchEventKinds.ENTRY_CREATE)
+	 * 		.expecting(l -&gt; l.stream().map(WatchEvent::context).map(Path::getFileName).map(Path::toString)
+	 * 				.anyMatch(n -&gt; n.equals("test")))
+	 * 		.repeat(3).every(Duration.ofMillis(250)).usingDefaultExecutor().asyncExec();
+	 * </pre>
+	 * 
+	 * Defines a 3 tries with a wait time of 250ms, for a creation event, containing
+	 * at least one event with last part of a path named test.
 	 * 
 	 * @param directory
 	 *            the directory to be verified.
@@ -69,6 +82,18 @@ public final class WaitFile {
 	 * Wait for a folder to contains new entry.
 	 * <p>
 	 * The wait starts at the first try to get the result.
+	 * <p>
+	 * For exemple :
+	 * 
+	 * <pre>
+	 * CompletableFuture&lt;Optional&lt;Collection&lt;Path&gt;&gt;&gt; wait = WaitFile.newFileIn(test)
+	 * 		.expecting(l -&gt; l.stream().map(Path::getFileName).map(Path::toString).anyMatch(n -&gt; n.equals("test")))
+	 * 		.repeat(3).every(Duration.ofMillis(250)).usingDefaultExecutor().asyncExec();
+	 * </pre>
+	 * 
+	 * Defines a 3 tries with a wait time of 250ms, for a list of new file,
+	 * containing at least one file with last part of a path named test.
+	 * 
 	 * 
 	 * @param directory
 	 *            the directory to be verified.
