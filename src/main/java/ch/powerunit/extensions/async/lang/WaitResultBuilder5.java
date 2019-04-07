@@ -139,6 +139,8 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * {@link ForkJoinPool#commonPool()}.
 	 * 
 	 * @return the {@link CompletableFuture}
+	 * @see #usingDefaultExecutor()
+	 * @see WaitResultBuilder6#asyncExec()
 	 */
 	default CompletableFuture<Optional<T>> asyncExec() {
 		return usingDefaultExecutor().asyncExec();
@@ -171,6 +173,8 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception.
+	 * @see #usingDefaultExecutor()
+	 * @see WaitResultBuilder6#finish()
 	 */
 	default Optional<T> finish() {
 		return usingDefaultExecutor().finish();
@@ -204,6 +208,8 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception or missing result.
+	 * @see #usingDefaultExecutor()
+	 * @see WaitResultBuilder6#finishWithAResult()
 	 */
 	default T finishWithAResult() {
 		return usingDefaultExecutor().finishWithAResult();
