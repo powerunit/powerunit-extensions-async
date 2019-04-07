@@ -39,9 +39,12 @@ import ch.powerunit.extensions.async.impl.FilePool;
 
 /**
  * This class provides methods to wait for fileSystem events.
+ * <p>
+ * The goal is to wait for filesystem event, by using the
+ * {@link java.nio.file.WatchService} functionality.
  * 
  * @since 1.1.0
- *
+ * @see java.nio.file.WatchService
  */
 public final class WaitFile {
 	private WaitFile() {
