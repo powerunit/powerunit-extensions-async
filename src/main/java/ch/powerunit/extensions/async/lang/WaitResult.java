@@ -252,6 +252,12 @@ public final class WaitResult {
 	// Helper method for logging
 	/**
 	 * Modify a Callable to add a toString.
+	 * <p>
+	 * <i>The goal of this method is to provide a way to have lambda, used for
+	 * example in the context of this library, that are decorated with a
+	 * {@code toString} method.</i> Later, when this Callable is used in log, it is
+	 * possible to have a meaningful description and not the default
+	 * {@code toString}.
 	 * 
 	 * @param callable
 	 *            the Callable to be decorated.
@@ -283,6 +289,12 @@ public final class WaitResult {
 
 	/**
 	 * Modify a Predicate to add a toString.
+	 * <p>
+	 * <i>The goal of this method is to provide a way to have lambda, used for
+	 * example in the context of this library, that are decorated with a
+	 * {@code toString} method.</i> Later, when this Predicate is used in log, it is
+	 * possible to have a meaningful description and not the default
+	 * {@code toString}.
 	 * 
 	 * @param predicate
 	 *            the Predicate to be decorated.
