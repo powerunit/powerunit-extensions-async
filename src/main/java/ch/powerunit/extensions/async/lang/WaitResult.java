@@ -210,8 +210,8 @@ public final class WaitResult {
 
 	/**
 	 * Start the builder to create an instance of {@link CompletableFuture} based on
-	 * repeated control of a call that is assumed as done when an exception a
-	 * specific exception is throw.
+	 * repeated control of a call that is assumed as done when a a specific
+	 * exception is thrown.
 	 * 
 	 * @param action
 	 *            the action that is expected to thrown an exception.
