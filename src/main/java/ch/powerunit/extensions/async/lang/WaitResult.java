@@ -257,6 +257,8 @@ public final class WaitResult {
 	 *            the Callable to be decorated.
 	 * @param toString
 	 *            the Supplier to be used as toString method.
+	 * @param <T>
+	 *            the return type of the Callable
 	 * @return the decorated Callable.
 	 * @throws NullPointerException
 	 *             if callable or toString is null.
@@ -286,6 +288,8 @@ public final class WaitResult {
 	 *            the Predicate to be decorated.
 	 * @param toString
 	 *            the Supplier to be used as toString method.
+	 * @param <T>
+	 *            the input type of the Predicate.
 	 * @return the decorated Predicate.
 	 * @throws NullPointerException
 	 *             if predicate or toString is null.

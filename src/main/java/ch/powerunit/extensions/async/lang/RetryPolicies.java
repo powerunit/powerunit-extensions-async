@@ -120,6 +120,21 @@ public final class RetryPolicies {
 	/**
 	 * Create a new RetryPolicy, that wait each time more time : first time the
 	 * received duration, second time twice, etc.
+	 * <p>
+	 * For example, using this definition :
+	 * 
+	 * <pre>
+	 * RetryPolicy incremental = RetryPolicies.ofIncremental(3, 20);
+	 * </pre>
+	 * 
+	 * the following of (re-)tries will be (maximum retries):
+	 * <ol>
+	 * <li>Do a first try</li>
+	 * <li>Wait 20ms</li>
+	 * <li>Do a second retry</li>
+	 * <li>Wait 40ms</li>
+	 * <li>Do a third retry</li>
+	 * </ol>
 	 * 
 	 * @param count
 	 *            the number of retry.
@@ -134,6 +149,21 @@ public final class RetryPolicies {
 	/**
 	 * Create a new RetryPolicy, that wait each time more time : first time the
 	 * received duration, second time twice, etc.
+	 * <p>
+	 * For example, using this definition :
+	 * 
+	 * <pre>
+	 * RetryPolicy incremental = RetryPolicies.ofIncremental(3, Duration.ofMillis(50));
+	 * </pre>
+	 * 
+	 * the following of (re-)tries will be (maximum retries):
+	 * <ol>
+	 * <li>Do a first try</li>
+	 * <li>Wait 50ms</li>
+	 * <li>Do a second retry</li>
+	 * <li>Wait 100ms</li>
+	 * <li>Do a third retry</li>
+	 * </ol>
 	 * 
 	 * @param count
 	 *            the number of retry.
