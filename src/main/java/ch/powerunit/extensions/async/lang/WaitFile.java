@@ -30,10 +30,13 @@ import static java.util.stream.Collectors.toList;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
 import ch.powerunit.extensions.async.impl.FilePool;
 
@@ -109,6 +112,15 @@ public final class WaitFile {
 	 * Wait for a folder to contains new entry based on his name.
 	 * <p>
 	 * The wait starts at the first try to get the result.
+	 * <p>
+	 * For exemple :
+	 * 
+	 * <pre>
+	 * CompletableFuture&lt;Optional&lt;Path&gt;&gt; wait = WaitFile.newFileNamedIn(test, "test").expectingNotNull().repeat(3)
+	 * 		.every(Duration.ofMillis(250)).usingDefaultExecutor().asyncExec();
+	 * </pre>
+	 * 
+	 * Defines a 3 tries with a wait time of 25ms, for a file named "test".
 	 * 
 	 * @param directory
 	 *            the directory to be verified.
