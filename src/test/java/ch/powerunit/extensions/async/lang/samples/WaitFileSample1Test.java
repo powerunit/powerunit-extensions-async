@@ -73,15 +73,15 @@ public class WaitFileSample1Test implements TestSuite {
 				.expecting(l -> l.stream()
 						.map(Path::getFileName)
 						.map(Path::toString)
-						.anyMatch(n->n.equals("test"))
+						.anyMatch(n->n.equals("test2"))
 						)
-				.repeat(3)
-					.every(Duration.ofMillis(250))
+				.repeat(4)
+					.every(Duration.ofMillis(200))
 				.usingDefaultExecutor()
 					.asyncExec();
 		//@formatter:off
-		Thread.sleep(200);
-		new File(test.toFile(), "test").mkdir();
+		Thread.sleep(210);
+		new File(test.toFile(), "test2").mkdir();
 		assertThat(wait.join()).is(optionalIsPresent());
 	}
 	
