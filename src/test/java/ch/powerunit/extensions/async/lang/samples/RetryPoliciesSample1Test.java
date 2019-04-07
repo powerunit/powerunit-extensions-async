@@ -38,4 +38,18 @@ public class RetryPoliciesSample1Test implements TestSuite {
 		incremental.sleepBetweenRetry(2);
 		System.out.println(incremental);
 	}
+
+	@Test
+	public void testOfGeneric() {
+		//@formatter:off
+		RetryPolicy incremental = 
+			RetryPolicies.of(
+				3, 
+				c->(long)(Math.random()*100)
+			);
+		//@formatter:on
+		incremental.sleepBetweenRetry(1);
+		incremental.sleepBetweenRetry(2);
+		System.out.println(incremental);
+	}
 }
