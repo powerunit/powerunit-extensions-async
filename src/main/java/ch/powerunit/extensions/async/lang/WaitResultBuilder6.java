@@ -41,6 +41,22 @@ public interface WaitResultBuilder6<T> {
 	/**
 	 * Create and start the async execution of the {@link CompletableFuture} the
 	 * executor that was defined before.
+	 * <p>
+	 * This method is the <i>main</i> method of this interface. This start the
+	 * execution of the {@link CompletableFuture} based on the parameter defined
+	 * before.
+	 * <p>
+	 * For example:
+	 * 
+	 * <pre>
+	 * CompletableFuture&lt;Optional&lt;String&gt;&gt; future = WaitResult.of(myCallable).dontIgnoreException()
+	 * 		.expecting(myPredicate).repeat(2).every(1000, TimeUnit.MILLISECONDS).usingDefaultExecutor().asyncExec();
+	 * </pre>
+	 * 
+	 * This defines a {@link CompletableFuture} that will repeat maximum two time,
+	 * with a wait time of 1000ms, the execution of {@code myCallable}, doesn't
+	 * ignore the exception, verify the {@code myPredicate} condition. This
+	 * {@link CompletableFuture} will use the default executor.
 	 * 
 	 * @return the {@link CompletableFuture}
 	 */
