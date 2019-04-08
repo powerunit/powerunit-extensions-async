@@ -184,7 +184,7 @@ public interface WaitResultBuilder6<T> {
 	 * @see #asyncExec()
 	 */
 	default CompletableFuture<Optional<T>> orTimeout(long timeout, TimeUnit unit) {
-		throw new UnsupportedOperationException("Not available on java 8");
+		return asyncExec().orTimeout(timeout, unit);
 	}
 
 	/**
@@ -199,7 +199,7 @@ public interface WaitResultBuilder6<T> {
 	 * @see #asyncExec()
 	 */
 	default CompletionStage<Optional<T>> minimalCompletionStage​() {
-		throw new UnsupportedOperationException("Not available on java 8");
+		return asyncExec().minimalCompletionStage();
 	}
 
 	/**

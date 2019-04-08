@@ -1,3 +1,5 @@
-component_depth: 8
+component_depth: 9
 languages:
 - java
+exclude:
+- /src/main/java/.*

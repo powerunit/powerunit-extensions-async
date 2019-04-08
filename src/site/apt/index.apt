@@ -4,5 +4,5 @@ PowerUnit Extension Async
  to do a static import from <<<ch.powerunit.extensions.async.lang.WaitResult>>> and
  then use the various methods to start some asynchronous operations.
  
- This version is dedicated to Java 9. For the version for java 8, please use the version 0.2.0
- of this library
+ This version is dedicated to Java 9. Multi-version jar (supporting java 8) is available 
+ since version 1.1.0

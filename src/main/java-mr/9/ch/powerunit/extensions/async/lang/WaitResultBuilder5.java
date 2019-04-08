@@ -262,7 +262,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * @since 1.1.0
 	 */
 	default WaitResultBuilder5<T> or(Supplier<? extends Optional<? extends T>> supplier) {
-		throw new UnsupportedOperationException("Not available on java 8");
+		return () -> get().or(supplier);
 	}
 
 	/**

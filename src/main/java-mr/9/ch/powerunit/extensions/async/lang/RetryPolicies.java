@@ -36,6 +36,8 @@ import java.util.function.Supplier;
  */
 public final class RetryPolicies {
 
+	private static final Logger LOGGER = System.getLogger(RetryPolicies.class.getName());
+
 	/**
 	 * Retry Policy to just do one try.
 	 * 
@@ -254,6 +256,7 @@ public final class RetryPolicies {
 
 	private static void sleepBetweenRetry(long ms) {
 		try {
+			LOGGER.log(Level.DEBUG, "Waiting {1} ms", ms);
 			Thread.sleep(ms);
 		} catch (InterruptedException e) {
 			// ignore
