@@ -65,11 +65,16 @@ public interface WaitResultBuilder6<T> {
 	/**
 	 * Directly wait for the result of this execution. In case of not ignored
 	 * exception, an {@link AssertionError} is thrown.
+	 * <p>
+	 * This method is a <i>shortcut</i> method to {@code asyncExec().get()}, which
+	 * throw AssertionError in case of error.
 	 * 
 	 * @return the {@link Optional} with the result of the execution
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception.
+	 * @see #asyncExec()
+	 * @see CompletableFuture#get()
 	 */
 	default Optional<T> finish() {
 		try {
@@ -85,11 +90,15 @@ public interface WaitResultBuilder6<T> {
 	 * Directly wait for a positive result of this execution. In case of not ignored
 	 * exception, or when no result are available, an {@link AssertionError} is
 	 * thrown.
+	 * <p>
+	 * This method is a <i>shortcut</i> method to the finish method that read the
+	 * optional value and throw an AssertionError in case of mission value.
 	 * 
 	 * @return the value if available
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception or missing result.
+	 * @see #finish()
 	 */
 	default T finishWithAResult() {
 		return finish().orElseThrow(() -> new AssertionError("No result is available"));
@@ -103,6 +112,7 @@ public interface WaitResultBuilder6<T> {
 	 * @return the result of the wait
 	 * @since 1.0.0
 	 * @see CompletableFuture#join()
+	 * @see #asyncExec()
 	 */
 	default Optional<T> join() {
 		return asyncExec().join();
@@ -117,6 +127,7 @@ public interface WaitResultBuilder6<T> {
 	 * @return the result of the wait
 	 * @since 1.0.0
 	 * @see CompletableFuture#join()
+	 * @see #join()
 	 */
 	default T joinWithAResult() {
 		return join().orElseThrow(() -> new AssertionError("No result is available when one is expected"));
@@ -131,6 +142,7 @@ public interface WaitResultBuilder6<T> {
 	 * @return the {@link CompletableFuture}
 	 * @since 1.0.0
 	 * @see CompletableFuture#thenAccept(Consumer)
+	 * @see #asyncExec()
 	 */
 	default CompletableFuture<Void> thenAccept(Consumer<? super Optional<T>> action) {
 		return asyncExec().thenAccept(action);
@@ -148,6 +160,7 @@ public interface WaitResultBuilder6<T> {
 	 * @return the {@link CompletableFuture}
 	 * @since 1.0.0
 	 * @see CompletableFuture#thenApply(Function)
+	 * @see #asyncExec()
 	 */
 	default <U> CompletableFuture<U> thenApply(Function<? super Optional<T>, ? extends U> fn) {
 		return asyncExec().thenApply(fn);
@@ -166,6 +179,7 @@ public interface WaitResultBuilder6<T> {
 	 * @return the {@link CompletableFuture}
 	 * @since 1.0.0
 	 * @see CompletableFuture#orTimeout(long, TimeUnit)
+	 * @see #asyncExec()
 	 */
 	default CompletableFuture<Optional<T>> orTimeout(long timeout, TimeUnit unit) {
 		return asyncExec().orTimeout(timeout, unit);
@@ -178,6 +192,7 @@ public interface WaitResultBuilder6<T> {
 	 * @return the new CompletionStage
 	 * @since 1.0.0
 	 * @see CompletableFuture#minimalCompletionStage()
+	 * @see #asyncExec()
 	 */
 	default CompletionStage<Optional<T>> minimalCompletionStage​() {
 		return asyncExec().minimalCompletionStage();
@@ -195,6 +210,7 @@ public interface WaitResultBuilder6<T> {
 	 * @throws InterruptedException
 	 *             if the current thread was interrupted while waiting
 	 * @see CompletableFuture#get()
+	 * @see #asyncExec()
 	 * @since 1.0.0
 	 */
 	default Optional<T> get() throws InterruptedException, ExecutionException {
