@@ -362,7 +362,7 @@ public class WaitResultTest implements TestSuite {
 	// or
 	@Test
 	public void testOrNotPresent() {
-		assumeThat(Boolean.valueOf(System.getProperty("java8test","false"))).is(false);
+		assumeThat(Boolean.valueOf(System.getProperty("java8test", "false"))).is(false);
 		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> false).repeatOnlyOnce()
 				.or(() -> Optional.ofNullable("y")).asyncExec().join()).is(optionalIs("y"));
 	}
@@ -377,7 +377,7 @@ public class WaitResultTest implements TestSuite {
 	// or timeout
 	@Test
 	public void testOrTimeout() {
-		assumeThat(Boolean.valueOf(System.getProperty("java8test","false"))).is(false);
+		assumeThat(Boolean.valueOf(System.getProperty("java8test", "false"))).is(false);
 		assertWhen(() -> WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> false).repeat(10).everyMinute()
 				.usingDefaultExecutor().orTimeout(2, TimeUnit.SECONDS).get())
 						.throwException(instanceOf(ExecutionException.class));
@@ -386,7 +386,7 @@ public class WaitResultTest implements TestSuite {
 	// minimalCompletionStage
 	@Test
 	public void testMinimalCompletionStage() {
-		assumeThat(Boolean.valueOf(System.getProperty("java8test","false"))).is(false);assumeThat(Boolean.valueOf(System.getProperty("java8test","false"))).is(false);
+		assumeThat(Boolean.valueOf(System.getProperty("java8test", "false"))).is(false);
 		assertThat(WaitResult.of(() -> "x").dontIgnoreException().expecting(s -> true).repeatOnlyOnce()
 				.usingDefaultExecutor().minimalCompletionStage​().toCompletableFuture().join()).is(optionalIs("x"));
 	}
