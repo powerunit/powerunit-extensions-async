@@ -72,6 +72,7 @@ public interface WaitResultBuilder4<T> {
 	 * @param unit
 	 *            the time unit
 	 * @return {@link WaitResultBuilder5 the next step of the builder}
+	 * @see TimeUnit
 	 */
 	default WaitResultBuilder5<T> every(int value, TimeUnit unit) {
 		return everyMs(requireNonNull(unit, "unit can't be null").toMillis(value));
@@ -84,6 +85,7 @@ public interface WaitResultBuilder4<T> {
 	 *            the duration to be used
 	 * @return {@link WaitResultBuilder5 the next step of the builder}
 	 * @since 1.0.0
+	 * @see Duration
 	 */
 	default WaitResultBuilder5<T> every(Duration delay) {
 		return everyMs(requireNonNull(delay, "delay can't be null").toMillis());
