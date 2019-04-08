@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ch.powerunit.extensions</groupId>
 	<artifactId>powerunit-extensions-async</artifactId>
-	<version>1.1.0</version>
+	<version>1.1.1-SNAPSHOT</version>
 
 	<name>Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.</name>
 	<description>This is a test framework for the JDK 1.9 - Extension to provide async operation in unit test.</description>
