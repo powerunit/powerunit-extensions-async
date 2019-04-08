@@ -41,6 +41,7 @@ public interface WaitResultBuilder3<T> {
 	 *            the retry clause.
 	 * @return {@link WaitResultBuilder5 the final step of the builder}
 	 * @since 1.0.0
+	 * @see RetryPolicies
 	 */
 	WaitResultBuilder5<T> repeat(RetryPolicy retry);
 

@@ -72,7 +72,9 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * Register an action to be done when the retrieval is finish (in success or
 	 * not).
 	 * <p>
-	 * This may be used, for example, to release resources.
+	 * This may be used, for example, to release resources. This method may be used
+	 * several times. In this case, all the registered action will be executed on
+	 * Finish, starting by the first one.
 	 * 
 	 * @param action
 	 *            the action to be done. May be null (ignored).
@@ -100,7 +102,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * the thread provided by the executor.
 	 * 
 	 * @param executor
-	 *            the executor to be used.
+	 *            the executor to be used. This can't be null.
 	 * @return {@link WaitResultBuilder6 the final step}
 	 */
 	default WaitResultBuilder6<T> using(Executor executor) {
@@ -139,6 +141,8 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * {@link ForkJoinPool#commonPool()}.
 	 * 
 	 * @return the {@link CompletableFuture}
+	 * @see #usingDefaultExecutor()
+	 * @see WaitResultBuilder6#asyncExec()
 	 */
 	default CompletableFuture<Optional<T>> asyncExec() {
 		return usingDefaultExecutor().asyncExec();
@@ -171,6 +175,8 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception.
+	 * @see #usingDefaultExecutor()
+	 * @see WaitResultBuilder6#finish()
 	 */
 	default Optional<T> finish() {
 		return usingDefaultExecutor().finish();
@@ -204,6 +210,8 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * 
 	 * @throws AssertionError
 	 *             In case of not ignored exception or missing result.
+	 * @see #usingDefaultExecutor()
+	 * @see WaitResultBuilder6#finishWithAResult()
 	 */
 	default T finishWithAResult() {
 		return usingDefaultExecutor().finishWithAResult();

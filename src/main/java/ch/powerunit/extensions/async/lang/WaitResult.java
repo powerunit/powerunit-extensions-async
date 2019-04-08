@@ -210,8 +210,8 @@ public final class WaitResult {
 
 	/**
 	 * Start the builder to create an instance of {@link CompletableFuture} based on
-	 * repeated control of a call that is assumed as done when an exception a
-	 * specific exception is throw.
+	 * repeated control of a call that is assumed as done when a a specific
+	 * exception is thrown.
 	 * 
 	 * @param action
 	 *            the action that is expected to thrown an exception.
@@ -252,11 +252,19 @@ public final class WaitResult {
 	// Helper method for logging
 	/**
 	 * Modify a Callable to add a toString.
+	 * <p>
+	 * <i>The goal of this method is to provide a way to have lambda, used for
+	 * example in the context of this library, that are decorated with a
+	 * {@code toString} method.</i> Later, when this Callable is used in log, it is
+	 * possible to have a meaningful description and not the default
+	 * {@code toString}.
 	 * 
 	 * @param callable
 	 *            the Callable to be decorated.
 	 * @param toString
 	 *            the Supplier to be used as toString method.
+	 * @param <T>
+	 *            the return type of the Callable
 	 * @return the decorated Callable.
 	 * @throws NullPointerException
 	 *             if callable or toString is null.
@@ -281,11 +289,19 @@ public final class WaitResult {
 
 	/**
 	 * Modify a Predicate to add a toString.
+	 * <p>
+	 * <i>The goal of this method is to provide a way to have lambda, used for
+	 * example in the context of this library, that are decorated with a
+	 * {@code toString} method.</i> Later, when this Predicate is used in log, it is
+	 * possible to have a meaningful description and not the default
+	 * {@code toString}.
 	 * 
 	 * @param predicate
 	 *            the Predicate to be decorated.
 	 * @param toString
 	 *            the Supplier to be used as toString method.
+	 * @param <T>
+	 *            the input type of the Predicate.
 	 * @return the decorated Predicate.
 	 * @throws NullPointerException
 	 *             if predicate or toString is null.

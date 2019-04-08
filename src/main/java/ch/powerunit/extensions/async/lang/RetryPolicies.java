@@ -48,12 +48,27 @@ public final class RetryPolicies {
 	}
 
 	/**
-	 * Create a new RetryPolicy.
+	 * Create a new RetryPolicy with constant wait time.
+	 * <p>
+	 * For example,
+	 * 
+	 * <pre>
+	 * RetryPolicy incremental = RetryPolicies.of(3, 12);
+	 * </pre>
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * <ol>
+	 * <li>Do a first try</li>
+	 * <li>Wait 12 ms</li>
+	 * <li>Do a second retry</li>
+	 * <li>Wait 12 ms</li>
+	 * <li>Do a third retry</li>
+	 * </ol>
 	 * 
 	 * @param count
 	 *            the number of retry.
 	 * @param ms
-	 *            the wait time in ms.
+	 *            the constant wait time in ms.
 	 * @return the RetryPolicy
 	 */
 	public static RetryPolicy of(int count, long ms) {
@@ -61,7 +76,22 @@ public final class RetryPolicies {
 	}
 
 	/**
-	 * Create a new RetryPolicy.
+	 * Create a new RetryPolicy with constant wait time.
+	 * <p>
+	 * For example,
+	 * 
+	 * <pre>
+	 * RetryPolicy incremental = RetryPolicies.of(3, 15, TimeUnit.MILLISECONDS);
+	 * </pre>
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * <ol>
+	 * <li>Do a first try</li>
+	 * <li>Wait 15 ms</li>
+	 * <li>Do a second retry</li>
+	 * <li>Wait 15 ms</li>
+	 * <li>Do a third retry</li>
+	 * </ol>
 	 * 
 	 * @param count
 	 *            the number of retry.
@@ -76,12 +106,27 @@ public final class RetryPolicies {
 	}
 
 	/**
-	 * Create a new RetryPolicy.
+	 * Create a new RetryPolicy with constant wait time.
+	 * <p>
+	 * For example,
+	 * 
+	 * <pre>
+	 * RetryPolicy incremental = RetryPolicies.of(3, Duration.ofMillis(10));
+	 * </pre>
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * <ol>
+	 * <li>Do a first try</li>
+	 * <li>Wait 10 ms</li>
+	 * <li>Do a second retry</li>
+	 * <li>Wait 10 ms</li>
+	 * <li>Do a third retry</li>
+	 * </ol>
 	 * 
 	 * @param count
 	 *            the number of retry.
 	 * @param duration
-	 *            the duration to wait.
+	 *            the constant duration to wait.
 	 * @return the RetryPolicy
 	 */
 	public static RetryPolicy of(int count, Duration duration) {
@@ -89,12 +134,31 @@ public final class RetryPolicies {
 	}
 
 	/**
-	 * Create a new RetryPolicy.
+	 * Create a new RetryPolicy, by using a generic function to compute the retry
+	 * duration.
+	 * <p>
+	 * For example, using this definition :
+	 * 
+	 * <pre>
+	 * RetryPolicy incremental = RetryPolicies.of(3, c -&gt; (long) (Math.random() * 100));
+	 * </pre>
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * <ol>
+	 * <li>Do a first try</li>
+	 * <li>Wait a random time between 0 and 100 ms</li>
+	 * <li>Do a second retry</li>
+	 * <li>Wait a random time between 0 and 100 ms</li>
+	 * <li>Do a third retry</li>
+	 * </ol>
 	 * 
 	 * @param count
-	 *            the number of retry.
+	 *            the number of retry. A value of 1 is to do only one try, without
+	 *            sleep.
 	 * @param retryToWaitTime
-	 *            the function to compute the wait time based on the retry.
+	 *            the function to compute the wait time based on the retry. The
+	 *            received value by this function starts with 1, and this will be
+	 *            the first retry (meaning a the initial try has been done before).
 	 * @return the RetryPolicy
 	 */
 	public static RetryPolicy of(int count, IntToLongFunction retryToWaitTime) {
@@ -120,6 +184,21 @@ public final class RetryPolicies {
 	/**
 	 * Create a new RetryPolicy, that wait each time more time : first time the
 	 * received duration, second time twice, etc.
+	 * <p>
+	 * For example, using this definition :
+	 * 
+	 * <pre>
+	 * RetryPolicy incremental = RetryPolicies.ofIncremental(3, 20);
+	 * </pre>
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * <ol>
+	 * <li>Do a first try</li>
+	 * <li>Wait 20ms</li>
+	 * <li>Do a second retry</li>
+	 * <li>Wait 40ms</li>
+	 * <li>Do a third retry</li>
+	 * </ol>
 	 * 
 	 * @param count
 	 *            the number of retry.
@@ -134,6 +213,21 @@ public final class RetryPolicies {
 	/**
 	 * Create a new RetryPolicy, that wait each time more time : first time the
 	 * received duration, second time twice, etc.
+	 * <p>
+	 * For example, using this definition :
+	 * 
+	 * <pre>
+	 * RetryPolicy incremental = RetryPolicies.ofIncremental(3, Duration.ofMillis(50));
+	 * </pre>
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * <ol>
+	 * <li>Do a first try</li>
+	 * <li>Wait 50ms</li>
+	 * <li>Do a second retry</li>
+	 * <li>Wait 100ms</li>
+	 * <li>Do a third retry</li>
+	 * </ol>
 	 * 
 	 * @param count
 	 *            the number of retry.

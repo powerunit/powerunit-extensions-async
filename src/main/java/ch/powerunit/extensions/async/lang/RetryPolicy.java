@@ -38,7 +38,8 @@ public interface RetryPolicy {
 	 * This is the method called to wait between a retry.
 	 * 
 	 * @param retry
-	 *            the current retry (start at 1).
+	 *            the current retry (start at 1). A initial try has been done before
+	 *            any retry without wait time.
 	 */
 	void sleepBetweenRetry(int retry);
 }
