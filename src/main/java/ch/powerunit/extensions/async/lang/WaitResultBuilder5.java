@@ -72,7 +72,9 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * Register an action to be done when the retrieval is finish (in success or
 	 * not).
 	 * <p>
-	 * This may be used, for example, to release resources.
+	 * This may be used, for example, to release resources. This method may be used
+	 * several times. In this case, all the registered action will be executed on
+	 * Finish, starting by the first one.
 	 * 
 	 * @param action
 	 *            the action to be done. May be null (ignored).
@@ -100,7 +102,7 @@ public interface WaitResultBuilder5<T> extends Supplier<Optional<T>> {
 	 * the thread provided by the executor.
 	 * 
 	 * @param executor
-	 *            the executor to be used.
+	 *            the executor to be used. This can't be null.
 	 * @return {@link WaitResultBuilder6 the final step}
 	 */
 	default WaitResultBuilder6<T> using(Executor executor) {
