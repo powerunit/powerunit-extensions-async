@@ -75,11 +75,11 @@
 				<artifactId>wagon-webdav</artifactId>
 				<version>1.0-beta-2</version>
 			</extension>
-		    <extension>
-		      <groupId>pw.krejci</groupId>
-		      <artifactId>multi-release-jar-maven-plugin</artifactId>
-		      <version>0.1.5</version>
-		    </extension>
+			<extension>
+				<groupId>pw.krejci</groupId>
+				<artifactId>multi-release-jar-maven-plugin</artifactId>
+				<version>0.1.5</version>
+			</extension>
 		</extensions>
 		<pluginManagement>
 			<plugins>
@@ -210,6 +210,21 @@
 							<version>${powerunit.version}</version>
 						</dependency>
 					</dependencies>
+					<executions>
+						<execution>
+							<id>java-8</id>
+							<goals>
+								<goal>test</goal>
+							</goals>
+							<configuration>
+								<classesDirectory>${basedir}/target/classes</classesDirectory>
+								<reportNameSuffix>java8</reportNameSuffix>
+								<systemPropertyVariables>
+									<java8test>true</java8test>
+								</systemPropertyVariables>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -357,9 +372,9 @@
 				</configuration>
 				<dependencies>
 					<dependency>
-					    <groupId>javax.xml.bind</groupId>
-					    <artifactId>jaxb-api</artifactId>
-					    <version>${jaxb-api.version}</version>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>${jaxb-api.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -507,29 +522,29 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>${jaxb-api.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>${jaxb-api.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>${jaxb-api.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-             <groupId>javax.annotation</groupId>
-             <artifactId>javax.annotation-api</artifactId>
-             <version>1.3.2</version>
-             <scope>test</scope>
-             <optional>true</optional>
-        </dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>${jaxb-api.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>${jaxb-api.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+			<version>${jaxb-api.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>1.3.2</version>
+			<scope>test</scope>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 </project>
