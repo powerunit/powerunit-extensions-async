@@ -202,6 +202,7 @@
 					<version>${surefire.version}</version>
 					<configuration>
 						<classesDirectory>${basedir}/target/classes-9</classesDirectory>
+						<argLine>${argLine.java9}</argLine>
 					</configuration>
 					<dependencies>
 						<dependency>
@@ -218,6 +219,7 @@
 							</goals>
 							<configuration>
 								<classesDirectory>${basedir}/target/classes</classesDirectory>
+								<argLine>${argLine.java8}</argLine>
 								<reportNameSuffix>java8</reportNameSuffix>
 								<systemPropertyVariables>
 									<java8test>true</java8test>
@@ -316,10 +318,24 @@
 				</configuration>
 				<executions>
 					<execution>
-						<id>default</id>
+						<id>java8</id>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
+						<configuration>
+							<propertyName>argLine.java8</propertyName>
+							<destFile>${project.build.directory}/jacoco-java8.exec</destFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>java9</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<propertyName>argLine.java9</propertyName>
+							<destFile>${project.build.directory}/jacoco.exec</destFile>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -499,9 +515,11 @@
 					<reportSet>
 						<reports>
 							<report>report</report>
-							<report>report-integration</report>
-							<report>report-aggregate</report>
 						</reports>
+						<configuration>
+							<dataFile>${project.build.directory}/jacoco.exec</dataFile>
+							<title>${project.name}-java9</title>
+						</configuration>
 					</reportSet>
 				</reportSets>
 			</plugin>
