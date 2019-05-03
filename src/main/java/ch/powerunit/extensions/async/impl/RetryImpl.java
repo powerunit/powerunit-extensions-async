@@ -21,8 +21,6 @@ package ch.powerunit.extensions.async.impl;
 
 import static java.util.Optional.empty;
 
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.util.Optional;
 
 import ch.powerunit.extensions.async.lang.RetryPolicy;
