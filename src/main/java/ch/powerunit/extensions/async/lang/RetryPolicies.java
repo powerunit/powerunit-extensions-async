@@ -21,8 +21,6 @@ package ch.powerunit.extensions.async.lang;
 
 import static java.util.Objects.requireNonNull;
 
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.function.IntToLongFunction;
