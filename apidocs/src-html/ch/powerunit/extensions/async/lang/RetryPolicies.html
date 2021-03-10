@@ -1,0 +1,332 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a name="line.1">/**</a>
+<span class="sourceLineNo">002</span><a name="line.2"> * Powerunit - A JDK1.8 test framework</a>
+<span class="sourceLineNo">003</span><a name="line.3"> * Copyright (C) 2014 Mathieu Boretti.</a>
+<span class="sourceLineNo">004</span><a name="line.4"> *</a>
+<span class="sourceLineNo">005</span><a name="line.5"> * This file is part of Powerunit</a>
+<span class="sourceLineNo">006</span><a name="line.6"> *</a>
+<span class="sourceLineNo">007</span><a name="line.7"> * Powerunit is free software: you can redistribute it and/or modify</a>
+<span class="sourceLineNo">008</span><a name="line.8"> * it under the terms of the GNU General Public License as published by</a>
+<span class="sourceLineNo">009</span><a name="line.9"> * the Free Software Foundation, either version 3 of the License, or</a>
+<span class="sourceLineNo">010</span><a name="line.10"> * (at your option) any later version.</a>
+<span class="sourceLineNo">011</span><a name="line.11"> *</a>
+<span class="sourceLineNo">012</span><a name="line.12"> * Powerunit is distributed in the hope that it will be useful,</a>
+<span class="sourceLineNo">013</span><a name="line.13"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</a>
+<span class="sourceLineNo">014</span><a name="line.14"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</a>
+<span class="sourceLineNo">015</span><a name="line.15"> * GNU General Public License for more details.</a>
+<span class="sourceLineNo">016</span><a name="line.16"> *</a>
+<span class="sourceLineNo">017</span><a name="line.17"> * You should have received a copy of the GNU General Public License</a>
+<span class="sourceLineNo">018</span><a name="line.18"> * along with Powerunit. If not, see &lt;http://www.gnu.org/licenses/&gt;.</a>
+<span class="sourceLineNo">019</span><a name="line.19"> */</a>
+<span class="sourceLineNo">020</span><a name="line.20">package ch.powerunit.extensions.async.lang;</a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span><a name="line.22">import static java.util.Objects.requireNonNull;</a>
+<span class="sourceLineNo">023</span><a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24">import java.time.Duration;</a>
+<span class="sourceLineNo">025</span><a name="line.25">import java.util.concurrent.TimeUnit;</a>
+<span class="sourceLineNo">026</span><a name="line.26">import java.util.function.IntToLongFunction;</a>
+<span class="sourceLineNo">027</span><a name="line.27">import java.util.function.Supplier;</a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span><a name="line.29">/**</a>
+<span class="sourceLineNo">030</span><a name="line.30"> * Helpers methods to build {@link RetryPolicy}.</a>
+<span class="sourceLineNo">031</span><a name="line.31"> * </a>
+<span class="sourceLineNo">032</span><a name="line.32"> * @since 1.0.0</a>
+<span class="sourceLineNo">033</span><a name="line.33"> *</a>
+<span class="sourceLineNo">034</span><a name="line.34"> */</a>
+<span class="sourceLineNo">035</span><a name="line.35">public final class RetryPolicies {</a>
+<span class="sourceLineNo">036</span><a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37">        /**</a>
+<span class="sourceLineNo">038</span><a name="line.38">         * Retry Policy to just do one try.</a>
+<span class="sourceLineNo">039</span><a name="line.39">         * </a>
+<span class="sourceLineNo">040</span><a name="line.40">         */</a>
+<span class="sourceLineNo">041</span><a name="line.41">        public static final RetryPolicy RETRY_ONLY_ONCE = of(1, 1);</a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43">        private RetryPolicies() {</a>
+<span class="sourceLineNo">044</span><a name="line.44">        }</a>
+<span class="sourceLineNo">045</span><a name="line.45"></a>
+<span class="sourceLineNo">046</span><a name="line.46">        /**</a>
+<span class="sourceLineNo">047</span><a name="line.47">         * Create a new RetryPolicy with constant wait time.</a>
+<span class="sourceLineNo">048</span><a name="line.48">         * &lt;p&gt;</a>
+<span class="sourceLineNo">049</span><a name="line.49">         * For example,</a>
+<span class="sourceLineNo">050</span><a name="line.50">         * </a>
+<span class="sourceLineNo">051</span><a name="line.51">         * &lt;pre&gt;</a>
+<span class="sourceLineNo">052</span><a name="line.52">         * RetryPolicy incremental = RetryPolicies.of(3, 12);</a>
+<span class="sourceLineNo">053</span><a name="line.53">         * &lt;/pre&gt;</a>
+<span class="sourceLineNo">054</span><a name="line.54">         * </a>
+<span class="sourceLineNo">055</span><a name="line.55">         * Then following of (re-)tries will be (maximum retries):</a>
+<span class="sourceLineNo">056</span><a name="line.56">         * &lt;ol&gt;</a>
+<span class="sourceLineNo">057</span><a name="line.57">         * &lt;li&gt;Do a first try&lt;/li&gt;</a>
+<span class="sourceLineNo">058</span><a name="line.58">         * &lt;li&gt;Wait 12 ms&lt;/li&gt;</a>
+<span class="sourceLineNo">059</span><a name="line.59">         * &lt;li&gt;Do a second retry&lt;/li&gt;</a>
+<span class="sourceLineNo">060</span><a name="line.60">         * &lt;li&gt;Wait 12 ms&lt;/li&gt;</a>
+<span class="sourceLineNo">061</span><a name="line.61">         * &lt;li&gt;Do a third retry&lt;/li&gt;</a>
+<span class="sourceLineNo">062</span><a name="line.62">         * &lt;/ol&gt;</a>
+<span class="sourceLineNo">063</span><a name="line.63">         * </a>
+<span class="sourceLineNo">064</span><a name="line.64">         * @param count</a>
+<span class="sourceLineNo">065</span><a name="line.65">         *            the number of retry.</a>
+<span class="sourceLineNo">066</span><a name="line.66">         * @param ms</a>
+<span class="sourceLineNo">067</span><a name="line.67">         *            the constant wait time in ms.</a>
+<span class="sourceLineNo">068</span><a name="line.68">         * @return the RetryPolicy</a>
+<span class="sourceLineNo">069</span><a name="line.69">         */</a>
+<span class="sourceLineNo">070</span><a name="line.70">        public static RetryPolicy of(int count, long ms) {</a>
+<span class="sourceLineNo">071</span><a name="line.71">                return of(count, addToString(l -&gt; ms, () -&gt; String.format("Constant wait time of %s ms", ms)));</a>
+<span class="sourceLineNo">072</span><a name="line.72">        }</a>
+<span class="sourceLineNo">073</span><a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74">        /**</a>
+<span class="sourceLineNo">075</span><a name="line.75">         * Create a new RetryPolicy with constant wait time.</a>
+<span class="sourceLineNo">076</span><a name="line.76">         * &lt;p&gt;</a>
+<span class="sourceLineNo">077</span><a name="line.77">         * For example,</a>
+<span class="sourceLineNo">078</span><a name="line.78">         * </a>
+<span class="sourceLineNo">079</span><a name="line.79">         * &lt;pre&gt;</a>
+<span class="sourceLineNo">080</span><a name="line.80">         * RetryPolicy incremental = RetryPolicies.of(3, 15, TimeUnit.MILLISECONDS);</a>
+<span class="sourceLineNo">081</span><a name="line.81">         * &lt;/pre&gt;</a>
+<span class="sourceLineNo">082</span><a name="line.82">         * </a>
+<span class="sourceLineNo">083</span><a name="line.83">         * Then following of (re-)tries will be (maximum retries):</a>
+<span class="sourceLineNo">084</span><a name="line.84">         * &lt;ol&gt;</a>
+<span class="sourceLineNo">085</span><a name="line.85">         * &lt;li&gt;Do a first try&lt;/li&gt;</a>
+<span class="sourceLineNo">086</span><a name="line.86">         * &lt;li&gt;Wait 15 ms&lt;/li&gt;</a>
+<span class="sourceLineNo">087</span><a name="line.87">         * &lt;li&gt;Do a second retry&lt;/li&gt;</a>
+<span class="sourceLineNo">088</span><a name="line.88">         * &lt;li&gt;Wait 15 ms&lt;/li&gt;</a>
+<span class="sourceLineNo">089</span><a name="line.89">         * &lt;li&gt;Do a third retry&lt;/li&gt;</a>
+<span class="sourceLineNo">090</span><a name="line.90">         * &lt;/ol&gt;</a>
+<span class="sourceLineNo">091</span><a name="line.91">         * </a>
+<span class="sourceLineNo">092</span><a name="line.92">         * @param count</a>
+<span class="sourceLineNo">093</span><a name="line.93">         *            the number of retry.</a>
+<span class="sourceLineNo">094</span><a name="line.94">         * @param value</a>
+<span class="sourceLineNo">095</span><a name="line.95">         *            the wait time</a>
+<span class="sourceLineNo">096</span><a name="line.96">         * @param unit</a>
+<span class="sourceLineNo">097</span><a name="line.97">         *            the unit of the wait time.</a>
+<span class="sourceLineNo">098</span><a name="line.98">         * @return the RetryPolicy</a>
+<span class="sourceLineNo">099</span><a name="line.99">         */</a>
+<span class="sourceLineNo">100</span><a name="line.100">        public static RetryPolicy of(int count, long value, TimeUnit unit) {</a>
+<span class="sourceLineNo">101</span><a name="line.101">                return of(count, requireNonNull(unit, "unit can't be null").toMillis(value));</a>
+<span class="sourceLineNo">102</span><a name="line.102">        }</a>
+<span class="sourceLineNo">103</span><a name="line.103"></a>
+<span class="sourceLineNo">104</span><a name="line.104">        /**</a>
+<span class="sourceLineNo">105</span><a name="line.105">         * Create a new RetryPolicy with constant wait time.</a>
+<span class="sourceLineNo">106</span><a name="line.106">         * &lt;p&gt;</a>
+<span class="sourceLineNo">107</span><a name="line.107">         * For example,</a>
+<span class="sourceLineNo">108</span><a name="line.108">         * </a>
+<span class="sourceLineNo">109</span><a name="line.109">         * &lt;pre&gt;</a>
+<span class="sourceLineNo">110</span><a name="line.110">         * RetryPolicy incremental = RetryPolicies.of(3, Duration.ofMillis(10));</a>
+<span class="sourceLineNo">111</span><a name="line.111">         * &lt;/pre&gt;</a>
+<span class="sourceLineNo">112</span><a name="line.112">         * </a>
+<span class="sourceLineNo">113</span><a name="line.113">         * Then following of (re-)tries will be (maximum retries):</a>
+<span class="sourceLineNo">114</span><a name="line.114">         * &lt;ol&gt;</a>
+<span class="sourceLineNo">115</span><a name="line.115">         * &lt;li&gt;Do a first try&lt;/li&gt;</a>
+<span class="sourceLineNo">116</span><a name="line.116">         * &lt;li&gt;Wait 10 ms&lt;/li&gt;</a>
+<span class="sourceLineNo">117</span><a name="line.117">         * &lt;li&gt;Do a second retry&lt;/li&gt;</a>
+<span class="sourceLineNo">118</span><a name="line.118">         * &lt;li&gt;Wait 10 ms&lt;/li&gt;</a>
+<span class="sourceLineNo">119</span><a name="line.119">         * &lt;li&gt;Do a third retry&lt;/li&gt;</a>
+<span class="sourceLineNo">120</span><a name="line.120">         * &lt;/ol&gt;</a>
+<span class="sourceLineNo">121</span><a name="line.121">         * </a>
+<span class="sourceLineNo">122</span><a name="line.122">         * @param count</a>
+<span class="sourceLineNo">123</span><a name="line.123">         *            the number of retry.</a>
+<span class="sourceLineNo">124</span><a name="line.124">         * @param duration</a>
+<span class="sourceLineNo">125</span><a name="line.125">         *            the constant duration to wait.</a>
+<span class="sourceLineNo">126</span><a name="line.126">         * @return the RetryPolicy</a>
+<span class="sourceLineNo">127</span><a name="line.127">         */</a>
+<span class="sourceLineNo">128</span><a name="line.128">        public static RetryPolicy of(int count, Duration duration) {</a>
+<span class="sourceLineNo">129</span><a name="line.129">                return of(count, requireNonNull(duration, "duration can't be null").toMillis());</a>
+<span class="sourceLineNo">130</span><a name="line.130">        }</a>
+<span class="sourceLineNo">131</span><a name="line.131"></a>
+<span class="sourceLineNo">132</span><a name="line.132">        /**</a>
+<span class="sourceLineNo">133</span><a name="line.133">         * Create a new RetryPolicy, by using a generic function to compute the retry</a>
+<span class="sourceLineNo">134</span><a name="line.134">         * duration.</a>
+<span class="sourceLineNo">135</span><a name="line.135">         * &lt;p&gt;</a>
+<span class="sourceLineNo">136</span><a name="line.136">         * For example, using this definition :</a>
+<span class="sourceLineNo">137</span><a name="line.137">         * </a>
+<span class="sourceLineNo">138</span><a name="line.138">         * &lt;pre&gt;</a>
+<span class="sourceLineNo">139</span><a name="line.139">         * RetryPolicy incremental = RetryPolicies.of(3, c -&amp;gt; (long) (Math.random() * 100));</a>
+<span class="sourceLineNo">140</span><a name="line.140">         * &lt;/pre&gt;</a>
+<span class="sourceLineNo">141</span><a name="line.141">         * </a>
+<span class="sourceLineNo">142</span><a name="line.142">         * Then following of (re-)tries will be (maximum retries):</a>
+<span class="sourceLineNo">143</span><a name="line.143">         * &lt;ol&gt;</a>
+<span class="sourceLineNo">144</span><a name="line.144">         * &lt;li&gt;Do a first try&lt;/li&gt;</a>
+<span class="sourceLineNo">145</span><a name="line.145">         * &lt;li&gt;Wait a random time between 0 and 100 ms&lt;/li&gt;</a>
+<span class="sourceLineNo">146</span><a name="line.146">         * &lt;li&gt;Do a second retry&lt;/li&gt;</a>
+<span class="sourceLineNo">147</span><a name="line.147">         * &lt;li&gt;Wait a random time between 0 and 100 ms&lt;/li&gt;</a>
+<span class="sourceLineNo">148</span><a name="line.148">         * &lt;li&gt;Do a third retry&lt;/li&gt;</a>
+<span class="sourceLineNo">149</span><a name="line.149">         * &lt;/ol&gt;</a>
+<span class="sourceLineNo">150</span><a name="line.150">         * </a>
+<span class="sourceLineNo">151</span><a name="line.151">         * @param count</a>
+<span class="sourceLineNo">152</span><a name="line.152">         *            the number of retry. A value of 1 is to do only one try, without</a>
+<span class="sourceLineNo">153</span><a name="line.153">         *            sleep.</a>
+<span class="sourceLineNo">154</span><a name="line.154">         * @param retryToWaitTime</a>
+<span class="sourceLineNo">155</span><a name="line.155">         *            the function to compute the wait time based on the retry. The</a>
+<span class="sourceLineNo">156</span><a name="line.156">         *            received value by this function starts with 1, and this will be</a>
+<span class="sourceLineNo">157</span><a name="line.157">         *            the first retry (meaning a the initial try has been done before).</a>
+<span class="sourceLineNo">158</span><a name="line.158">         * @return the RetryPolicy</a>
+<span class="sourceLineNo">159</span><a name="line.159">         */</a>
+<span class="sourceLineNo">160</span><a name="line.160">        public static RetryPolicy of(int count, IntToLongFunction retryToWaitTime) {</a>
+<span class="sourceLineNo">161</span><a name="line.161">                return new RetryPolicy() {</a>
+<span class="sourceLineNo">162</span><a name="line.162"></a>
+<span class="sourceLineNo">163</span><a name="line.163">                        @Override</a>
+<span class="sourceLineNo">164</span><a name="line.164">                        public void sleepBetweenRetry(int retry) {</a>
+<span class="sourceLineNo">165</span><a name="line.165">                                RetryPolicies.sleepBetweenRetry(retryToWaitTime.applyAsLong(retry));</a>
+<span class="sourceLineNo">166</span><a name="line.166">                        }</a>
+<span class="sourceLineNo">167</span><a name="line.167"></a>
+<span class="sourceLineNo">168</span><a name="line.168">                        @Override</a>
+<span class="sourceLineNo">169</span><a name="line.169">                        public int getCount() {</a>
+<span class="sourceLineNo">170</span><a name="line.170">                                return count;</a>
+<span class="sourceLineNo">171</span><a name="line.171">                        }</a>
+<span class="sourceLineNo">172</span><a name="line.172"></a>
+<span class="sourceLineNo">173</span><a name="line.173">                        @Override</a>
+<span class="sourceLineNo">174</span><a name="line.174">                        public String toString() {</a>
+<span class="sourceLineNo">175</span><a name="line.175">                                return String.format("total count = %s, with sleep method = %s", count, retryToWaitTime);</a>
+<span class="sourceLineNo">176</span><a name="line.176">                        }</a>
+<span class="sourceLineNo">177</span><a name="line.177">                };</a>
+<span class="sourceLineNo">178</span><a name="line.178">        }</a>
+<span class="sourceLineNo">179</span><a name="line.179"></a>
+<span class="sourceLineNo">180</span><a name="line.180">        /**</a>
+<span class="sourceLineNo">181</span><a name="line.181">         * Create a new RetryPolicy, that wait each time more time : first time the</a>
+<span class="sourceLineNo">182</span><a name="line.182">         * received duration, second time twice, etc.</a>
+<span class="sourceLineNo">183</span><a name="line.183">         * &lt;p&gt;</a>
+<span class="sourceLineNo">184</span><a name="line.184">         * For example, using this definition :</a>
+<span class="sourceLineNo">185</span><a name="line.185">         * </a>
+<span class="sourceLineNo">186</span><a name="line.186">         * &lt;pre&gt;</a>
+<span class="sourceLineNo">187</span><a name="line.187">         * RetryPolicy incremental = RetryPolicies.ofIncremental(3, 20);</a>
+<span class="sourceLineNo">188</span><a name="line.188">         * &lt;/pre&gt;</a>
+<span class="sourceLineNo">189</span><a name="line.189">         * </a>
+<span class="sourceLineNo">190</span><a name="line.190">         * Then following of (re-)tries will be (maximum retries):</a>
+<span class="sourceLineNo">191</span><a name="line.191">         * &lt;ol&gt;</a>
+<span class="sourceLineNo">192</span><a name="line.192">         * &lt;li&gt;Do a first try&lt;/li&gt;</a>
+<span class="sourceLineNo">193</span><a name="line.193">         * &lt;li&gt;Wait 20ms&lt;/li&gt;</a>
+<span class="sourceLineNo">194</span><a name="line.194">         * &lt;li&gt;Do a second retry&lt;/li&gt;</a>
+<span class="sourceLineNo">195</span><a name="line.195">         * &lt;li&gt;Wait 40ms&lt;/li&gt;</a>
+<span class="sourceLineNo">196</span><a name="line.196">         * &lt;li&gt;Do a third retry&lt;/li&gt;</a>
+<span class="sourceLineNo">197</span><a name="line.197">         * &lt;/ol&gt;</a>
+<span class="sourceLineNo">198</span><a name="line.198">         * </a>
+<span class="sourceLineNo">199</span><a name="line.199">         * @param count</a>
+<span class="sourceLineNo">200</span><a name="line.200">         *            the number of retry.</a>
+<span class="sourceLineNo">201</span><a name="line.201">         * @param ms</a>
+<span class="sourceLineNo">202</span><a name="line.202">         *            the time in ms that will be combined with the retry number</a>
+<span class="sourceLineNo">203</span><a name="line.203">         * @return the RetryPolicy</a>
+<span class="sourceLineNo">204</span><a name="line.204">         */</a>
+<span class="sourceLineNo">205</span><a name="line.205">        public static RetryPolicy ofIncremental(int count, long ms) {</a>
+<span class="sourceLineNo">206</span><a name="line.206">                return of(count, addToString(retry -&gt; retry * ms, () -&gt; String.format("Incremental retry based on %s ms", ms)));</a>
+<span class="sourceLineNo">207</span><a name="line.207">        }</a>
+<span class="sourceLineNo">208</span><a name="line.208"></a>
+<span class="sourceLineNo">209</span><a name="line.209">        /**</a>
+<span class="sourceLineNo">210</span><a name="line.210">         * Create a new RetryPolicy, that wait each time more time : first time the</a>
+<span class="sourceLineNo">211</span><a name="line.211">         * received duration, second time twice, etc.</a>
+<span class="sourceLineNo">212</span><a name="line.212">         * &lt;p&gt;</a>
+<span class="sourceLineNo">213</span><a name="line.213">         * For example, using this definition :</a>
+<span class="sourceLineNo">214</span><a name="line.214">         * </a>
+<span class="sourceLineNo">215</span><a name="line.215">         * &lt;pre&gt;</a>
+<span class="sourceLineNo">216</span><a name="line.216">         * RetryPolicy incremental = RetryPolicies.ofIncremental(3, Duration.ofMillis(50));</a>
+<span class="sourceLineNo">217</span><a name="line.217">         * &lt;/pre&gt;</a>
+<span class="sourceLineNo">218</span><a name="line.218">         * </a>
+<span class="sourceLineNo">219</span><a name="line.219">         * Then following of (re-)tries will be (maximum retries):</a>
+<span class="sourceLineNo">220</span><a name="line.220">         * &lt;ol&gt;</a>
+<span class="sourceLineNo">221</span><a name="line.221">         * &lt;li&gt;Do a first try&lt;/li&gt;</a>
+<span class="sourceLineNo">222</span><a name="line.222">         * &lt;li&gt;Wait 50ms&lt;/li&gt;</a>
+<span class="sourceLineNo">223</span><a name="line.223">         * &lt;li&gt;Do a second retry&lt;/li&gt;</a>
+<span class="sourceLineNo">224</span><a name="line.224">         * &lt;li&gt;Wait 100ms&lt;/li&gt;</a>
+<span class="sourceLineNo">225</span><a name="line.225">         * &lt;li&gt;Do a third retry&lt;/li&gt;</a>
+<span class="sourceLineNo">226</span><a name="line.226">         * &lt;/ol&gt;</a>
+<span class="sourceLineNo">227</span><a name="line.227">         * </a>
+<span class="sourceLineNo">228</span><a name="line.228">         * @param count</a>
+<span class="sourceLineNo">229</span><a name="line.229">         *            the number of retry.</a>
+<span class="sourceLineNo">230</span><a name="line.230">         * @param duration</a>
+<span class="sourceLineNo">231</span><a name="line.231">         *            the duration that will be combined with the retry number</a>
+<span class="sourceLineNo">232</span><a name="line.232">         * @return the RetryPolicy</a>
+<span class="sourceLineNo">233</span><a name="line.233">         */</a>
+<span class="sourceLineNo">234</span><a name="line.234">        public static RetryPolicy ofIncremental(int count, Duration duration) {</a>
+<span class="sourceLineNo">235</span><a name="line.235">                return ofIncremental(count, requireNonNull(duration, "duration can't be null").toMillis());</a>
+<span class="sourceLineNo">236</span><a name="line.236">        }</a>
+<span class="sourceLineNo">237</span><a name="line.237"></a>
+<span class="sourceLineNo">238</span><a name="line.238">        private static IntToLongFunction addToString(IntToLongFunction target, Supplier&lt;String&gt; toString) {</a>
+<span class="sourceLineNo">239</span><a name="line.239">                return new IntToLongFunction() {</a>
+<span class="sourceLineNo">240</span><a name="line.240"></a>
+<span class="sourceLineNo">241</span><a name="line.241">                        @Override</a>
+<span class="sourceLineNo">242</span><a name="line.242">                        public long applyAsLong(int value) {</a>
+<span class="sourceLineNo">243</span><a name="line.243">                                return target.applyAsLong(value);</a>
+<span class="sourceLineNo">244</span><a name="line.244">                        }</a>
+<span class="sourceLineNo">245</span><a name="line.245"></a>
+<span class="sourceLineNo">246</span><a name="line.246">                        @Override</a>
+<span class="sourceLineNo">247</span><a name="line.247">                        public String toString() {</a>
+<span class="sourceLineNo">248</span><a name="line.248">                                return toString.get();</a>
+<span class="sourceLineNo">249</span><a name="line.249">                        }</a>
+<span class="sourceLineNo">250</span><a name="line.250">                };</a>
+<span class="sourceLineNo">251</span><a name="line.251">        }</a>
+<span class="sourceLineNo">252</span><a name="line.252"></a>
+<span class="sourceLineNo">253</span><a name="line.253">        private static void sleepBetweenRetry(long ms) {</a>
+<span class="sourceLineNo">254</span><a name="line.254">                try {</a>
+<span class="sourceLineNo">255</span><a name="line.255">                        Thread.sleep(ms);</a>
+<span class="sourceLineNo">256</span><a name="line.256">                } catch (InterruptedException e) {</a>
+<span class="sourceLineNo">257</span><a name="line.257">                        // ignore</a>
+<span class="sourceLineNo">258</span><a name="line.258">                }</a>
+<span class="sourceLineNo">259</span><a name="line.259">        }</a>
+<span class="sourceLineNo">260</span><a name="line.260">}</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

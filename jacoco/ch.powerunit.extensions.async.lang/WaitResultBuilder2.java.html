@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WaitResultBuilder2.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.</a> &gt; <a href="index.source.html" class="el_package">ch.powerunit.extensions.async.lang</a> &gt; <span class="el_source">WaitResultBuilder2.java</span></div><h1>WaitResultBuilder2.java</h1><pre class="source lang-java linenums">/**
+ * Powerunit - A JDK1.8 test framework
+ * Copyright (C) 2014 Mathieu Boretti.
+ *
+ * This file is part of Powerunit
+ *
+ * Powerunit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Powerunit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Powerunit. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package ch.powerunit.extensions.async.lang;
+
+import static ch.powerunit.extensions.async.lang.WaitResult.predicateWithToString;
+import static java.util.Arrays.stream;
+import static java.util.Objects.requireNonNull;
+
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
+
+/**
+ * Second Step of the builder of {@link CompletableFuture} to specify the
+ * condition to accept a result.
+ * 
+ * @param &lt;T&gt;
+ *            The type of result of the {@link CompletableFuture}
+ *
+ */
+public interface WaitResultBuilder2&lt;T&gt; {
+	/**
+	 * Specify the condition that accept the result.
+	 * 
+	 * @param acceptingClause
+	 *            the {@link Predicate} to validate the result
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 */
+	WaitResultBuilder3&lt;T&gt; expecting(Predicate&lt;T&gt; acceptingClause);
+
+	/**
+	 * Specify that the returned result must be equals to the received object.
+	 * 
+	 * @param other
+	 *            the object to compare with. May be null.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @see Predicate#isEqual(Object)
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3&lt;T&gt; expectingEqualsTo(T other) {
+<span class="fc" id="L58">		return expecting(</span>
+<span class="fc" id="L59">				predicateWithToString(Predicate.isEqual(other), () -&gt; String.format(&quot;is equals to %s&quot;, other)));</span>
+	}
+
+	/**
+	 * Specify that the returned result must be not null.
+	 * 
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @see Objects#nonNull(Object)
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3&lt;T&gt; expectingNotNull() {
+<span class="fc" id="L70">		return expecting(predicateWithToString(Objects::nonNull, () -&gt; &quot;is not null&quot;));</span>
+	}
+
+	/**
+	 * Specify the condition that doesn't accept the result.
+	 * 
+	 * @param notAcceptingClause
+	 *            the {@link Predicate} to validate the result
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3&lt;T&gt; expectingNot(Predicate&lt;T&gt; notAcceptingClause) {
+<span class="fc" id="L82">		requireNonNull(notAcceptingClause, &quot;notAcceptingClause can't be null&quot;);</span>
+<span class="fc" id="L83">		return expecting(</span>
+<span class="fc" id="L84">				predicateWithToString(notAcceptingClause.negate(), () -&gt; String.format(&quot;not %s&quot;, notAcceptingClause)));</span>
+	}
+
+	/**
+	 * Specify that at least one condition must accept the result.
+	 * 
+	 * @param acceptingClause1
+	 *            {@link Predicate first condition} to accept the result.
+	 * @param next
+	 *            all the following condition to accept the result.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3&lt;T&gt; expectingAnyOf(Predicate&lt;T&gt; acceptingClause1,
+			@SuppressWarnings(&quot;unchecked&quot;) Predicate&lt;T&gt;... next) {
+<span class="fc" id="L99">		Predicate&lt;T&gt; base = requireNonNull(acceptingClause1, &quot;acceptingClause1 can't be null&quot;);</span>
+<span class="fc" id="L100">		return expecting(stream(next).reduce(base, Predicate::or));</span>
+	}
+
+	/**
+	 * Specify that at all conditions must accept the result.
+	 * 
+	 * @param acceptingClause1
+	 *            {@link Predicate first condition} to accept the result.
+	 * @param next
+	 *            all the following condition to accept the result.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder3&lt;T&gt; expectingAllOf(Predicate&lt;T&gt; acceptingClause1,
+			@SuppressWarnings(&quot;unchecked&quot;) Predicate&lt;T&gt;... next) {
+<span class="fc" id="L115">		Predicate&lt;T&gt; base = requireNonNull(acceptingClause1, &quot;acceptingClause1 can't be null&quot;);</span>
+<span class="fc" id="L116">		return expecting(stream(next).reduce(base, Predicate::and));</span>
+
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

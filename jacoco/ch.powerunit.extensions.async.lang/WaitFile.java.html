@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WaitFile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.</a> &gt; <a href="index.source.html" class="el_package">ch.powerunit.extensions.async.lang</a> &gt; <span class="el_source">WaitFile.java</span></div><h1>WaitFile.java</h1><pre class="source lang-java linenums">/**
+ * Powerunit - A JDK1.8 test framework
+ * Copyright (C) 2014 Mathieu Boretti.
+ *
+ * This file is part of Powerunit
+ *
+ * Powerunit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Powerunit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Powerunit. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package ch.powerunit.extensions.async.lang;
+
+import static ch.powerunit.extensions.async.lang.WaitResult.callableWithToString;
+import static ch.powerunit.extensions.async.lang.WaitResult.of;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
+
+import java.nio.file.Path;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchEvent.Kind;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+
+import ch.powerunit.extensions.async.impl.FilePool;
+
+/**
+ * This class provides methods to wait for fileSystem events.
+ * &lt;p&gt;
+ * The goal is to wait for filesystem event, by using the
+ * {@link java.nio.file.WatchService} functionality.
+ * 
+ * @since 1.1.0
+ * @see java.nio.file.WatchService
+ */
+public final class WaitFile {
+	private WaitFile() {
+	}
+
+	/**
+	 * Wait for a folder to have some event.
+	 * &lt;p&gt;
+	 * The wait starts at the first try to get the result.
+	 * &lt;p&gt;
+	 * For example :
+	 * 
+	 * &lt;pre&gt;
+	 * CompletableFuture&amp;lt;Optional&amp;lt;Collection&amp;lt;WatchEvent&amp;lt;Path&amp;gt;&amp;gt;&amp;gt;&amp;gt; wait = WaitFile
+	 * 		.eventIn(test, StandardWatchEventKinds.ENTRY_CREATE)
+	 * 		.expecting(l -&amp;gt; l.stream().map(WatchEvent::context).map(Path::getFileName).map(Path::toString)
+	 * 				.anyMatch(n -&amp;gt; n.equals(&quot;test&quot;)))
+	 * 		.repeat(3).every(Duration.ofMillis(250)).usingDefaultExecutor().asyncExec();
+	 * &lt;/pre&gt;
+	 * 
+	 * Defines a 3 tries with a wait time of 250ms, for a creation event, containing
+	 * at least one event with last part of a path named test.
+	 * 
+	 * @param directory
+	 *            the directory to be verified.
+	 * @param events
+	 *            the events to wait for.
+	 * @return {@link WaitResultBuilder1} the next step of the builder.
+	 */
+	@SafeVarargs
+	public static WaitResultBuilder1&lt;Collection&lt;WatchEvent&lt;Path&gt;&gt;&gt; eventIn(Path directory, Kind&lt;Path&gt;... events) {
+<span class="nc" id="L79">		requireNonNull(directory, &quot;directory can't be null&quot;);</span>
+<span class="nc" id="L80">		FilePool filePool = new FilePool(directory, events);</span>
+<span class="nc" id="L81">		return of(filePool, filePool::close);</span>
+	}
+
+	/**
+	 * Wait for a folder to contains new entry.
+	 * &lt;p&gt;
+	 * The wait starts at the first try to get the result.
+	 * &lt;p&gt;
+	 * For example :
+	 * 
+	 * &lt;pre&gt;
+	 * CompletableFuture&amp;lt;Optional&amp;lt;Collection&amp;lt;Path&amp;gt;&amp;gt;&amp;gt; wait = WaitFile.newFileIn(test)
+	 * 		.expecting(l -&amp;gt; l.stream().map(Path::getFileName).map(Path::toString).anyMatch(n -&amp;gt; n.equals(&quot;test&quot;)))
+	 * 		.repeat(3).every(Duration.ofMillis(250)).usingDefaultExecutor().asyncExec();
+	 * &lt;/pre&gt;
+	 * 
+	 * Defines a 3 tries with a wait time of 250ms, for a list of new file,
+	 * containing at least one file with last part of a path named test.
+	 * 
+	 * 
+	 * @param directory
+	 *            the directory to be verified.
+	 * @return {@link WaitResultBuilder1} the next step of the builder.
+	 */
+	public static WaitResultBuilder1&lt;Collection&lt;Path&gt;&gt; newFileIn(Path directory) {
+<span class="nc" id="L106">		requireNonNull(directory, &quot;directory can't be null&quot;);</span>
+<span class="nc" id="L107">		FilePool filePool = new FilePool(directory, ENTRY_CREATE);</span>
+<span class="nc" id="L108">		return of(callableWithToString(toPathCollection(filePool), () -&gt; &quot;new file in &quot; + filePool), filePool::close);</span>
+	}
+
+	/**
+	 * Wait for a folder to contains new entry based on his name.
+	 * &lt;p&gt;
+	 * The wait starts at the first try to get the result.
+	 * &lt;p&gt;
+	 * For example :
+	 * 
+	 * &lt;pre&gt;
+	 * CompletableFuture&amp;lt;Optional&amp;lt;Path&amp;gt;&amp;gt; wait = WaitFile.newFileNamedIn(test, &quot;test&quot;).expectingNotNull().repeat(3)
+	 * 		.every(Duration.ofMillis(250)).usingDefaultExecutor().asyncExec();
+	 * &lt;/pre&gt;
+	 * 
+	 * Defines a 3 tries with a wait time of 25ms, for a file named &quot;test&quot;.
+	 * 
+	 * @param directory
+	 *            the directory to be verified.
+	 * @param name
+	 *            the expected name
+	 * @return {@link WaitResultBuilder1} the next step of the builder.
+	 */
+	public static WaitResultBuilder1&lt;Path&gt; newFileNamedIn(Path directory, String name) {
+<span class="nc" id="L132">		requireNonNull(directory, &quot;directory can't be null&quot;);</span>
+<span class="nc" id="L133">		requireNonNull(name, &quot;name can't be null&quot;);</span>
+<span class="nc" id="L134">		FilePool filePool = new FilePool(directory, ENTRY_CREATE);</span>
+<span class="nc" id="L135">		return of(callableWithToString(toPathByName(toPathCollection(filePool), name),</span>
+<span class="nc" id="L136">				() -&gt; String.format(&quot;New file named %s in %s&quot;, name, filePool)), filePool::close);</span>
+	}
+
+	/**
+	 * Wait for a folder to have entry removed.
+	 * &lt;p&gt;
+	 * The wait starts at the first try to get the result.
+	 * 
+	 * @param directory
+	 *            the directory to be verified.
+	 * @return {@link WaitResultBuilder1} the next step of the builder.
+	 */
+	public static WaitResultBuilder1&lt;Collection&lt;Path&gt;&gt; removeFileFrom(Path directory) {
+<span class="nc" id="L149">		requireNonNull(directory, &quot;directory can't be null&quot;);</span>
+<span class="nc" id="L150">		FilePool filePool = new FilePool(directory, ENTRY_DELETE);</span>
+<span class="nc" id="L151">		return of(callableWithToString(toPathCollection(filePool), () -&gt; &quot;Removed file from &quot; + directory),</span>
+				filePool::close);
+	}
+
+	private static Callable&lt;Collection&lt;Path&gt;&gt; toPathCollection(Callable&lt;Collection&lt;WatchEvent&lt;Path&gt;&gt;&gt; callable) {
+<span class="nc" id="L156">		return () -&gt; callable.call().stream().map(WatchEvent::context)</span>
+<span class="nc" id="L157">				.collect(collectingAndThen(toList(), Collections::unmodifiableList));</span>
+	}
+
+	private static Callable&lt;Path&gt; toPathByName(Callable&lt;Collection&lt;Path&gt;&gt; callable, String name) {
+<span class="nc" id="L161">		return () -&gt; callable.call().stream()</span>
+<span class="nc" id="L162">				.filter(p -&gt; Objects.equals(p.getName(p.getNameCount() - 1).toString(), name)).findFirst().orElse(null);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a name="line.1">/**</a>
+<span class="sourceLineNo">002</span><a name="line.2"> * Powerunit - A JDK1.8 test framework</a>
+<span class="sourceLineNo">003</span><a name="line.3"> * Copyright (C) 2014 Mathieu Boretti.</a>
+<span class="sourceLineNo">004</span><a name="line.4"> *</a>
+<span class="sourceLineNo">005</span><a name="line.5"> * This file is part of Powerunit</a>
+<span class="sourceLineNo">006</span><a name="line.6"> *</a>
+<span class="sourceLineNo">007</span><a name="line.7"> * Powerunit is free software: you can redistribute it and/or modify</a>
+<span class="sourceLineNo">008</span><a name="line.8"> * it under the terms of the GNU General Public License as published by</a>
+<span class="sourceLineNo">009</span><a name="line.9"> * the Free Software Foundation, either version 3 of the License, or</a>
+<span class="sourceLineNo">010</span><a name="line.10"> * (at your option) any later version.</a>
+<span class="sourceLineNo">011</span><a name="line.11"> *</a>
+<span class="sourceLineNo">012</span><a name="line.12"> * Powerunit is distributed in the hope that it will be useful,</a>
+<span class="sourceLineNo">013</span><a name="line.13"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</a>
+<span class="sourceLineNo">014</span><a name="line.14"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</a>
+<span class="sourceLineNo">015</span><a name="line.15"> * GNU General Public License for more details.</a>
+<span class="sourceLineNo">016</span><a name="line.16"> *</a>
+<span class="sourceLineNo">017</span><a name="line.17"> * You should have received a copy of the GNU General Public License</a>
+<span class="sourceLineNo">018</span><a name="line.18"> * along with Powerunit. If not, see &lt;http://www.gnu.org/licenses/&gt;.</a>
+<span class="sourceLineNo">019</span><a name="line.19"> */</a>
+<span class="sourceLineNo">020</span><a name="line.20">package ch.powerunit.extensions.async.lang;</a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span><a name="line.22">import static ch.powerunit.extensions.async.lang.WaitResult.predicateWithToString;</a>
+<span class="sourceLineNo">023</span><a name="line.23">import static java.util.Arrays.stream;</a>
+<span class="sourceLineNo">024</span><a name="line.24">import static java.util.Objects.requireNonNull;</a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26">import java.util.Objects;</a>
+<span class="sourceLineNo">027</span><a name="line.27">import java.util.concurrent.CompletableFuture;</a>
+<span class="sourceLineNo">028</span><a name="line.28">import java.util.function.Predicate;</a>
+<span class="sourceLineNo">029</span><a name="line.29"></a>
+<span class="sourceLineNo">030</span><a name="line.30">/**</a>
+<span class="sourceLineNo">031</span><a name="line.31"> * Second Step of the builder of {@link CompletableFuture} to specify the</a>
+<span class="sourceLineNo">032</span><a name="line.32"> * condition to accept a result.</a>
+<span class="sourceLineNo">033</span><a name="line.33"> * </a>
+<span class="sourceLineNo">034</span><a name="line.34"> * @param &lt;T&gt;</a>
+<span class="sourceLineNo">035</span><a name="line.35"> *            The type of result of the {@link CompletableFuture}</a>
+<span class="sourceLineNo">036</span><a name="line.36"> *</a>
+<span class="sourceLineNo">037</span><a name="line.37"> */</a>
+<span class="sourceLineNo">038</span><a name="line.38">public interface WaitResultBuilder2&lt;T&gt; {</a>
+<span class="sourceLineNo">039</span><a name="line.39">        /**</a>
+<span class="sourceLineNo">040</span><a name="line.40">         * Specify the condition that accept the result.</a>
+<span class="sourceLineNo">041</span><a name="line.41">         * </a>
+<span class="sourceLineNo">042</span><a name="line.42">         * @param acceptingClause</a>
+<span class="sourceLineNo">043</span><a name="line.43">         *            the {@link Predicate} to validate the result</a>
+<span class="sourceLineNo">044</span><a name="line.44">         * @return {@link WaitResultBuilder3 the next step of the builder}</a>
+<span class="sourceLineNo">045</span><a name="line.45">         */</a>
+<span class="sourceLineNo">046</span><a name="line.46">        WaitResultBuilder3&lt;T&gt; expecting(Predicate&lt;T&gt; acceptingClause);</a>
+<span class="sourceLineNo">047</span><a name="line.47"></a>
+<span class="sourceLineNo">048</span><a name="line.48">        /**</a>
+<span class="sourceLineNo">049</span><a name="line.49">         * Specify that the returned result must be equals to the received object.</a>
+<span class="sourceLineNo">050</span><a name="line.50">         * </a>
+<span class="sourceLineNo">051</span><a name="line.51">         * @param other</a>
+<span class="sourceLineNo">052</span><a name="line.52">         *            the object to compare with. May be null.</a>
+<span class="sourceLineNo">053</span><a name="line.53">         * @return {@link WaitResultBuilder3 the next step of the builder}</a>
+<span class="sourceLineNo">054</span><a name="line.54">         * @see Predicate#isEqual(Object)</a>
+<span class="sourceLineNo">055</span><a name="line.55">         * @since 1.0.0</a>
+<span class="sourceLineNo">056</span><a name="line.56">         */</a>
+<span class="sourceLineNo">057</span><a name="line.57">        default WaitResultBuilder3&lt;T&gt; expectingEqualsTo(T other) {</a>
+<span class="sourceLineNo">058</span><a name="line.58">                return expecting(</a>
+<span class="sourceLineNo">059</span><a name="line.59">                                predicateWithToString(Predicate.isEqual(other), () -&gt; String.format("is equals to %s", other)));</a>
+<span class="sourceLineNo">060</span><a name="line.60">        }</a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span><a name="line.62">        /**</a>
+<span class="sourceLineNo">063</span><a name="line.63">         * Specify that the returned result must be not null.</a>
+<span class="sourceLineNo">064</span><a name="line.64">         * </a>
+<span class="sourceLineNo">065</span><a name="line.65">         * @return {@link WaitResultBuilder3 the next step of the builder}</a>
+<span class="sourceLineNo">066</span><a name="line.66">         * @see Objects#nonNull(Object)</a>
+<span class="sourceLineNo">067</span><a name="line.67">         * @since 1.0.0</a>
+<span class="sourceLineNo">068</span><a name="line.68">         */</a>
+<span class="sourceLineNo">069</span><a name="line.69">        default WaitResultBuilder3&lt;T&gt; expectingNotNull() {</a>
+<span class="sourceLineNo">070</span><a name="line.70">                return expecting(predicateWithToString(Objects::nonNull, () -&gt; "is not null"));</a>
+<span class="sourceLineNo">071</span><a name="line.71">        }</a>
+<span class="sourceLineNo">072</span><a name="line.72"></a>
+<span class="sourceLineNo">073</span><a name="line.73">        /**</a>
+<span class="sourceLineNo">074</span><a name="line.74">         * Specify the condition that doesn't accept the result.</a>
+<span class="sourceLineNo">075</span><a name="line.75">         * </a>
+<span class="sourceLineNo">076</span><a name="line.76">         * @param notAcceptingClause</a>
+<span class="sourceLineNo">077</span><a name="line.77">         *            the {@link Predicate} to validate the result</a>
+<span class="sourceLineNo">078</span><a name="line.78">         * @return {@link WaitResultBuilder3 the next step of the builder}</a>
+<span class="sourceLineNo">079</span><a name="line.79">         * @since 1.0.0</a>
+<span class="sourceLineNo">080</span><a name="line.80">         */</a>
+<span class="sourceLineNo">081</span><a name="line.81">        default WaitResultBuilder3&lt;T&gt; expectingNot(Predicate&lt;T&gt; notAcceptingClause) {</a>
+<span class="sourceLineNo">082</span><a name="line.82">                requireNonNull(notAcceptingClause, "notAcceptingClause can't be null");</a>
+<span class="sourceLineNo">083</span><a name="line.83">                return expecting(</a>
+<span class="sourceLineNo">084</span><a name="line.84">                                predicateWithToString(notAcceptingClause.negate(), () -&gt; String.format("not %s", notAcceptingClause)));</a>
+<span class="sourceLineNo">085</span><a name="line.85">        }</a>
+<span class="sourceLineNo">086</span><a name="line.86"></a>
+<span class="sourceLineNo">087</span><a name="line.87">        /**</a>
+<span class="sourceLineNo">088</span><a name="line.88">         * Specify that at least one condition must accept the result.</a>
+<span class="sourceLineNo">089</span><a name="line.89">         * </a>
+<span class="sourceLineNo">090</span><a name="line.90">         * @param acceptingClause1</a>
+<span class="sourceLineNo">091</span><a name="line.91">         *            {@link Predicate first condition} to accept the result.</a>
+<span class="sourceLineNo">092</span><a name="line.92">         * @param next</a>
+<span class="sourceLineNo">093</span><a name="line.93">         *            all the following condition to accept the result.</a>
+<span class="sourceLineNo">094</span><a name="line.94">         * @return {@link WaitResultBuilder3 the next step of the builder}</a>
+<span class="sourceLineNo">095</span><a name="line.95">         * @since 1.0.0</a>
+<span class="sourceLineNo">096</span><a name="line.96">         */</a>
+<span class="sourceLineNo">097</span><a name="line.97">        default WaitResultBuilder3&lt;T&gt; expectingAnyOf(Predicate&lt;T&gt; acceptingClause1,</a>
+<span class="sourceLineNo">098</span><a name="line.98">                        @SuppressWarnings("unchecked") Predicate&lt;T&gt;... next) {</a>
+<span class="sourceLineNo">099</span><a name="line.99">                Predicate&lt;T&gt; base = requireNonNull(acceptingClause1, "acceptingClause1 can't be null");</a>
+<span class="sourceLineNo">100</span><a name="line.100">                return expecting(stream(next).reduce(base, Predicate::or));</a>
+<span class="sourceLineNo">101</span><a name="line.101">        }</a>
+<span class="sourceLineNo">102</span><a name="line.102"></a>
+<span class="sourceLineNo">103</span><a name="line.103">        /**</a>
+<span class="sourceLineNo">104</span><a name="line.104">         * Specify that at all conditions must accept the result.</a>
+<span class="sourceLineNo">105</span><a name="line.105">         * </a>
+<span class="sourceLineNo">106</span><a name="line.106">         * @param acceptingClause1</a>
+<span class="sourceLineNo">107</span><a name="line.107">         *            {@link Predicate first condition} to accept the result.</a>
+<span class="sourceLineNo">108</span><a name="line.108">         * @param next</a>
+<span class="sourceLineNo">109</span><a name="line.109">         *            all the following condition to accept the result.</a>
+<span class="sourceLineNo">110</span><a name="line.110">         * @return {@link WaitResultBuilder3 the next step of the builder}</a>
+<span class="sourceLineNo">111</span><a name="line.111">         * @since 1.0.0</a>
+<span class="sourceLineNo">112</span><a name="line.112">         */</a>
+<span class="sourceLineNo">113</span><a name="line.113">        default WaitResultBuilder3&lt;T&gt; expectingAllOf(Predicate&lt;T&gt; acceptingClause1,</a>
+<span class="sourceLineNo">114</span><a name="line.114">                        @SuppressWarnings("unchecked") Predicate&lt;T&gt;... next) {</a>
+<span class="sourceLineNo">115</span><a name="line.115">                Predicate&lt;T&gt; base = requireNonNull(acceptingClause1, "acceptingClause1 can't be null");</a>
+<span class="sourceLineNo">116</span><a name="line.116">                return expecting(stream(next).reduce(base, Predicate::and));</a>
+<span class="sourceLineNo">117</span><a name="line.117"></a>
+<span class="sourceLineNo">118</span><a name="line.118">        }</a>
+<span class="sourceLineNo">119</span><a name="line.119">}</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
