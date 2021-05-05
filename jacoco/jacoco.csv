@@ -1,0 +1,19 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.impl,WaitResultImpl,98,0,4,0,22,0,8,0,6,0
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.impl,ExceptionHandler,76,0,8,0,13,0,8,0,4,0
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.impl,FilePool,95,0,4,0,21,0,11,0,9,0
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.impl,RetryImpl,57,0,4,0,19,0,6,0,4,0
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitResultBuilder1,0,6,0,0,0,2,0,2,0,2
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitFile,178,0,0,0,18,0,12,0,12,0
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitResultBuilder4,0,32,0,0,0,5,0,5,0,5
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitResultBuilder5,86,0,2,0,17,0,19,0,18,0
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitResultBuilder2,0,74,0,0,0,10,0,8,0,8
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitResultBuilder3,0,18,0,0,0,3,0,4,0,4
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitResult,0,229,0,0,0,34,0,29,0,29
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,RetryPolicies.new RetryPolicy() {...},34,0,0,0,5,0,4,0,4,0
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,RetryPolicies.new IntToLongFunction() {...},19,0,0,0,3,0,3,0,3,0
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitResultBuilder6,89,0,0,0,13,0,13,0,13,0
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitResult.new Callable() {...},0,18,0,0,0,3,0,3,0,3
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitResult.new WaitResultBuilder1() {...},0,52,0,0,0,6,0,6,0,6
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,WaitResult.new Predicate() {...},0,19,0,0,0,3,0,3,0,3
+Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.,ch.powerunit.extensions.async.lang,RetryPolicies,90,0,0,0,12,0,13,0,13,0

@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WaitResult.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.</a> &gt; <a href="index.source.html" class="el_package">ch.powerunit.extensions.async.lang</a> &gt; <span class="el_source">WaitResult.java</span></div><h1>WaitResult.java</h1><pre class="source lang-java linenums">/**
+ * Powerunit - A JDK1.8 test framework
+ * Copyright (C) 2014 Mathieu Boretti.
+ *
+ * This file is part of Powerunit
+ *
+ * Powerunit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Powerunit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Powerunit. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package ch.powerunit.extensions.async.lang;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
+import static java.util.concurrent.Executors.callable;
+
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import ch.powerunit.extensions.async.impl.WaitResultImpl;
+
+/**
+ * This class is the entry point for this library to support async operation
+ * inside test.
+ * &lt;p&gt;
+ * Use one of the provided methods to repeatedly get some data, until some
+ * condition.
+ * 
+ * @since 1.0.0 - Before, this class was under
+ *        {@link ch.powerunit.extensions.async}. This change is linked with java
+ *        9 module, as it will not be possible to have the implementation in a
+ *        sub package of the exported one.
+ * @since 1.1.0 - Starting from version 1.1.0, the {@link System.Logger} feature
+ *        is used to do some logging of the system. One goal is to provide a way
+ *        to the user to see when the system is waiting for example. Also, some
+ *        methods were added to decorate {@link Callable} and {@link Predicate}
+ *        to add toString to describe them.
+ */
+public final class WaitResult {
+	private WaitResult() {
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * the result of the received action, with repetition until some condition.
+	 * &lt;h1&gt;Simple sample&lt;/h1&gt;
+	 * 
+	 * &lt;pre&gt;
+	 * CompletableFuture&amp;lt;Optional&amp;lt;MyObject&amp;gt;&amp;gt; exec = WaitResult.of(MyObject::myCallable).expecting(MyObject::myControl)
+	 * 		.repeat(10).every(10, TimeUnit.MILLISECONDS).asyncExec();
+	 * &lt;/pre&gt;
+	 * 
+	 * @param action
+	 *            the {@link Callable} providing the result.
+	 * @param &lt;T&gt;
+	 *            The type of the result.
+	 * @return {@link WaitResultBuilder1 the next step of the builder}
+	 * @throws NullPointerException
+	 *             if action is null
+	 */
+	public static &lt;T&gt; WaitResultBuilder1&lt;T&gt; of(Callable&lt;T&gt; action) {
+<span class="fc" id="L74">		return of(action, null);</span>
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * the result of the received action, with repetition until some condition.
+	 * 
+	 * @param action
+	 *            the {@link Callable} providing the result.
+	 * @param actionOnFinish
+	 *            register an action after the result is retrieved (success or
+	 *            failure). This may be used to register some resource cleanup.
+	 * @param &lt;T&gt;
+	 *            The type of the result.
+	 * @return {@link WaitResultBuilder1 the next step of the builder}
+	 * @throws NullPointerException
+	 *             if action is null
+	 * @since 1.1.0
+	 */
+	public static &lt;T&gt; WaitResultBuilder1&lt;T&gt; of(Callable&lt;T&gt; action, Runnable actionOnFinish) {
+<span class="fc" id="L94">		requireNonNull(action, &quot;action can't be null&quot;);</span>
+<span class="fc" id="L95">		return new WaitResultBuilder1&lt;T&gt;() {</span>
+
+			@Override
+			public WaitResultBuilder3&lt;T&gt; expecting(Predicate&lt;T&gt; acceptingClause) {
+<span class="fc" id="L99">				return retry -&gt; ((WaitResultBuilder5&lt;T&gt;) new WaitResultImpl&lt;&gt;(</span>
+<span class="fc" id="L100">						asFilteredCallable(action, acceptingClause), retry)::get).onFinish(actionOnFinish);</span>
+			}
+
+			@Override
+			public WaitResultBuilder2&lt;T&gt; ignoreException(boolean alsoDontFailWhenNoResultAndException) {
+<span class="fc" id="L105">				return predicate -&gt; retry -&gt; ((WaitResultBuilder5&lt;T&gt;) new WaitResultImpl&lt;&gt;(</span>
+<span class="fc" id="L106">						asFilteredCallable(action, predicate), alsoDontFailWhenNoResultAndException, retry)::get)</span>
+<span class="fc" id="L107">								.onFinish(actionOnFinish);</span>
+			}
+		};
+	}
+
+	private static &lt;T&gt; Callable&lt;Optional&lt;T&gt;&gt; asFilteredCallable(Callable&lt;T&gt; action, Predicate&lt;T&gt; acceptingClause) {
+<span class="fc" id="L113">		requireNonNull(action, &quot;action can't be null&quot;);</span>
+<span class="fc" id="L114">		requireNonNull(acceptingClause, &quot;acceptingClause can't be null&quot;);</span>
+<span class="fc" id="L115">		return callableWithToString(() -&gt; ofNullable(action.call()).filter(acceptingClause),</span>
+<span class="fc" id="L116">				() -&gt; String.format(&quot;Action = %s, AcceptingClause = %s&quot;, action, acceptingClause));</span>
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * execution of the received action, with repetition until some condition.
+	 * &lt;p&gt;
+	 * 
+	 * @param supplier
+	 *            the {@link Supplier} to be executed.
+	 * @param &lt;T&gt;
+	 *            The type of the result.
+	 * @return {@link WaitResultBuilder1 the next step of the builder}
+	 * @since 1.1.0
+	 * @throws NullPointerException
+	 *             if supplier is null
+	 */
+	public static &lt;T&gt; WaitResultBuilder1&lt;T&gt; ofSupplier(Supplier&lt;T&gt; supplier) {
+<span class="fc" id="L134">		requireNonNull(supplier, &quot;supplier can't be null&quot;);</span>
+<span class="fc" id="L135">		return of(callableWithToString(supplier::get, () -&gt; supplier.toString()));</span>
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * execution of the received action, with repetition until some condition.
+	 * &lt;p&gt;
+	 * In this case, it is assumed that the received action throws unchecked
+	 * exception when the condition is not yet OK. The returned Optional will be
+	 * present in case of success.
+	 * 
+	 * @param action
+	 *            the {@link Runnable} to be executed.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 * @throws NullPointerException
+	 *             if action is null
+	 */
+	public static WaitResultBuilder3&lt;Boolean&gt; ofRunnable(Runnable action) {
+<span class="fc" id="L154">		requireNonNull(action, &quot;action can't be null&quot;);</span>
+<span class="fc" id="L155">		return of(callableWithToString(callable(action, true), () -&gt; action.toString())).ignoreException(true)</span>
+<span class="fc" id="L156">				.expecting(predicateWithToString(b -&gt; b, () -&gt; &quot;Expecting true&quot;));</span>
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * repeated control on the mutable object.
+	 * &lt;h1&gt;Simple sample&lt;/h1&gt;
+	 * 
+	 * &lt;pre&gt;
+	 * CompletableFuture&amp;lt;Optional&amp;lt;MyObject&amp;gt;&amp;gt; exec = WaitResult.on(myObject).expecting(MyObject::myControl).repeat(100)
+	 * 		.every(10, TimeUnit.MILLISECONDS).asyncExec();
+	 * &lt;/pre&gt;
+	 * 
+	 * @param mutableObject
+	 *            the mutable object to be checked.
+	 * @param &lt;T&gt;
+	 *            The type of the result.
+	 * @return {@link WaitResultBuilder2 the next step of the builder}
+	 */
+	public static &lt;T&gt; WaitResultBuilder2&lt;T&gt; on(T mutableObject) {
+<span class="fc" id="L176">		return of(callableWithToString(() -&gt; mutableObject, () -&gt; String.format(&quot;on object %s&quot;, mutableObject)));</span>
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * repeated control on a method returning a boolean.
+	 * 
+	 * @param conditionSupplier
+	 *            the boolean supplier
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @throws NullPointerException
+	 *             if conditionSupplier is null
+	 */
+	public static WaitResultBuilder3&lt;Boolean&gt; onCondition(Supplier&lt;Boolean&gt; conditionSupplier) {
+<span class="fc" id="L190">		requireNonNull(conditionSupplier, &quot;conditionSupplier can't be null&quot;);</span>
+<span class="fc" id="L191">		return of(callableWithToString(conditionSupplier::get, () -&gt; conditionSupplier.toString()))</span>
+<span class="fc" id="L192">				.expecting(predicateWithToString(b -&gt; b, () -&gt; &quot;Expecting true&quot;));</span>
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * repeated control of a call that is assumed as OK when an exception is thrown.
+	 * 
+	 * @param action
+	 *            the action that is expected to thrown an exception.
+	 * @return {@link WaitResultBuilder3 the next step of the builder}
+	 * @since 1.0.0
+	 * @throws NullPointerException
+	 *             if action is null
+	 */
+	public static WaitResultBuilder3&lt;Exception&gt; forException(Callable&lt;?&gt; action) {
+<span class="fc" id="L207">		requireNonNull(action, &quot;action can't be null&quot;);</span>
+<span class="fc" id="L208">		return of(asCallableForException(action, e -&gt; e)).dontIgnoreException().expectingNotNull();</span>
+	}
+
+	/**
+	 * Start the builder to create an instance of {@link CompletableFuture} based on
+	 * repeated control of a call that is assumed as done when a a specific
+	 * exception is thrown.
+	 * 
+	 * @param action
+	 *            the action that is expected to thrown an exception.
+	 * @param targetException
+	 *            the expected Exception class
+	 * @param &lt;T&gt;
+	 *            the expected exception type
+	 * @return {@link WaitResultBuilder1 the next step of the builder}
+	 * @since 1.1.0
+	 * @throws NullPointerException
+	 *             if action or targetException is null
+	 */
+	@SuppressWarnings(&quot;unchecked&quot;)
+	public static &lt;T extends Exception&gt; WaitResultBuilder1&lt;T&gt; forException(Callable&lt;?&gt; action,
+			Class&lt;T&gt; targetException) {
+<span class="fc" id="L230">		requireNonNull(action, &quot;action can't be null&quot;);</span>
+<span class="fc" id="L231">		requireNonNull(targetException, &quot;targetException can't be null&quot;);</span>
+<span class="fc" id="L232">		return of(asCallableForException(action, e -&gt; (T) Optional.of(e)</span>
+<span class="fc" id="L233">				.filter(c -&gt; targetException.isAssignableFrom(c.getClass())).orElseThrow(() -&gt; e)));</span>
+	}
+
+	private static interface ExceptionMapper&lt;T extends Exception&gt; {
+		T handleException(Exception e) throws Exception;
+	}
+
+	private static &lt;T extends Exception&gt; Callable&lt;T&gt; asCallableForException(Callable&lt;?&gt; action,
+			ExceptionMapper&lt;T&gt; exceptionHandler) {
+<span class="fc" id="L242">		return callableWithToString(() -&gt; {</span>
+			try {
+<span class="fc" id="L244">				action.call();</span>
+<span class="fc" id="L245">				return null;</span>
+<span class="fc" id="L246">			} catch (Exception e) {</span>
+<span class="fc" id="L247">				return exceptionHandler.handleException(e);</span>
+			}
+<span class="fc" id="L249">		}, () -&gt; action.toString());</span>
+	}
+
+	// Helper method for logging
+	/**
+	 * Modify a Callable to add a toString.
+	 * &lt;p&gt;
+	 * &lt;i&gt;The goal of this method is to provide a way to have lambda, used for
+	 * example in the context of this library, that are decorated with a
+	 * {@code toString} method.&lt;/i&gt; Later, when this Callable is used in log, it is
+	 * possible to have a meaningful description and not the default
+	 * {@code toString}.
+	 * 
+	 * @param callable
+	 *            the Callable to be decorated.
+	 * @param toString
+	 *            the Supplier to be used as toString method.
+	 * @param &lt;T&gt;
+	 *            the return type of the Callable
+	 * @return the decorated Callable.
+	 * @throws NullPointerException
+	 *             if callable or toString is null.
+	 * @since 1.1.0
+	 */
+	public static &lt;T&gt; Callable&lt;T&gt; callableWithToString(Callable&lt;T&gt; callable, Supplier&lt;String&gt; toString) {
+<span class="fc" id="L274">		requireNonNull(callable, &quot;callable can't be null&quot;);</span>
+<span class="fc" id="L275">		requireNonNull(toString, &quot;toString can't be null&quot;);</span>
+<span class="fc" id="L276">		return new Callable&lt;T&gt;() {</span>
+
+			@Override
+			public T call() throws Exception {
+<span class="fc" id="L280">				return callable.call();</span>
+			}
+
+			@Override
+			public String toString() {
+<span class="fc" id="L285">				return toString.get();</span>
+			}
+		};
+	}
+
+	/**
+	 * Modify a Predicate to add a toString.
+	 * &lt;p&gt;
+	 * &lt;i&gt;The goal of this method is to provide a way to have lambda, used for
+	 * example in the context of this library, that are decorated with a
+	 * {@code toString} method.&lt;/i&gt; Later, when this Predicate is used in log, it is
+	 * possible to have a meaningful description and not the default
+	 * {@code toString}.
+	 * 
+	 * @param predicate
+	 *            the Predicate to be decorated.
+	 * @param toString
+	 *            the Supplier to be used as toString method.
+	 * @param &lt;T&gt;
+	 *            the input type of the Predicate.
+	 * @return the decorated Predicate.
+	 * @throws NullPointerException
+	 *             if predicate or toString is null.
+	 * @since 1.1.0
+	 */
+	public static &lt;T&gt; Predicate&lt;T&gt; predicateWithToString(Predicate&lt;T&gt; predicate, Supplier&lt;String&gt; toString) {
+<span class="fc" id="L311">		requireNonNull(predicate, &quot;predicate can't be null&quot;);</span>
+<span class="fc" id="L312">		requireNonNull(toString, &quot;toString can't be null&quot;);</span>
+<span class="fc" id="L313">		return new Predicate&lt;T&gt;() {</span>
+
+			@Override
+			public boolean test(T t) {
+<span class="fc" id="L317">				return predicate.test(t);</span>
+			}
+
+			@Override
+			public String toString() {
+<span class="fc" id="L322">				return toString.get();</span>
+			}
+		};
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

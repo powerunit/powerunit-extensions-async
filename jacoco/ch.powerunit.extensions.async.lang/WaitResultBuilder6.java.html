@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WaitResultBuilder6.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.</a> &gt; <a href="index.source.html" class="el_package">ch.powerunit.extensions.async.lang</a> &gt; <span class="el_source">WaitResultBuilder6.java</span></div><h1>WaitResultBuilder6.java</h1><pre class="source lang-java linenums">/**
+ * Powerunit - A JDK1.8 test framework
+ * Copyright (C) 2014 Mathieu Boretti.
+ *
+ * This file is part of Powerunit
+ *
+ * Powerunit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Powerunit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Powerunit. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package ch.powerunit.extensions.async.lang;
+
+import java.util.Optional;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+/**
+ * Last Step of the builder of {@link CompletableFuture} to create the
+ * completable operation it self.
+ * 
+ * @param &lt;T&gt;
+ *            The type of result of the {@link CompletableFuture}
+ * @since 1.0.0
+ */
+public interface WaitResultBuilder6&lt;T&gt; {
+
+	/**
+	 * Create and start the async execution of the {@link CompletableFuture} the
+	 * executor that was defined before.
+	 * &lt;p&gt;
+	 * This method is the &lt;i&gt;main&lt;/i&gt; method of this interface. This start the
+	 * execution of the {@link CompletableFuture} based on the parameter defined
+	 * before.
+	 * &lt;p&gt;
+	 * For example:
+	 * 
+	 * &lt;pre&gt;
+	 * CompletableFuture&amp;lt;Optional&amp;lt;String&amp;gt;&amp;gt; future = WaitResult.of(myCallable).dontIgnoreException()
+	 * 		.expecting(myPredicate).repeat(2).every(1000, TimeUnit.MILLISECONDS).usingDefaultExecutor().asyncExec();
+	 * &lt;/pre&gt;
+	 * 
+	 * This defines a {@link CompletableFuture} that will repeat maximum two time,
+	 * with a wait time of 1000ms, the execution of {@code myCallable}, doesn't
+	 * ignore the exception, verify the {@code myPredicate} condition. This
+	 * {@link CompletableFuture} will use the default executor.
+	 * 
+	 * @return the {@link CompletableFuture}
+	 */
+	CompletableFuture&lt;Optional&lt;T&gt;&gt; asyncExec();
+
+	/**
+	 * Directly wait for the result of this execution. In case of not ignored
+	 * exception, an {@link AssertionError} is thrown.
+	 * &lt;p&gt;
+	 * This method is a &lt;i&gt;shortcut&lt;/i&gt; method to {@code asyncExec().get()}, which
+	 * throw AssertionError in case of error.
+	 * 
+	 * @return the {@link Optional} with the result of the execution
+	 * 
+	 * @throws AssertionError
+	 *             In case of not ignored exception.
+	 * @see #asyncExec()
+	 * @see CompletableFuture#get()
+	 */
+	default Optional&lt;T&gt; finish() {
+		try {
+<span class="nc" id="L81">			return asyncExec().get();</span>
+<span class="nc" id="L82">		} catch (InterruptedException | ExecutionException e) {</span>
+<span class="nc" id="L83">			throw Optional.ofNullable(e.getCause()).filter(c -&gt; c instanceof AssertionError)</span>
+<span class="nc" id="L84">					.map(AssertionError.class::cast)</span>
+<span class="nc" id="L85">					.orElseGet(() -&gt; new AssertionError(&quot;Unexpected error &quot; + e.getMessage(), e));</span>
+		}
+	}
+
+	/**
+	 * Directly wait for a positive result of this execution. In case of not ignored
+	 * exception, or when no result are available, an {@link AssertionError} is
+	 * thrown.
+	 * &lt;p&gt;
+	 * This method is a &lt;i&gt;shortcut&lt;/i&gt; method to the finish method that read the
+	 * optional value and throw an AssertionError in case of mission value.
+	 * 
+	 * @return the value if available
+	 * 
+	 * @throws AssertionError
+	 *             In case of not ignored exception or missing result.
+	 * @see #finish()
+	 */
+	default T finishWithAResult() {
+<span class="nc" id="L104">		return finish().orElseThrow(() -&gt; new AssertionError(&quot;No result is available&quot;));</span>
+	}
+
+	/**
+	 * Shortcut method to the join of the {@link CompletableFuture}.
+	 * &lt;p&gt;
+	 * Only runtime exception in case of error.
+	 * 
+	 * @return the result of the wait
+	 * @since 1.0.0
+	 * @see CompletableFuture#join()
+	 * @see #asyncExec()
+	 */
+	default Optional&lt;T&gt; join() {
+<span class="nc" id="L118">		return asyncExec().join();</span>
+	}
+
+	/**
+	 * Shortcut method to the join of the {@link CompletableFuture}, that expect a
+	 * positive result.
+	 * &lt;p&gt;
+	 * Only runtime exception in case of error.
+	 * 
+	 * @return the result of the wait
+	 * @since 1.0.0
+	 * @see CompletableFuture#join()
+	 * @see #join()
+	 */
+	default T joinWithAResult() {
+<span class="nc" id="L133">		return join().orElseThrow(() -&gt; new AssertionError(&quot;No result is available when one is expected&quot;));</span>
+	}
+
+	/**
+	 * Create and start the async execution of the {@link CompletableFuture} and
+	 * directly register a Consumer on the result.
+	 * 
+	 * @param action
+	 *            the action to be done on the result
+	 * @return the {@link CompletableFuture}
+	 * @since 1.0.0
+	 * @see CompletableFuture#thenAccept(Consumer)
+	 * @see #asyncExec()
+	 */
+	default CompletableFuture&lt;Void&gt; thenAccept(Consumer&lt;? super Optional&lt;T&gt;&gt; action) {
+<span class="nc" id="L148">		return asyncExec().thenAccept(action);</span>
+	}
+
+	/**
+	 * Create and start the async execution of the {@link CompletableFuture} and
+	 * directly register a Function on the result.
+	 * 
+	 * @param fn
+	 *            then function to be applied
+	 * 
+	 * @param &lt;U&gt;
+	 *            The new return type
+	 * @return the {@link CompletableFuture}
+	 * @since 1.0.0
+	 * @see CompletableFuture#thenApply(Function)
+	 * @see #asyncExec()
+	 */
+	default &lt;U&gt; CompletableFuture&lt;U&gt; thenApply(Function&lt;? super Optional&lt;T&gt;, ? extends U&gt; fn) {
+<span class="nc" id="L166">		return asyncExec().thenApply(fn);</span>
+	}
+
+	/**
+	 * Create and start the async execution of the {@link CompletableFuture} and
+	 * exceptionally completes this CompletableFuture with a TimeoutException if not
+	 * otherwise completed before the given timeout.
+	 * &lt;p&gt;
+	 * &lt;b&gt;Only available on java 9&lt;/b&gt;
+	 * 
+	 * @param timeout
+	 *            how long to wait before completing exceptionally with a
+	 *            TimeoutException, in units of unit
+	 * @param unit
+	 *            a TimeUnit determining how to interpret the timeout parameter
+	 * @return the {@link CompletableFuture}
+	 * @since 1.0.0
+	 * @see CompletableFuture#orTimeout(long, TimeUnit)
+	 * @see #asyncExec()
+	 */
+	default CompletableFuture&lt;Optional&lt;T&gt;&gt; orTimeout(long timeout, TimeUnit unit) {
+<span class="nc" id="L187">		throw new UnsupportedOperationException(&quot;Not available on java 8&quot;);</span>
+	}
+
+	/**
+	 * Returns a new CompletionStage that is completed normally based on this
+	 * {@link CompletableFuture}.
+	 * &lt;p&gt;
+	 * &lt;b&gt;Only available on java 9&lt;/b&gt;
+	 *
+	 * @return the new CompletionStage
+	 * @since 1.0.0
+	 * @see CompletableFuture#minimalCompletionStage()
+	 * @see #asyncExec()
+	 */
+	default CompletionStage&lt;Optional&lt;T&gt;&gt; minimalCompletionStage​() {
+<span class="nc" id="L202">		throw new UnsupportedOperationException(&quot;Not available on java 8&quot;);</span>
+	}
+
+	/**
+	 * Waits if necessary for the produced future to complete, and then returns its
+	 * result.
+	 *
+	 * @return the result value
+	 * @throws CancellationException
+	 *             if the produced future was cancelled
+	 * @throws ExecutionException
+	 *             if the produced future completed exceptionally
+	 * @throws InterruptedException
+	 *             if the current thread was interrupted while waiting
+	 * @see CompletableFuture#get()
+	 * @see #asyncExec()
+	 * @since 1.0.0
+	 */
+	default Optional&lt;T&gt; get() throws InterruptedException, ExecutionException {
+<span class="nc" id="L221">		return asyncExec().get();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WaitResultBuilder3.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.</a> &gt; <a href="index.source.html" class="el_package">ch.powerunit.extensions.async.lang</a> &gt; <span class="el_source">WaitResultBuilder3.java</span></div><h1>WaitResultBuilder3.java</h1><pre class="source lang-java linenums">/**
+ * Powerunit - A JDK1.8 test framework
+ * Copyright (C) 2014 Mathieu Boretti.
+ *
+ * This file is part of Powerunit
+ *
+ * Powerunit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Powerunit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Powerunit. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package ch.powerunit.extensions.async.lang;
+
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * Third Step of the builder of {@link CompletableFuture} to specify the maximal
+ * number of retry.
+ * 
+ * @param &lt;T&gt;
+ *            The type of result of the {@link CompletableFuture}
+ *
+ */
+public interface WaitResultBuilder3&lt;T&gt; {
+
+	/**
+	 * Specify a retry clause.
+	 * &lt;p&gt;
+	 * The goal is here to define somewhere in the test a constant with this clause
+	 * and reuse it in the test.
+	 * 
+	 * @param retry
+	 *            the retry clause.
+	 * @return {@link WaitResultBuilder5 the final step of the builder}
+	 * @since 1.0.0
+	 * @see RetryPolicies
+	 */
+	WaitResultBuilder5&lt;T&gt; repeat(RetryPolicy retry);
+
+	/**
+	 * Specify the maximal number of retry.
+	 * 
+	 * @param count
+	 *            the number of retry
+	 * @return {@link WaitResultBuilder4 the next step of the builder}
+	 */
+	default WaitResultBuilder4&lt;T&gt; repeat(int count) {
+<span class="fc" id="L56">		return value -&gt; repeat(RetryPolicies.of(count, value));</span>
+	}
+
+	/**
+	 * Specify that only one retry will be done (so only one execution and one
+	 * validation).
+	 * 
+	 * @return {@link WaitResultBuilder5 the final step of the builder}
+	 */
+	default WaitResultBuilder5&lt;T&gt; repeatOnlyOnce() {
+<span class="fc" id="L66">		return repeat(RetryPolicies.RETRY_ONLY_ONCE);</span>
+	}
+
+	/**
+	 * Specify that only two retry will be done.
+	 * 
+	 * @return {@link WaitResultBuilder4 the next step of the builder}
+	 * @since 1.0.0
+	 */
+	default WaitResultBuilder4&lt;T&gt; repeatTwice() {
+<span class="fc" id="L76">		return repeat(2);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

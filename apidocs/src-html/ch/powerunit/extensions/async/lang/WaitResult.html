@@ -1,0 +1,399 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a name="line.1">/**</a>
+<span class="sourceLineNo">002</span><a name="line.2"> * Powerunit - A JDK1.8 test framework</a>
+<span class="sourceLineNo">003</span><a name="line.3"> * Copyright (C) 2014 Mathieu Boretti.</a>
+<span class="sourceLineNo">004</span><a name="line.4"> *</a>
+<span class="sourceLineNo">005</span><a name="line.5"> * This file is part of Powerunit</a>
+<span class="sourceLineNo">006</span><a name="line.6"> *</a>
+<span class="sourceLineNo">007</span><a name="line.7"> * Powerunit is free software: you can redistribute it and/or modify</a>
+<span class="sourceLineNo">008</span><a name="line.8"> * it under the terms of the GNU General Public License as published by</a>
+<span class="sourceLineNo">009</span><a name="line.9"> * the Free Software Foundation, either version 3 of the License, or</a>
+<span class="sourceLineNo">010</span><a name="line.10"> * (at your option) any later version.</a>
+<span class="sourceLineNo">011</span><a name="line.11"> *</a>
+<span class="sourceLineNo">012</span><a name="line.12"> * Powerunit is distributed in the hope that it will be useful,</a>
+<span class="sourceLineNo">013</span><a name="line.13"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</a>
+<span class="sourceLineNo">014</span><a name="line.14"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</a>
+<span class="sourceLineNo">015</span><a name="line.15"> * GNU General Public License for more details.</a>
+<span class="sourceLineNo">016</span><a name="line.16"> *</a>
+<span class="sourceLineNo">017</span><a name="line.17"> * You should have received a copy of the GNU General Public License</a>
+<span class="sourceLineNo">018</span><a name="line.18"> * along with Powerunit. If not, see &lt;http://www.gnu.org/licenses/&gt;.</a>
+<span class="sourceLineNo">019</span><a name="line.19"> */</a>
+<span class="sourceLineNo">020</span><a name="line.20">package ch.powerunit.extensions.async.lang;</a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span><a name="line.22">import static java.util.Objects.requireNonNull;</a>
+<span class="sourceLineNo">023</span><a name="line.23">import static java.util.Optional.ofNullable;</a>
+<span class="sourceLineNo">024</span><a name="line.24">import static java.util.concurrent.Executors.callable;</a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26">import java.util.Optional;</a>
+<span class="sourceLineNo">027</span><a name="line.27">import java.util.concurrent.Callable;</a>
+<span class="sourceLineNo">028</span><a name="line.28">import java.util.concurrent.CompletableFuture;</a>
+<span class="sourceLineNo">029</span><a name="line.29">import java.util.function.Predicate;</a>
+<span class="sourceLineNo">030</span><a name="line.30">import java.util.function.Supplier;</a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span><a name="line.32">import ch.powerunit.extensions.async.impl.WaitResultImpl;</a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34">/**</a>
+<span class="sourceLineNo">035</span><a name="line.35"> * This class is the entry point for this library to support async operation</a>
+<span class="sourceLineNo">036</span><a name="line.36"> * inside test.</a>
+<span class="sourceLineNo">037</span><a name="line.37"> * &lt;p&gt;</a>
+<span class="sourceLineNo">038</span><a name="line.38"> * Use one of the provided methods to repeatedly get some data, until some</a>
+<span class="sourceLineNo">039</span><a name="line.39"> * condition.</a>
+<span class="sourceLineNo">040</span><a name="line.40"> * </a>
+<span class="sourceLineNo">041</span><a name="line.41"> * @since 1.0.0 - Before, this class was under</a>
+<span class="sourceLineNo">042</span><a name="line.42"> *        {@link ch.powerunit.extensions.async}. This change is linked with java</a>
+<span class="sourceLineNo">043</span><a name="line.43"> *        9 module, as it will not be possible to have the implementation in a</a>
+<span class="sourceLineNo">044</span><a name="line.44"> *        sub package of the exported one.</a>
+<span class="sourceLineNo">045</span><a name="line.45"> * @since 1.1.0 - Starting from version 1.1.0, the {@link System.Logger} feature</a>
+<span class="sourceLineNo">046</span><a name="line.46"> *        is used to do some logging of the system. One goal is to provide a way</a>
+<span class="sourceLineNo">047</span><a name="line.47"> *        to the user to see when the system is waiting for example. Also, some</a>
+<span class="sourceLineNo">048</span><a name="line.48"> *        methods were added to decorate {@link Callable} and {@link Predicate}</a>
+<span class="sourceLineNo">049</span><a name="line.49"> *        to add toString to describe them.</a>
+<span class="sourceLineNo">050</span><a name="line.50"> */</a>
+<span class="sourceLineNo">051</span><a name="line.51">public final class WaitResult {</a>
+<span class="sourceLineNo">052</span><a name="line.52">        private WaitResult() {</a>
+<span class="sourceLineNo">053</span><a name="line.53">        }</a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span><a name="line.55">        /**</a>
+<span class="sourceLineNo">056</span><a name="line.56">         * Start the builder to create an instance of {@link CompletableFuture} based on</a>
+<span class="sourceLineNo">057</span><a name="line.57">         * the result of the received action, with repetition until some condition.</a>
+<span class="sourceLineNo">058</span><a name="line.58">         * &lt;h1&gt;Simple sample&lt;/h1&gt;</a>
+<span class="sourceLineNo">059</span><a name="line.59">         * </a>
+<span class="sourceLineNo">060</span><a name="line.60">         * &lt;pre&gt;</a>
+<span class="sourceLineNo">061</span><a name="line.61">         * CompletableFuture&amp;lt;Optional&amp;lt;MyObject&amp;gt;&amp;gt; exec = WaitResult.of(MyObject::myCallable).expecting(MyObject::myControl)</a>
+<span class="sourceLineNo">062</span><a name="line.62">         *              .repeat(10).every(10, TimeUnit.MILLISECONDS).asyncExec();</a>
+<span class="sourceLineNo">063</span><a name="line.63">         * &lt;/pre&gt;</a>
+<span class="sourceLineNo">064</span><a name="line.64">         * </a>
+<span class="sourceLineNo">065</span><a name="line.65">         * @param action</a>
+<span class="sourceLineNo">066</span><a name="line.66">         *            the {@link Callable} providing the result.</a>
+<span class="sourceLineNo">067</span><a name="line.67">         * @param &lt;T&gt;</a>
+<span class="sourceLineNo">068</span><a name="line.68">         *            The type of the result.</a>
+<span class="sourceLineNo">069</span><a name="line.69">         * @return {@link WaitResultBuilder1 the next step of the builder}</a>
+<span class="sourceLineNo">070</span><a name="line.70">         * @throws NullPointerException</a>
+<span class="sourceLineNo">071</span><a name="line.71">         *             if action is null</a>
+<span class="sourceLineNo">072</span><a name="line.72">         */</a>
+<span class="sourceLineNo">073</span><a name="line.73">        public static &lt;T&gt; WaitResultBuilder1&lt;T&gt; of(Callable&lt;T&gt; action) {</a>
+<span class="sourceLineNo">074</span><a name="line.74">                return of(action, null);</a>
+<span class="sourceLineNo">075</span><a name="line.75">        }</a>
+<span class="sourceLineNo">076</span><a name="line.76"></a>
+<span class="sourceLineNo">077</span><a name="line.77">        /**</a>
+<span class="sourceLineNo">078</span><a name="line.78">         * Start the builder to create an instance of {@link CompletableFuture} based on</a>
+<span class="sourceLineNo">079</span><a name="line.79">         * the result of the received action, with repetition until some condition.</a>
+<span class="sourceLineNo">080</span><a name="line.80">         * </a>
+<span class="sourceLineNo">081</span><a name="line.81">         * @param action</a>
+<span class="sourceLineNo">082</span><a name="line.82">         *            the {@link Callable} providing the result.</a>
+<span class="sourceLineNo">083</span><a name="line.83">         * @param actionOnFinish</a>
+<span class="sourceLineNo">084</span><a name="line.84">         *            register an action after the result is retrieved (success or</a>
+<span class="sourceLineNo">085</span><a name="line.85">         *            failure). This may be used to register some resource cleanup.</a>
+<span class="sourceLineNo">086</span><a name="line.86">         * @param &lt;T&gt;</a>
+<span class="sourceLineNo">087</span><a name="line.87">         *            The type of the result.</a>
+<span class="sourceLineNo">088</span><a name="line.88">         * @return {@link WaitResultBuilder1 the next step of the builder}</a>
+<span class="sourceLineNo">089</span><a name="line.89">         * @throws NullPointerException</a>
+<span class="sourceLineNo">090</span><a name="line.90">         *             if action is null</a>
+<span class="sourceLineNo">091</span><a name="line.91">         * @since 1.1.0</a>
+<span class="sourceLineNo">092</span><a name="line.92">         */</a>
+<span class="sourceLineNo">093</span><a name="line.93">        public static &lt;T&gt; WaitResultBuilder1&lt;T&gt; of(Callable&lt;T&gt; action, Runnable actionOnFinish) {</a>
+<span class="sourceLineNo">094</span><a name="line.94">                requireNonNull(action, "action can't be null");</a>
+<span class="sourceLineNo">095</span><a name="line.95">                return new WaitResultBuilder1&lt;T&gt;() {</a>
+<span class="sourceLineNo">096</span><a name="line.96"></a>
+<span class="sourceLineNo">097</span><a name="line.97">                        @Override</a>
+<span class="sourceLineNo">098</span><a name="line.98">                        public WaitResultBuilder3&lt;T&gt; expecting(Predicate&lt;T&gt; acceptingClause) {</a>
+<span class="sourceLineNo">099</span><a name="line.99">                                return retry -&gt; ((WaitResultBuilder5&lt;T&gt;) new WaitResultImpl&lt;&gt;(</a>
+<span class="sourceLineNo">100</span><a name="line.100">                                                asFilteredCallable(action, acceptingClause), retry)::get).onFinish(actionOnFinish);</a>
+<span class="sourceLineNo">101</span><a name="line.101">                        }</a>
+<span class="sourceLineNo">102</span><a name="line.102"></a>
+<span class="sourceLineNo">103</span><a name="line.103">                        @Override</a>
+<span class="sourceLineNo">104</span><a name="line.104">                        public WaitResultBuilder2&lt;T&gt; ignoreException(boolean alsoDontFailWhenNoResultAndException) {</a>
+<span class="sourceLineNo">105</span><a name="line.105">                                return predicate -&gt; retry -&gt; ((WaitResultBuilder5&lt;T&gt;) new WaitResultImpl&lt;&gt;(</a>
+<span class="sourceLineNo">106</span><a name="line.106">                                                asFilteredCallable(action, predicate), alsoDontFailWhenNoResultAndException, retry)::get)</a>
+<span class="sourceLineNo">107</span><a name="line.107">                                                                .onFinish(actionOnFinish);</a>
+<span class="sourceLineNo">108</span><a name="line.108">                        }</a>
+<span class="sourceLineNo">109</span><a name="line.109">                };</a>
+<span class="sourceLineNo">110</span><a name="line.110">        }</a>
+<span class="sourceLineNo">111</span><a name="line.111"></a>
+<span class="sourceLineNo">112</span><a name="line.112">        private static &lt;T&gt; Callable&lt;Optional&lt;T&gt;&gt; asFilteredCallable(Callable&lt;T&gt; action, Predicate&lt;T&gt; acceptingClause) {</a>
+<span class="sourceLineNo">113</span><a name="line.113">                requireNonNull(action, "action can't be null");</a>
+<span class="sourceLineNo">114</span><a name="line.114">                requireNonNull(acceptingClause, "acceptingClause can't be null");</a>
+<span class="sourceLineNo">115</span><a name="line.115">                return callableWithToString(() -&gt; ofNullable(action.call()).filter(acceptingClause),</a>
+<span class="sourceLineNo">116</span><a name="line.116">                                () -&gt; String.format("Action = %s, AcceptingClause = %s", action, acceptingClause));</a>
+<span class="sourceLineNo">117</span><a name="line.117">        }</a>
+<span class="sourceLineNo">118</span><a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119">        /**</a>
+<span class="sourceLineNo">120</span><a name="line.120">         * Start the builder to create an instance of {@link CompletableFuture} based on</a>
+<span class="sourceLineNo">121</span><a name="line.121">         * execution of the received action, with repetition until some condition.</a>
+<span class="sourceLineNo">122</span><a name="line.122">         * &lt;p&gt;</a>
+<span class="sourceLineNo">123</span><a name="line.123">         * </a>
+<span class="sourceLineNo">124</span><a name="line.124">         * @param supplier</a>
+<span class="sourceLineNo">125</span><a name="line.125">         *            the {@link Supplier} to be executed.</a>
+<span class="sourceLineNo">126</span><a name="line.126">         * @param &lt;T&gt;</a>
+<span class="sourceLineNo">127</span><a name="line.127">         *            The type of the result.</a>
+<span class="sourceLineNo">128</span><a name="line.128">         * @return {@link WaitResultBuilder1 the next step of the builder}</a>
+<span class="sourceLineNo">129</span><a name="line.129">         * @since 1.1.0</a>
+<span class="sourceLineNo">130</span><a name="line.130">         * @throws NullPointerException</a>
+<span class="sourceLineNo">131</span><a name="line.131">         *             if supplier is null</a>
+<span class="sourceLineNo">132</span><a name="line.132">         */</a>
+<span class="sourceLineNo">133</span><a name="line.133">        public static &lt;T&gt; WaitResultBuilder1&lt;T&gt; ofSupplier(Supplier&lt;T&gt; supplier) {</a>
+<span class="sourceLineNo">134</span><a name="line.134">                requireNonNull(supplier, "supplier can't be null");</a>
+<span class="sourceLineNo">135</span><a name="line.135">                return of(callableWithToString(supplier::get, () -&gt; supplier.toString()));</a>
+<span class="sourceLineNo">136</span><a name="line.136">        }</a>
+<span class="sourceLineNo">137</span><a name="line.137"></a>
+<span class="sourceLineNo">138</span><a name="line.138">        /**</a>
+<span class="sourceLineNo">139</span><a name="line.139">         * Start the builder to create an instance of {@link CompletableFuture} based on</a>
+<span class="sourceLineNo">140</span><a name="line.140">         * execution of the received action, with repetition until some condition.</a>
+<span class="sourceLineNo">141</span><a name="line.141">         * &lt;p&gt;</a>
+<span class="sourceLineNo">142</span><a name="line.142">         * In this case, it is assumed that the received action throws unchecked</a>
+<span class="sourceLineNo">143</span><a name="line.143">         * exception when the condition is not yet OK. The returned Optional will be</a>
+<span class="sourceLineNo">144</span><a name="line.144">         * present in case of success.</a>
+<span class="sourceLineNo">145</span><a name="line.145">         * </a>
+<span class="sourceLineNo">146</span><a name="line.146">         * @param action</a>
+<span class="sourceLineNo">147</span><a name="line.147">         *            the {@link Runnable} to be executed.</a>
+<span class="sourceLineNo">148</span><a name="line.148">         * @return {@link WaitResultBuilder3 the next step of the builder}</a>
+<span class="sourceLineNo">149</span><a name="line.149">         * @since 1.0.0</a>
+<span class="sourceLineNo">150</span><a name="line.150">         * @throws NullPointerException</a>
+<span class="sourceLineNo">151</span><a name="line.151">         *             if action is null</a>
+<span class="sourceLineNo">152</span><a name="line.152">         */</a>
+<span class="sourceLineNo">153</span><a name="line.153">        public static WaitResultBuilder3&lt;Boolean&gt; ofRunnable(Runnable action) {</a>
+<span class="sourceLineNo">154</span><a name="line.154">                requireNonNull(action, "action can't be null");</a>
+<span class="sourceLineNo">155</span><a name="line.155">                return of(callableWithToString(callable(action, true), () -&gt; action.toString())).ignoreException(true)</a>
+<span class="sourceLineNo">156</span><a name="line.156">                                .expecting(predicateWithToString(b -&gt; b, () -&gt; "Expecting true"));</a>
+<span class="sourceLineNo">157</span><a name="line.157">        }</a>
+<span class="sourceLineNo">158</span><a name="line.158"></a>
+<span class="sourceLineNo">159</span><a name="line.159">        /**</a>
+<span class="sourceLineNo">160</span><a name="line.160">         * Start the builder to create an instance of {@link CompletableFuture} based on</a>
+<span class="sourceLineNo">161</span><a name="line.161">         * repeated control on the mutable object.</a>
+<span class="sourceLineNo">162</span><a name="line.162">         * &lt;h1&gt;Simple sample&lt;/h1&gt;</a>
+<span class="sourceLineNo">163</span><a name="line.163">         * </a>
+<span class="sourceLineNo">164</span><a name="line.164">         * &lt;pre&gt;</a>
+<span class="sourceLineNo">165</span><a name="line.165">         * CompletableFuture&amp;lt;Optional&amp;lt;MyObject&amp;gt;&amp;gt; exec = WaitResult.on(myObject).expecting(MyObject::myControl).repeat(100)</a>
+<span class="sourceLineNo">166</span><a name="line.166">         *              .every(10, TimeUnit.MILLISECONDS).asyncExec();</a>
+<span class="sourceLineNo">167</span><a name="line.167">         * &lt;/pre&gt;</a>
+<span class="sourceLineNo">168</span><a name="line.168">         * </a>
+<span class="sourceLineNo">169</span><a name="line.169">         * @param mutableObject</a>
+<span class="sourceLineNo">170</span><a name="line.170">         *            the mutable object to be checked.</a>
+<span class="sourceLineNo">171</span><a name="line.171">         * @param &lt;T&gt;</a>
+<span class="sourceLineNo">172</span><a name="line.172">         *            The type of the result.</a>
+<span class="sourceLineNo">173</span><a name="line.173">         * @return {@link WaitResultBuilder2 the next step of the builder}</a>
+<span class="sourceLineNo">174</span><a name="line.174">         */</a>
+<span class="sourceLineNo">175</span><a name="line.175">        public static &lt;T&gt; WaitResultBuilder2&lt;T&gt; on(T mutableObject) {</a>
+<span class="sourceLineNo">176</span><a name="line.176">                return of(callableWithToString(() -&gt; mutableObject, () -&gt; String.format("on object %s", mutableObject)));</a>
+<span class="sourceLineNo">177</span><a name="line.177">        }</a>
+<span class="sourceLineNo">178</span><a name="line.178"></a>
+<span class="sourceLineNo">179</span><a name="line.179">        /**</a>
+<span class="sourceLineNo">180</span><a name="line.180">         * Start the builder to create an instance of {@link CompletableFuture} based on</a>
+<span class="sourceLineNo">181</span><a name="line.181">         * repeated control on a method returning a boolean.</a>
+<span class="sourceLineNo">182</span><a name="line.182">         * </a>
+<span class="sourceLineNo">183</span><a name="line.183">         * @param conditionSupplier</a>
+<span class="sourceLineNo">184</span><a name="line.184">         *            the boolean supplier</a>
+<span class="sourceLineNo">185</span><a name="line.185">         * @return {@link WaitResultBuilder3 the next step of the builder}</a>
+<span class="sourceLineNo">186</span><a name="line.186">         * @throws NullPointerException</a>
+<span class="sourceLineNo">187</span><a name="line.187">         *             if conditionSupplier is null</a>
+<span class="sourceLineNo">188</span><a name="line.188">         */</a>
+<span class="sourceLineNo">189</span><a name="line.189">        public static WaitResultBuilder3&lt;Boolean&gt; onCondition(Supplier&lt;Boolean&gt; conditionSupplier) {</a>
+<span class="sourceLineNo">190</span><a name="line.190">                requireNonNull(conditionSupplier, "conditionSupplier can't be null");</a>
+<span class="sourceLineNo">191</span><a name="line.191">                return of(callableWithToString(conditionSupplier::get, () -&gt; conditionSupplier.toString()))</a>
+<span class="sourceLineNo">192</span><a name="line.192">                                .expecting(predicateWithToString(b -&gt; b, () -&gt; "Expecting true"));</a>
+<span class="sourceLineNo">193</span><a name="line.193">        }</a>
+<span class="sourceLineNo">194</span><a name="line.194"></a>
+<span class="sourceLineNo">195</span><a name="line.195">        /**</a>
+<span class="sourceLineNo">196</span><a name="line.196">         * Start the builder to create an instance of {@link CompletableFuture} based on</a>
+<span class="sourceLineNo">197</span><a name="line.197">         * repeated control of a call that is assumed as OK when an exception is thrown.</a>
+<span class="sourceLineNo">198</span><a name="line.198">         * </a>
+<span class="sourceLineNo">199</span><a name="line.199">         * @param action</a>
+<span class="sourceLineNo">200</span><a name="line.200">         *            the action that is expected to thrown an exception.</a>
+<span class="sourceLineNo">201</span><a name="line.201">         * @return {@link WaitResultBuilder3 the next step of the builder}</a>
+<span class="sourceLineNo">202</span><a name="line.202">         * @since 1.0.0</a>
+<span class="sourceLineNo">203</span><a name="line.203">         * @throws NullPointerException</a>
+<span class="sourceLineNo">204</span><a name="line.204">         *             if action is null</a>
+<span class="sourceLineNo">205</span><a name="line.205">         */</a>
+<span class="sourceLineNo">206</span><a name="line.206">        public static WaitResultBuilder3&lt;Exception&gt; forException(Callable&lt;?&gt; action) {</a>
+<span class="sourceLineNo">207</span><a name="line.207">                requireNonNull(action, "action can't be null");</a>
+<span class="sourceLineNo">208</span><a name="line.208">                return of(asCallableForException(action, e -&gt; e)).dontIgnoreException().expectingNotNull();</a>
+<span class="sourceLineNo">209</span><a name="line.209">        }</a>
+<span class="sourceLineNo">210</span><a name="line.210"></a>
+<span class="sourceLineNo">211</span><a name="line.211">        /**</a>
+<span class="sourceLineNo">212</span><a name="line.212">         * Start the builder to create an instance of {@link CompletableFuture} based on</a>
+<span class="sourceLineNo">213</span><a name="line.213">         * repeated control of a call that is assumed as done when a a specific</a>
+<span class="sourceLineNo">214</span><a name="line.214">         * exception is thrown.</a>
+<span class="sourceLineNo">215</span><a name="line.215">         * </a>
+<span class="sourceLineNo">216</span><a name="line.216">         * @param action</a>
+<span class="sourceLineNo">217</span><a name="line.217">         *            the action that is expected to thrown an exception.</a>
+<span class="sourceLineNo">218</span><a name="line.218">         * @param targetException</a>
+<span class="sourceLineNo">219</span><a name="line.219">         *            the expected Exception class</a>
+<span class="sourceLineNo">220</span><a name="line.220">         * @param &lt;T&gt;</a>
+<span class="sourceLineNo">221</span><a name="line.221">         *            the expected exception type</a>
+<span class="sourceLineNo">222</span><a name="line.222">         * @return {@link WaitResultBuilder1 the next step of the builder}</a>
+<span class="sourceLineNo">223</span><a name="line.223">         * @since 1.1.0</a>
+<span class="sourceLineNo">224</span><a name="line.224">         * @throws NullPointerException</a>
+<span class="sourceLineNo">225</span><a name="line.225">         *             if action or targetException is null</a>
+<span class="sourceLineNo">226</span><a name="line.226">         */</a>
+<span class="sourceLineNo">227</span><a name="line.227">        @SuppressWarnings("unchecked")</a>
+<span class="sourceLineNo">228</span><a name="line.228">        public static &lt;T extends Exception&gt; WaitResultBuilder1&lt;T&gt; forException(Callable&lt;?&gt; action,</a>
+<span class="sourceLineNo">229</span><a name="line.229">                        Class&lt;T&gt; targetException) {</a>
+<span class="sourceLineNo">230</span><a name="line.230">                requireNonNull(action, "action can't be null");</a>
+<span class="sourceLineNo">231</span><a name="line.231">                requireNonNull(targetException, "targetException can't be null");</a>
+<span class="sourceLineNo">232</span><a name="line.232">                return of(asCallableForException(action, e -&gt; (T) Optional.of(e)</a>
+<span class="sourceLineNo">233</span><a name="line.233">                                .filter(c -&gt; targetException.isAssignableFrom(c.getClass())).orElseThrow(() -&gt; e)));</a>
+<span class="sourceLineNo">234</span><a name="line.234">        }</a>
+<span class="sourceLineNo">235</span><a name="line.235"></a>
+<span class="sourceLineNo">236</span><a name="line.236">        private static interface ExceptionMapper&lt;T extends Exception&gt; {</a>
+<span class="sourceLineNo">237</span><a name="line.237">                T handleException(Exception e) throws Exception;</a>
+<span class="sourceLineNo">238</span><a name="line.238">        }</a>
+<span class="sourceLineNo">239</span><a name="line.239"></a>
+<span class="sourceLineNo">240</span><a name="line.240">        private static &lt;T extends Exception&gt; Callable&lt;T&gt; asCallableForException(Callable&lt;?&gt; action,</a>
+<span class="sourceLineNo">241</span><a name="line.241">                        ExceptionMapper&lt;T&gt; exceptionHandler) {</a>
+<span class="sourceLineNo">242</span><a name="line.242">                return callableWithToString(() -&gt; {</a>
+<span class="sourceLineNo">243</span><a name="line.243">                        try {</a>
+<span class="sourceLineNo">244</span><a name="line.244">                                action.call();</a>
+<span class="sourceLineNo">245</span><a name="line.245">                                return null;</a>
+<span class="sourceLineNo">246</span><a name="line.246">                        } catch (Exception e) {</a>
+<span class="sourceLineNo">247</span><a name="line.247">                                return exceptionHandler.handleException(e);</a>
+<span class="sourceLineNo">248</span><a name="line.248">                        }</a>
+<span class="sourceLineNo">249</span><a name="line.249">                }, () -&gt; action.toString());</a>
+<span class="sourceLineNo">250</span><a name="line.250">        }</a>
+<span class="sourceLineNo">251</span><a name="line.251"></a>
+<span class="sourceLineNo">252</span><a name="line.252">        // Helper method for logging</a>
+<span class="sourceLineNo">253</span><a name="line.253">        /**</a>
+<span class="sourceLineNo">254</span><a name="line.254">         * Modify a Callable to add a toString.</a>
+<span class="sourceLineNo">255</span><a name="line.255">         * &lt;p&gt;</a>
+<span class="sourceLineNo">256</span><a name="line.256">         * &lt;i&gt;The goal of this method is to provide a way to have lambda, used for</a>
+<span class="sourceLineNo">257</span><a name="line.257">         * example in the context of this library, that are decorated with a</a>
+<span class="sourceLineNo">258</span><a name="line.258">         * {@code toString} method.&lt;/i&gt; Later, when this Callable is used in log, it is</a>
+<span class="sourceLineNo">259</span><a name="line.259">         * possible to have a meaningful description and not the default</a>
+<span class="sourceLineNo">260</span><a name="line.260">         * {@code toString}.</a>
+<span class="sourceLineNo">261</span><a name="line.261">         * </a>
+<span class="sourceLineNo">262</span><a name="line.262">         * @param callable</a>
+<span class="sourceLineNo">263</span><a name="line.263">         *            the Callable to be decorated.</a>
+<span class="sourceLineNo">264</span><a name="line.264">         * @param toString</a>
+<span class="sourceLineNo">265</span><a name="line.265">         *            the Supplier to be used as toString method.</a>
+<span class="sourceLineNo">266</span><a name="line.266">         * @param &lt;T&gt;</a>
+<span class="sourceLineNo">267</span><a name="line.267">         *            the return type of the Callable</a>
+<span class="sourceLineNo">268</span><a name="line.268">         * @return the decorated Callable.</a>
+<span class="sourceLineNo">269</span><a name="line.269">         * @throws NullPointerException</a>
+<span class="sourceLineNo">270</span><a name="line.270">         *             if callable or toString is null.</a>
+<span class="sourceLineNo">271</span><a name="line.271">         * @since 1.1.0</a>
+<span class="sourceLineNo">272</span><a name="line.272">         */</a>
+<span class="sourceLineNo">273</span><a name="line.273">        public static &lt;T&gt; Callable&lt;T&gt; callableWithToString(Callable&lt;T&gt; callable, Supplier&lt;String&gt; toString) {</a>
+<span class="sourceLineNo">274</span><a name="line.274">                requireNonNull(callable, "callable can't be null");</a>
+<span class="sourceLineNo">275</span><a name="line.275">                requireNonNull(toString, "toString can't be null");</a>
+<span class="sourceLineNo">276</span><a name="line.276">                return new Callable&lt;T&gt;() {</a>
+<span class="sourceLineNo">277</span><a name="line.277"></a>
+<span class="sourceLineNo">278</span><a name="line.278">                        @Override</a>
+<span class="sourceLineNo">279</span><a name="line.279">                        public T call() throws Exception {</a>
+<span class="sourceLineNo">280</span><a name="line.280">                                return callable.call();</a>
+<span class="sourceLineNo">281</span><a name="line.281">                        }</a>
+<span class="sourceLineNo">282</span><a name="line.282"></a>
+<span class="sourceLineNo">283</span><a name="line.283">                        @Override</a>
+<span class="sourceLineNo">284</span><a name="line.284">                        public String toString() {</a>
+<span class="sourceLineNo">285</span><a name="line.285">                                return toString.get();</a>
+<span class="sourceLineNo">286</span><a name="line.286">                        }</a>
+<span class="sourceLineNo">287</span><a name="line.287">                };</a>
+<span class="sourceLineNo">288</span><a name="line.288">        }</a>
+<span class="sourceLineNo">289</span><a name="line.289"></a>
+<span class="sourceLineNo">290</span><a name="line.290">        /**</a>
+<span class="sourceLineNo">291</span><a name="line.291">         * Modify a Predicate to add a toString.</a>
+<span class="sourceLineNo">292</span><a name="line.292">         * &lt;p&gt;</a>
+<span class="sourceLineNo">293</span><a name="line.293">         * &lt;i&gt;The goal of this method is to provide a way to have lambda, used for</a>
+<span class="sourceLineNo">294</span><a name="line.294">         * example in the context of this library, that are decorated with a</a>
+<span class="sourceLineNo">295</span><a name="line.295">         * {@code toString} method.&lt;/i&gt; Later, when this Predicate is used in log, it is</a>
+<span class="sourceLineNo">296</span><a name="line.296">         * possible to have a meaningful description and not the default</a>
+<span class="sourceLineNo">297</span><a name="line.297">         * {@code toString}.</a>
+<span class="sourceLineNo">298</span><a name="line.298">         * </a>
+<span class="sourceLineNo">299</span><a name="line.299">         * @param predicate</a>
+<span class="sourceLineNo">300</span><a name="line.300">         *            the Predicate to be decorated.</a>
+<span class="sourceLineNo">301</span><a name="line.301">         * @param toString</a>
+<span class="sourceLineNo">302</span><a name="line.302">         *            the Supplier to be used as toString method.</a>
+<span class="sourceLineNo">303</span><a name="line.303">         * @param &lt;T&gt;</a>
+<span class="sourceLineNo">304</span><a name="line.304">         *            the input type of the Predicate.</a>
+<span class="sourceLineNo">305</span><a name="line.305">         * @return the decorated Predicate.</a>
+<span class="sourceLineNo">306</span><a name="line.306">         * @throws NullPointerException</a>
+<span class="sourceLineNo">307</span><a name="line.307">         *             if predicate or toString is null.</a>
+<span class="sourceLineNo">308</span><a name="line.308">         * @since 1.1.0</a>
+<span class="sourceLineNo">309</span><a name="line.309">         */</a>
+<span class="sourceLineNo">310</span><a name="line.310">        public static &lt;T&gt; Predicate&lt;T&gt; predicateWithToString(Predicate&lt;T&gt; predicate, Supplier&lt;String&gt; toString) {</a>
+<span class="sourceLineNo">311</span><a name="line.311">                requireNonNull(predicate, "predicate can't be null");</a>
+<span class="sourceLineNo">312</span><a name="line.312">                requireNonNull(toString, "toString can't be null");</a>
+<span class="sourceLineNo">313</span><a name="line.313">                return new Predicate&lt;T&gt;() {</a>
+<span class="sourceLineNo">314</span><a name="line.314"></a>
+<span class="sourceLineNo">315</span><a name="line.315">                        @Override</a>
+<span class="sourceLineNo">316</span><a name="line.316">                        public boolean test(T t) {</a>
+<span class="sourceLineNo">317</span><a name="line.317">                                return predicate.test(t);</a>
+<span class="sourceLineNo">318</span><a name="line.318">                        }</a>
+<span class="sourceLineNo">319</span><a name="line.319"></a>
+<span class="sourceLineNo">320</span><a name="line.320">                        @Override</a>
+<span class="sourceLineNo">321</span><a name="line.321">                        public String toString() {</a>
+<span class="sourceLineNo">322</span><a name="line.322">                                return toString.get();</a>
+<span class="sourceLineNo">323</span><a name="line.323">                        }</a>
+<span class="sourceLineNo">324</span><a name="line.324">                };</a>
+<span class="sourceLineNo">325</span><a name="line.325">        }</a>
+<span class="sourceLineNo">326</span><a name="line.326"></a>
+<span class="sourceLineNo">327</span><a name="line.327">}</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

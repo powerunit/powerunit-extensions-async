@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RetryPolicies.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Powerunit - Java Testing framework for JDK 1.9 - Extension to provide async operation in unit test.</a> &gt; <a href="index.source.html" class="el_package">ch.powerunit.extensions.async.lang</a> &gt; <span class="el_source">RetryPolicies.java</span></div><h1>RetryPolicies.java</h1><pre class="source lang-java linenums">/**
+ * Powerunit - A JDK1.8 test framework
+ * Copyright (C) 2014 Mathieu Boretti.
+ *
+ * This file is part of Powerunit
+ *
+ * Powerunit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Powerunit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Powerunit. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package ch.powerunit.extensions.async.lang;
+
+import static java.util.Objects.requireNonNull;
+
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import java.util.function.IntToLongFunction;
+import java.util.function.Supplier;
+
+/**
+ * Helpers methods to build {@link RetryPolicy}.
+ * 
+ * @since 1.0.0
+ *
+ */
+public final class RetryPolicies {
+
+	/**
+	 * Retry Policy to just do one try.
+	 * 
+	 */
+<span class="nc" id="L41">	public static final RetryPolicy RETRY_ONLY_ONCE = of(1, 1);</span>
+
+	private RetryPolicies() {
+	}
+
+	/**
+	 * Create a new RetryPolicy with constant wait time.
+	 * &lt;p&gt;
+	 * For example,
+	 * 
+	 * &lt;pre&gt;
+	 * RetryPolicy incremental = RetryPolicies.of(3, 12);
+	 * &lt;/pre&gt;
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * &lt;ol&gt;
+	 * &lt;li&gt;Do a first try&lt;/li&gt;
+	 * &lt;li&gt;Wait 12 ms&lt;/li&gt;
+	 * &lt;li&gt;Do a second retry&lt;/li&gt;
+	 * &lt;li&gt;Wait 12 ms&lt;/li&gt;
+	 * &lt;li&gt;Do a third retry&lt;/li&gt;
+	 * &lt;/ol&gt;
+	 * 
+	 * @param count
+	 *            the number of retry.
+	 * @param ms
+	 *            the constant wait time in ms.
+	 * @return the RetryPolicy
+	 */
+	public static RetryPolicy of(int count, long ms) {
+<span class="nc" id="L71">		return of(count, addToString(l -&gt; ms, () -&gt; String.format(&quot;Constant wait time of %s ms&quot;, ms)));</span>
+	}
+
+	/**
+	 * Create a new RetryPolicy with constant wait time.
+	 * &lt;p&gt;
+	 * For example,
+	 * 
+	 * &lt;pre&gt;
+	 * RetryPolicy incremental = RetryPolicies.of(3, 15, TimeUnit.MILLISECONDS);
+	 * &lt;/pre&gt;
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * &lt;ol&gt;
+	 * &lt;li&gt;Do a first try&lt;/li&gt;
+	 * &lt;li&gt;Wait 15 ms&lt;/li&gt;
+	 * &lt;li&gt;Do a second retry&lt;/li&gt;
+	 * &lt;li&gt;Wait 15 ms&lt;/li&gt;
+	 * &lt;li&gt;Do a third retry&lt;/li&gt;
+	 * &lt;/ol&gt;
+	 * 
+	 * @param count
+	 *            the number of retry.
+	 * @param value
+	 *            the wait time
+	 * @param unit
+	 *            the unit of the wait time.
+	 * @return the RetryPolicy
+	 */
+	public static RetryPolicy of(int count, long value, TimeUnit unit) {
+<span class="nc" id="L101">		return of(count, requireNonNull(unit, &quot;unit can't be null&quot;).toMillis(value));</span>
+	}
+
+	/**
+	 * Create a new RetryPolicy with constant wait time.
+	 * &lt;p&gt;
+	 * For example,
+	 * 
+	 * &lt;pre&gt;
+	 * RetryPolicy incremental = RetryPolicies.of(3, Duration.ofMillis(10));
+	 * &lt;/pre&gt;
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * &lt;ol&gt;
+	 * &lt;li&gt;Do a first try&lt;/li&gt;
+	 * &lt;li&gt;Wait 10 ms&lt;/li&gt;
+	 * &lt;li&gt;Do a second retry&lt;/li&gt;
+	 * &lt;li&gt;Wait 10 ms&lt;/li&gt;
+	 * &lt;li&gt;Do a third retry&lt;/li&gt;
+	 * &lt;/ol&gt;
+	 * 
+	 * @param count
+	 *            the number of retry.
+	 * @param duration
+	 *            the constant duration to wait.
+	 * @return the RetryPolicy
+	 */
+	public static RetryPolicy of(int count, Duration duration) {
+<span class="nc" id="L129">		return of(count, requireNonNull(duration, &quot;duration can't be null&quot;).toMillis());</span>
+	}
+
+	/**
+	 * Create a new RetryPolicy, by using a generic function to compute the retry
+	 * duration.
+	 * &lt;p&gt;
+	 * For example, using this definition :
+	 * 
+	 * &lt;pre&gt;
+	 * RetryPolicy incremental = RetryPolicies.of(3, c -&amp;gt; (long) (Math.random() * 100));
+	 * &lt;/pre&gt;
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * &lt;ol&gt;
+	 * &lt;li&gt;Do a first try&lt;/li&gt;
+	 * &lt;li&gt;Wait a random time between 0 and 100 ms&lt;/li&gt;
+	 * &lt;li&gt;Do a second retry&lt;/li&gt;
+	 * &lt;li&gt;Wait a random time between 0 and 100 ms&lt;/li&gt;
+	 * &lt;li&gt;Do a third retry&lt;/li&gt;
+	 * &lt;/ol&gt;
+	 * 
+	 * @param count
+	 *            the number of retry. A value of 1 is to do only one try, without
+	 *            sleep.
+	 * @param retryToWaitTime
+	 *            the function to compute the wait time based on the retry. The
+	 *            received value by this function starts with 1, and this will be
+	 *            the first retry (meaning a the initial try has been done before).
+	 * @return the RetryPolicy
+	 */
+	public static RetryPolicy of(int count, IntToLongFunction retryToWaitTime) {
+<span class="nc" id="L161">		return new RetryPolicy() {</span>
+
+			@Override
+			public void sleepBetweenRetry(int retry) {
+<span class="nc" id="L165">				RetryPolicies.sleepBetweenRetry(retryToWaitTime.applyAsLong(retry));</span>
+<span class="nc" id="L166">			}</span>
+
+			@Override
+			public int getCount() {
+<span class="nc" id="L170">				return count;</span>
+			}
+
+			@Override
+			public String toString() {
+<span class="nc" id="L175">				return String.format(&quot;total count = %s, with sleep method = %s&quot;, count, retryToWaitTime);</span>
+			}
+		};
+	}
+
+	/**
+	 * Create a new RetryPolicy, that wait each time more time : first time the
+	 * received duration, second time twice, etc.
+	 * &lt;p&gt;
+	 * For example, using this definition :
+	 * 
+	 * &lt;pre&gt;
+	 * RetryPolicy incremental = RetryPolicies.ofIncremental(3, 20);
+	 * &lt;/pre&gt;
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * &lt;ol&gt;
+	 * &lt;li&gt;Do a first try&lt;/li&gt;
+	 * &lt;li&gt;Wait 20ms&lt;/li&gt;
+	 * &lt;li&gt;Do a second retry&lt;/li&gt;
+	 * &lt;li&gt;Wait 40ms&lt;/li&gt;
+	 * &lt;li&gt;Do a third retry&lt;/li&gt;
+	 * &lt;/ol&gt;
+	 * 
+	 * @param count
+	 *            the number of retry.
+	 * @param ms
+	 *            the time in ms that will be combined with the retry number
+	 * @return the RetryPolicy
+	 */
+	public static RetryPolicy ofIncremental(int count, long ms) {
+<span class="nc" id="L206">		return of(count, addToString(retry -&gt; retry * ms, () -&gt; String.format(&quot;Incremental retry based on %s ms&quot;, ms)));</span>
+	}
+
+	/**
+	 * Create a new RetryPolicy, that wait each time more time : first time the
+	 * received duration, second time twice, etc.
+	 * &lt;p&gt;
+	 * For example, using this definition :
+	 * 
+	 * &lt;pre&gt;
+	 * RetryPolicy incremental = RetryPolicies.ofIncremental(3, Duration.ofMillis(50));
+	 * &lt;/pre&gt;
+	 * 
+	 * Then following of (re-)tries will be (maximum retries):
+	 * &lt;ol&gt;
+	 * &lt;li&gt;Do a first try&lt;/li&gt;
+	 * &lt;li&gt;Wait 50ms&lt;/li&gt;
+	 * &lt;li&gt;Do a second retry&lt;/li&gt;
+	 * &lt;li&gt;Wait 100ms&lt;/li&gt;
+	 * &lt;li&gt;Do a third retry&lt;/li&gt;
+	 * &lt;/ol&gt;
+	 * 
+	 * @param count
+	 *            the number of retry.
+	 * @param duration
+	 *            the duration that will be combined with the retry number
+	 * @return the RetryPolicy
+	 */
+	public static RetryPolicy ofIncremental(int count, Duration duration) {
+<span class="nc" id="L235">		return ofIncremental(count, requireNonNull(duration, &quot;duration can't be null&quot;).toMillis());</span>
+	}
+
+	private static IntToLongFunction addToString(IntToLongFunction target, Supplier&lt;String&gt; toString) {
+<span class="nc" id="L239">		return new IntToLongFunction() {</span>
+
+			@Override
+			public long applyAsLong(int value) {
+<span class="nc" id="L243">				return target.applyAsLong(value);</span>
+			}
+
+			@Override
+			public String toString() {
+<span class="nc" id="L248">				return toString.get();</span>
+			}
+		};
+	}
+
+	private static void sleepBetweenRetry(long ms) {
+		try {
+<span class="nc" id="L255">			Thread.sleep(ms);</span>
+<span class="nc" id="L256">		} catch (InterruptedException e) {</span>
+			// ignore
+<span class="nc" id="L258">		}</span>
+<span class="nc" id="L259">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
